@@ -1,0 +1,12 @@
+.navBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 100px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: row;
+}
