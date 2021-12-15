@@ -4,6 +4,8 @@ Do-gether is a task management application that seeks to spice things up a littl
 
 ## Features (Planned)
 
-- Basic task management features (Create, Edit, Delete)
-- Tags to organise your tasks
-- Social features (Add friends, view their tasks, plan meet-ups with ease!)
+- [ ] Basic task management features (Create, Edit, Delete)
+
+- [ ] Tags to organise your tasks
+
+- [ ] Social features (Add friends, view their tasks, plan meet-ups with ease!)
