@@ -15,7 +15,7 @@ function App() {
         <div className="App">
             <Router>
                 <Routes>
-                    <Route path="/" element={<Home />}></Route>
+                    <Route path="/" element={isLoggedIn ? <Navigate replace to={`/dashboard/${username}`} /> : <Home />}></Route>
                     <Route path="/login" element={isLoggedIn ? <Navigate replace to={`/dashboard/${username}`} /> : <Login />}></Route>
                     <Route path="/register" element={isLoggedIn ? <Navigate replace to={`/dashboard/${username}`} /> : <Register />}></Route>
                     <Route path="/dashboard/:username" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />}></Route>
