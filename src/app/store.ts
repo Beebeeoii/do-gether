@@ -1,10 +1,18 @@
+import { TaskState } from './../services/task/taskSplice';
+import { AuthState } from './../services/auth/authSplice';
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 // import counterReducer from '../features/counter/counterSlice';
 import authReducer from '../services/auth/authSplice';
+import taskReducer from '../services/task/taskSplice';
 
-const saveToLocalStorage = (state: object) => {
+interface StoreState {
+    auth: AuthState,
+    task: TaskState
+}
+
+const saveToLocalStorage = (state: StoreState) => {
     try {
-        localStorage.setItem('state', JSON.stringify(state))
+        localStorage.setItem('auth', JSON.stringify(state.auth))
     } catch (e) {
         console.error(e)
     }
@@ -12,8 +20,13 @@ const saveToLocalStorage = (state: object) => {
 
 const loadFromLocalStorage = () => {
     try {
-        const stateStr = localStorage.getItem('state')
-        return stateStr ? JSON.parse(stateStr) : undefined
+        const authStateStr = localStorage.getItem('auth')
+        // const taskStateStr = localStorage.getItem('task')
+
+        return {
+            auth: authStateStr ? JSON.parse(authStateStr) : undefined,
+            task: undefined
+        }
     } catch (e) {
         console.error(e)
         return undefined
@@ -22,7 +35,8 @@ const loadFromLocalStorage = () => {
 
 export const store = configureStore({
     reducer: {
-        auth: authReducer
+        auth: authReducer,
+        task: taskReducer
     },
     preloadedState: loadFromLocalStorage()
 })
