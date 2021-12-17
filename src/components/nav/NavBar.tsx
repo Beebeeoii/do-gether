@@ -4,7 +4,8 @@ import Button from '@mui/material/Button'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
-import { isAuthenticated, logout, selectUser } from '../../services/auth/authSplice'
+import { selectAuthenticated, logout } from '../../services/auth/authSplice'
+import { selectUser } from '../../services/user/userSplice'
 import './NavBar.css'
 
 function stringToColor(string: string) {
@@ -35,8 +36,15 @@ function stringAvatar(name: string) {
 }
 
 export function NavBar() {
-    const isLoggedIn = useAppSelector(isAuthenticated)
-    const username = useAppSelector(selectUser)
+    const isLoggedIn = useAppSelector(selectAuthenticated)
+    const user = useAppSelector(selectUser)
+
+    let username = ""
+
+    if (user !== null) {
+        username = user.username
+    }
+
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
 

@@ -1,8 +1,10 @@
+import { User } from "../user/User";
+
 export interface RegisterResponse {
     success: boolean,
-    error: string,
+    error: string | null,
     data: {
-        username: string
+        user: User
         authenticated: boolean,
         token: string
     }
@@ -10,9 +12,9 @@ export interface RegisterResponse {
 
 export interface LoginResponse {
     success: boolean,
-    error: string,
+    error: string | null,
     data: {
-        username: string
+        user?: User
         authenticated: boolean,
         token: string
     }

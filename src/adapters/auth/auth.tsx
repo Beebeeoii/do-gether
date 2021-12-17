@@ -1,5 +1,13 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
 import { RegisterResponse, LoginResponse } from "../../interfaces/auth/AuthResponse";
+
+const mockUser1 = {
+    id: "0sfjas",
+    username: "beebeeoii",
+    friends: [],
+    outgoing_requests: [],
+    incoming_requests: [],
+    points: 0
+}
 
 export function createUser(username: string, password: string) {
     return new Promise<RegisterResponse>((resolve) => {
@@ -7,7 +15,7 @@ export function createUser(username: string, password: string) {
             success: true,
             error: "",
             data: {
-                username: "beebeeoii",
+                user: mockUser1,
                 authenticated: true,
                 token: "sample_jwt_token"
             }
@@ -22,7 +30,6 @@ export async function authenticate(username: string, password: string) {
                 success: false,
                 error: "Unauthorised: Invalid username or password",
                 data: {
-                    username: username,
                     authenticated: false,
                     token: ""
                 }
@@ -35,7 +42,7 @@ export async function authenticate(username: string, password: string) {
             success: true,
             error: "",
             data: {
-                username: "beebeeoii",
+                user: mockUser1,
                 authenticated: true,
                 token: "sample_jwt_token"
             }

@@ -4,13 +4,15 @@ import { authenticate, createUser } from '../../adapters/auth/auth';
 import { Credentials } from '../../interfaces/auth/Credentials';
 
 export interface AuthState {
+    userId: string | null
     authenticated: boolean
-    username: string
+    token: string | null
 }
 
 const initialState: AuthState = {
+    userId: null,
     authenticated: false,
-    username: "guest"
+    token: null
 }
 
 export const register = createAsyncThunk("auth/register", async (credentials: Credentials) => {
@@ -28,21 +30,22 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         logout: (state: AuthState) => {
+            state.userId = null
             state.authenticated = false
-            state.username = "guest"
+            state.token = null
         }
     },
     extraReducers: (builder) => {
         builder.addCase(register.fulfilled, (state, action) => {
             if (action.payload.success) {
                 state.authenticated = action.payload.data.authenticated
-                state.username = action.payload.data.username
+                state.userId = action.payload.data.user.id
             }
         })
         builder.addCase(login.fulfilled, (state, action) => {
-            if (action.payload.success) {
+            if (action.payload.success && action.payload.data.user) {
                 state.authenticated = action.payload.data.authenticated
-                state.username = action.payload.data.username
+                state.userId = action.payload.data.user.id
             }
         })
     }
@@ -50,7 +53,7 @@ export const authSlice = createSlice({
 
 export const { logout } = authSlice.actions
 
-export const selectUser = (state: RootState) => state.auth.username
-export const isAuthenticated = (state: RootState) => state.auth.authenticated
+export const selectUserId = (state: RootState) => state.auth.userId
+export const selectAuthenticated = (state: RootState) => state.auth.authenticated
 
 export default authSlice.reducer
