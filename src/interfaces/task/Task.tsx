@@ -1,13 +1,14 @@
 export interface Task {
+    id: string
     title: string
     tags: Array<string>
-    listName: string
-    listOrder: number
+    list_name: string
+    list_order: number
     priority: "low" | "medium" | "high"
     due: number
     completed: boolean
-    plan_start: number
-    plan_end: number
-    creator: string
+    planned_start: number
+    planned_end: number
+    owner: string
     private: boolean
 }

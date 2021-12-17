@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
-import { getTasks, reorderTasks, retrieveTasks } from "../../services/task/taskSplice";
+import { selectTasks, retrieveTasks, addTask, selectTaskStatus, reorderTasks } from "../../services/task/taskSplice";
 import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDraggingStyle } from 'react-beautiful-dnd';
 import "./Dashboard.css"
 import { Task } from "../../interfaces/task/Task";
@@ -20,11 +20,26 @@ const getListStyle = (isDraggingOver: boolean) => ({
 });
 
 const reorder = (list: Array<Task>, startIndex: number, endIndex: number) => {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
+    const result: Array<Task> = []
+    list.forEach((task: Task) => result.push(Object.assign({}, task)))
 
-    return result;
+    result[startIndex].list_order = endIndex
+
+    if (startIndex > endIndex) {
+        for (let i = endIndex; i < startIndex; i++) {
+            console.log("1")
+            result[i].list_order += 1
+        }
+    }
+
+    if (endIndex > startIndex) {
+        for (let i = startIndex + 1; i < endIndex + 1; i++) {
+            console.log("2")
+            result[i].list_order -= 1
+        }
+    }
+
+    return result
 };
 
 const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
@@ -48,17 +63,36 @@ const fabActions = [
 export function Dashboard() {
     const dispatch = useAppDispatch()
     const [dataLoadState, setDataLoadState] = useState<boolean>(false)
+
+    const addNewTask = (type: string) => {
+        return () => dispatch(addTask({
+            id: "asdjgt1",
+            title: "CVWO Assignment",
+            tags: ["CVWO", "Programming"],
+            list_name: "main",
+            priority: "high",
+            list_order: 1,
+            due: Date.now(),
+            completed: false,
+            planned_start: Date.now(),
+            planned_end: Date.now(),
+            owner: "beebeeoii",
+            private: true
+        }))
+    }
+
     // const [tasks, setTasks] = useState<Array<Task>>([])
+    const taskStatus = useAppSelector(selectTaskStatus)
 
 
     useEffect(() => {
-        if (!dataLoadState) {
+        if (taskStatus === "idle") {
             dispatch(retrieveTasks("beebeeoii"))
             setDataLoadState(true)
         }
-    }, [dataLoadState, dispatch])
+    }, [taskStatus, dispatch])
 
-    let tasks = useAppSelector(getTasks)
+    const tasks = useAppSelector(selectTasks)
 
     const onDragEnd = (result: DropResult) => {
         // dropped outside the list
@@ -71,8 +105,6 @@ export function Dashboard() {
             result.source.index,
             result.destination.index
         )))
-
-        // tasks = useAppSelector(getTasks)
     }
 
     return (
@@ -89,7 +121,7 @@ export function Dashboard() {
                             className="tasksContainer"
                         >
                             {tasks.map((item, index) => (
-                                <Draggable key={item.title} draggableId={item.title} index={index}>
+                                <Draggable key={item.id} draggableId={item.id} index={index}>
                                     {(provided, snapshot) => (
                                         <Card
                                             sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
@@ -125,7 +157,7 @@ export function Dashboard() {
             </DragDropContext>
 
             <SpeedDial
-                ariaLabel="SpeedDial basic example"
+                ariaLabel="Create a task"
                 sx={{ position: 'absolute', bottom: 32, right: 32 }}
                 icon={<SpeedDialIcon />}
             >
@@ -134,6 +166,7 @@ export function Dashboard() {
                         key={action.name}
                         icon={action.icon}
                         tooltipTitle={action.name}
+                        onClick={addNewTask(action.name)}
                     />
                 ))}
             </SpeedDial>

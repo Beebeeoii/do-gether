@@ -5,10 +5,14 @@ import { createTask, fetchTasks, reorderList } from '../../adapters/task/task';
 
 export interface TaskState {
     tasks: Array<Task>
+    status: 'idle' | 'loading' | 'succeeded' | 'failed',
+    error: string | null
 }
 
 const initialState: TaskState = {
-    tasks: []
+    tasks: [],
+    status: "idle",
+    error: null
 }
 
 export const addTask = createAsyncThunk("task/create", async (task: Task) => {
@@ -22,7 +26,6 @@ export const retrieveTasks = createAsyncThunk("task/fetch", async (username: str
 })
 
 export const reorderTasks = createAsyncThunk("task/reorder", async (taskList: Array<Task>) => {
-    console.log('test')
     const response = await reorderList(taskList)
     return response
 })
@@ -32,7 +35,12 @@ export const taskSlice = createSlice({
     initialState: initialState,
     reducers: {},
     extraReducers: (builder) => {
+        builder.addCase(addTask.pending, (state, action) => {
+            state.status = "loading"
+        })
+
         builder.addCase(addTask.fulfilled, (state, action) => {
+            state.status = "succeeded"
             if (action.payload.success) {
                 state.tasks.push(action.payload.data.task)
             }
@@ -40,22 +48,25 @@ export const taskSlice = createSlice({
 
         builder.addCase(retrieveTasks.fulfilled, (state, action) => {
             if (action.payload.success) {
-                state.tasks = action.payload.data.tasks.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
+                state.tasks = action.payload.data.tasks.sort((a: Task, b: Task) => a.list_order - b.list_order)
             }
         })
 
-        // TODO requires reworking
         builder.addCase(reorderTasks.pending, (state, action) => {
-            for (let i = 0; i < action.meta.arg.length; i++) {
-                let index = state.tasks.indexOf(action.meta.arg[i])
-                state.tasks[index].listOrder = i
+            state.status = "loading"
+            state.tasks = action.meta.arg.sort((a: Task, b: Task) => a.list_order - b.list_order)
+        })
+        
+        builder.addCase(reorderTasks.fulfilled, (state, action) => {
+            state.status = "succeeded"
+            if (action.payload.success) {
+                state.tasks = action.payload.data.tasks.sort((a: Task, b: Task) => a.list_order - b.list_order)
             }
-            state.tasks = state.tasks.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
-            console.log(state.tasks)
         })
     }
 })
 
-export const getTasks = (state: RootState) => state.task.tasks
+export const selectTasks = (state: RootState) => state.task.tasks
+export const selectTaskStatus = (state: RootState) => state.task.status
 
 export default taskSlice.reducer
