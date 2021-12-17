@@ -5,10 +5,11 @@ import { getTasks, reorderTasks, retrieveTasks } from "../../services/task/taskS
 import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDraggingStyle } from 'react-beautiful-dnd';
 import "./Dashboard.css"
 import { Task } from "../../interfaces/task/Task";
-import { Card, IconButton, Input, TextField, Typography } from "@mui/material";
+import { Card, IconButton, Input, SpeedDial, SpeedDialAction, SpeedDialIcon, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
+import { AddTask, AddToQueue, Archive } from "@mui/icons-material";
 
 const grid = 8;
 
@@ -39,6 +40,11 @@ const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDr
     ...draggableStyle
 } as React.CSSProperties);
 
+const fabActions = [
+    { icon: <AddTask />, name: 'New Task' },
+    { icon: <Archive />, name: 'New Backlog Task' }
+];
+
 export function Dashboard() {
     const dispatch = useAppDispatch()
     const [dataLoadState, setDataLoadState] = useState<boolean>(false)
@@ -65,7 +71,7 @@ export function Dashboard() {
             result.source.index,
             result.destination.index
         )))
-        
+
         // tasks = useAppSelector(getTasks)
     }
 
@@ -117,6 +123,20 @@ export function Dashboard() {
                     )}
                 </Droppable>
             </DragDropContext>
+
+            <SpeedDial
+                ariaLabel="SpeedDial basic example"
+                sx={{ position: 'absolute', bottom: 32, right: 32 }}
+                icon={<SpeedDialIcon />}
+            >
+                {fabActions.map((action) => (
+                    <SpeedDialAction
+                        key={action.name}
+                        icon={action.icon}
+                        tooltipTitle={action.name}
+                    />
+                ))}
+            </SpeedDial>
         </div>
     )
 }

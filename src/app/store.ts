@@ -11,9 +11,20 @@ interface StoreState {
     task: TaskState
 }
 
+interface AuthStateToStore {
+    userId: string | null
+    authenticated: boolean
+    token: string | null
+}
+
 const saveToLocalStorage = (state: StoreState) => {
     try {
-        localStorage.setItem('auth', JSON.stringify(state.auth))
+        let authStateToStore: AuthStateToStore = {
+            userId: state.auth.userId,
+            authenticated: state.auth.authenticated,
+            token: state.auth.token
+        }
+        localStorage.setItem('auth', JSON.stringify(authStateToStore))
     } catch (e) {
         console.error(e)
     }
@@ -22,11 +33,9 @@ const saveToLocalStorage = (state: StoreState) => {
 const loadFromLocalStorage = () => {
     try {
         const authStateStr = localStorage.getItem('auth')
-        // const taskStateStr = localStorage.getItem('task')
 
         return {
-            auth: authStateStr ? JSON.parse(authStateStr) : undefined,
-            task: undefined
+            auth: authStateStr ? JSON.parse(authStateStr) : undefined
         }
     } catch (e) {
         console.error(e)

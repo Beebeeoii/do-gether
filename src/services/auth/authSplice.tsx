@@ -5,12 +5,14 @@ import { Credentials } from '../../interfaces/auth/Credentials';
 
 export interface AuthState {
     userId: string | null
+    username: string | null
     authenticated: boolean
     token: string | null
 }
 
 const initialState: AuthState = {
     userId: null,
+    username: null,
     authenticated: false,
     token: null
 }
@@ -31,6 +33,7 @@ export const authSlice = createSlice({
     reducers: {
         logout: (state: AuthState) => {
             state.userId = null
+            state.username = null
             state.authenticated = false
             state.token = null
         }
@@ -40,12 +43,16 @@ export const authSlice = createSlice({
             if (action.payload.success) {
                 state.authenticated = action.payload.data.authenticated
                 state.userId = action.payload.data.user.id
+                state.username = action.payload.data.user.username
+                state.token = action.payload.data.token
             }
         })
         builder.addCase(login.fulfilled, (state, action) => {
             if (action.payload.success && action.payload.data.user) {
                 state.authenticated = action.payload.data.authenticated
                 state.userId = action.payload.data.user.id
+                state.username = action.payload.data.user.username
+                state.token = action.payload.data.token
             }
         })
     }
@@ -53,7 +60,9 @@ export const authSlice = createSlice({
 
 export const { logout } = authSlice.actions
 
+export const selectUsername = (state: RootState) => state.auth.username
 export const selectUserId = (state: RootState) => state.auth.userId
 export const selectAuthenticated = (state: RootState) => state.auth.authenticated
+export const selectToken = (state: RootState) => state.auth.token
 
 export default authSlice.reducer
