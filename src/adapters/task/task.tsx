@@ -11,14 +11,14 @@ export function createTask(task: Task) {
                     id: "0asgn3",
                     title: "CVWO Assignment",
                     tags: ["CVWO", "Programming"],
-                    list_name: "main",
+                    list_id: "main",
                     priority: "high",
                     list_order: 1,
                     due: Date.now(),
                     completed: false,
                     planned_start: Date.now(),
                     planned_end: Date.now(),
-                    owner: "beebeeoii",
+                    owner_id: "beebeeoii",
                     private: true
                 }
             }
@@ -38,13 +38,13 @@ export function fetchTasks(username: string) {
                         title: "CVWO Assignment",
                         tags: ["CVWO", "Programming"],
                         priority: "medium",
-                        list_name: "main",
+                        list_id: "main",
                         list_order: 0,
                         due: Date.now(),
                         completed: false,
                         planned_start: Date.now(),
                         planned_end: Date.now(),
-                        owner: "beebeeoii",
+                        owner_id: "beebeeoii",
                         private: true
                     },
                     {
@@ -52,13 +52,13 @@ export function fetchTasks(username: string) {
                         title: "Sunday Service",
                         tags: ["Church"],
                         priority: "high",
-                        list_name: "main",
+                        list_id: "main",
                         list_order: 1,
                         due: Date.now(),
                         completed: false,
                         planned_start: Date.now(),
                         planned_end: Date.now(),
-                        owner: "beebeeoii",
+                        owner_id: "beebeeoii",
                         private: false
                     },
                     {
@@ -66,13 +66,13 @@ export function fetchTasks(username: string) {
                         title: "Meetup with ABC",
                         tags: ["Friends"],
                         priority: "low",
-                        list_name: "main",
+                        list_id: "main",
                         list_order: 2,
                         due: Date.now(),
                         completed: false,
                         planned_start: Date.now(),
                         planned_end: Date.now(),
-                        owner: "beebeeoii",
+                        owner_id: "beebeeoii",
                         private: true
                     },
                     {
@@ -80,13 +80,13 @@ export function fetchTasks(username: string) {
                         title: "Discuss YF exco stuff with ben and wx",
                         tags: ["Church", "Friends"],
                         priority: "high",
-                        list_name: "main",
+                        list_id: "main",
                         list_order: 3,
                         due: Date.now(),
                         completed: true,
                         planned_start: Date.now(),
                         planned_end: Date.now(),
-                        owner: "beebeeoii",
+                        owner_id: "beebeeoii",
                         private: true
                     }
                 ]
@@ -107,13 +107,13 @@ export function reorderList(taskList: Array<Task>) {
                         title: "CVWO Assignment",
                         tags: ["CVWO", "Programming"],
                         priority: "medium",
-                        list_name: "main",
+                        list_id: "main",
                         list_order: 2,
                         due: Date.now(),
                         completed: false,
                         planned_start: Date.now(),
                         planned_end: Date.now(),
-                        owner: "beebeeoii",
+                        owner_id: "beebeeoii",
                         private: true
                     },
                     {
@@ -121,13 +121,13 @@ export function reorderList(taskList: Array<Task>) {
                         title: "Sunday Service",
                         tags: ["Church"],
                         priority: "high",
-                        list_name: "main",
+                        list_id: "main",
                         list_order: 0,
                         due: Date.now(),
                         completed: false,
                         planned_start: Date.now(),
                         planned_end: Date.now(),
-                        owner: "beebeeoii",
+                        owner_id: "beebeeoii",
                         private: false
                     },
                     {
@@ -135,13 +135,13 @@ export function reorderList(taskList: Array<Task>) {
                         title: "Meetup with ABC",
                         tags: ["Friends"],
                         priority: "low",
-                        list_name: "main",
+                        list_id: "main",
                         list_order: 1,
                         due: Date.now(),
                         completed: false,
                         planned_start: Date.now(),
                         planned_end: Date.now(),
-                        owner: "beebeeoii",
+                        owner_id: "beebeeoii",
                         private: true
                     },
                     {
@@ -149,13 +149,13 @@ export function reorderList(taskList: Array<Task>) {
                         title: "Discuss YF exco stuff with ben and wx",
                         tags: ["Church", "Friends"],
                         priority: "high",
-                        list_name: "main",
+                        list_id: "main",
                         list_order: 3,
                         due: Date.now(),
                         completed: true,
                         planned_start: Date.now(),
                         planned_end: Date.now(),
-                        owner: "beebeeoii",
+                        owner_id: "beebeeoii",
                         private: true
                     }
                 ]

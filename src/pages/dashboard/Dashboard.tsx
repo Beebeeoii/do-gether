@@ -5,11 +5,12 @@ import { selectTasks, retrieveTasks, addTask, selectTaskStatus, reorderTasks } f
 import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDraggingStyle } from 'react-beautiful-dnd';
 import "./Dashboard.css"
 import { Task } from "../../interfaces/task/Task";
-import { Card, IconButton, Input, SpeedDial, SpeedDialAction, SpeedDialIcon, TextField, Typography } from "@mui/material";
+import { Card, Fab, IconButton, Input, SpeedDial, SpeedDialAction, SpeedDialIcon, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import { AddTask, AddToQueue, Archive } from "@mui/icons-material";
+import { TaskDialog } from "../../components/taskDialog/TaskDialog";
 
 const grid = 8;
 
@@ -56,29 +57,25 @@ const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDr
 } as React.CSSProperties);
 
 const fabActions = [
-    { icon: <AddTask />, name: 'New Task' },
-    { icon: <Archive />, name: 'New Backlog Task' }
+    { icon: <AddTask />, name: 'main' },
+    { icon: <Archive />, name: 'backlog' }
 ];
 
 export function Dashboard() {
     const dispatch = useAppDispatch()
     const [dataLoadState, setDataLoadState] = useState<boolean>(false)
 
-    const addNewTask = (type: string) => {
-        return () => dispatch(addTask({
-            id: "asdjgt1",
-            title: "CVWO Assignment",
-            tags: ["CVWO", "Programming"],
-            list_name: "main",
-            priority: "high",
-            list_order: 1,
-            due: Date.now(),
-            completed: false,
-            planned_start: Date.now(),
-            planned_end: Date.now(),
-            owner: "beebeeoii",
-            private: true
-        }))
+    const [taskDialogOpen, setTaskDialogOpen] = useState<boolean>(false)
+    // const [taskDialogDefaultList, setTaskDialogDefaultList] = useState<string>("main")
+    const [selectedValue, setSelectedValue] = useState("")
+
+    const handleDialogOpen = () => {
+        setTaskDialogOpen(true)
+    }
+
+    const handleDialogClose = (value: string) => {
+        setTaskDialogOpen(false)
+        setSelectedValue(value)
     }
 
     // const [tasks, setTasks] = useState<Array<Task>>([])
@@ -156,20 +153,12 @@ export function Dashboard() {
                 </Droppable>
             </DragDropContext>
 
-            <SpeedDial
-                ariaLabel="Create a task"
-                sx={{ position: 'absolute', bottom: 32, right: 32 }}
-                icon={<SpeedDialIcon />}
-            >
-                {fabActions.map((action) => (
-                    <SpeedDialAction
-                        key={action.name}
-                        icon={action.icon}
-                        tooltipTitle={action.name}
-                        onClick={addNewTask(action.name)}
-                    />
-                ))}
-            </SpeedDial>
+            <Fab color="primary" aria-label="addTask" onClick={handleDialogOpen} variant="extended">
+                <AddTask sx={{ mr: 1 }} />
+                Add task
+            </Fab>
+
+            <TaskDialog open={taskDialogOpen} selected_value={selectedValue} onClose={handleDialogClose} />
         </div>
     )
 }
