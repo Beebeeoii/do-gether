@@ -5,6 +5,7 @@ import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import authReducer from '../services/auth/authSplice';
 import taskReducer from '../services/task/taskSplice';
 import userReducer from '../services/user/userSplice';
+import listReducer from '../services/list/listSplice';
 
 interface StoreState {
     auth: AuthState,
@@ -47,7 +48,8 @@ export const store = configureStore({
     reducer: {
         auth: authReducer,
         task: taskReducer,
-        user: userReducer
+        user: userReducer,
+        list: listReducer
     },
     preloadedState: loadFromLocalStorage()
 })

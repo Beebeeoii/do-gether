@@ -20,8 +20,8 @@ export const addTask = createAsyncThunk("task/create", async (task: Task) => {
     return response
 })
 
-export const retrieveTasks = createAsyncThunk("task/fetch", async (username: string) => {
-    const response = await fetchTasks(username)
+export const retrieveTasks = createAsyncThunk("task/fetch", async (list_id: string) => {
+    const response = await fetchTasks(list_id)
     return response
 })
 

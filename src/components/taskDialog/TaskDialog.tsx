@@ -1,6 +1,9 @@
-import { Chip, Dialog, DialogTitle, MenuItem, Select, SelectChangeEvent, Stack, TextField } from "@mui/material";
-import { useState } from "react";
+import { Chip, Dialog, DialogTitle, makeStyles, MenuItem, Select, SelectChangeEvent, Stack, TextField, ThemeProvider } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { List } from "../../interfaces/list/List";
 import { Task } from "../../interfaces/task/Task";
+import { retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
 
 export interface TaskDialogProps {
     open: boolean
@@ -8,37 +11,89 @@ export interface TaskDialogProps {
     onClose: (value: string) => void
 }
 
-
+const DEFAULT_LIST_VALUE = "defaultList"
 
 export function TaskDialog(props: TaskDialogProps) {
+    const dispatch = useAppDispatch()
     const { onClose, selected_value, open } = props
-    let [taskTitle, setTaskTitle] = useState<string>("")
-    let [listName, setListName] = useState<string>("main")
 
-    let task: Task = {
-        id: "asd0",
-        title: "test",
-        tags: [],
-        priority: "low",
-        private: true,
-        planned_end: Date.now(),
-        planned_start: Date.now(),
-        owner_id: "beebeeoii",
-        list_id: "defaultList",
-        due: Date.now(),
-        list_order: -1,
-        completed: false
-    }
+    let [taskTitle, setTaskTitle] = useState<string>("")
+
+    const listStatus = useAppSelector(selectListStatus)
+    const lists = useAppSelector(selectLists)
+    useEffect(() => {
+        if (listStatus === "idle") {
+            dispatch(retrieveAllLists("beebeeoii"))
+        }
+    }, [listStatus, dispatch])
+    let [listId, setListId] = useState<string>(DEFAULT_LIST_VALUE)
+
+    const [tags, setTags] = useState<Array<string>>(["tag1", "tag2"])
+    const [tagInputValue, setTagInputValue] = useState<string>("")
+
+    // let task: Task = {
+    //     id: "asd0",
+    //     title: "test",
+    //     tags: [],
+    //     priority: "low",
+    //     private: true,
+    //     planned_end: Date.now(),
+    //     planned_start: Date.now(),
+    //     owner_id: "beebeeoii",
+    //     list_id: "defaultList",
+    //     due: Date.now(),
+    //     list_order: -1,
+    //     completed: false
+    // }
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTaskTitle(event.target.value);
-        console.log(taskTitle)
-    };
-
+        setTaskTitle(event.target.value)
+    }
 
     const handleListChange = (event: SelectChangeEvent) => {
-        setListName(event.target.value)
+        setListId(event.target.value)
+    }
 
+    const handleTagInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTagInputValue(event.target.value)
+    }
+
+    const handleTagsChange = (value: string) => {
+        return (event: React.KeyboardEvent<HTMLDivElement>) => {
+            if (event.key === "Enter") {
+                const newSelectedItem = [...tags]
+                // const duplicatedValues = newSelectedItem.indexOf(
+                //     event.target.value.trim()
+                // );
+
+                // if (duplicatedValues !== -1) {
+                //     setTagInputValue("");
+                //     return;
+                // }
+                if (!value.replace(/\s/g, "").length) return
+
+                newSelectedItem.push(value.trim())
+                setTags(newSelectedItem)
+                setTagInputValue("")
+                console.log(tags)
+            }
+            if (tags.length && !tagInputValue.length && event.key === "Backspace") {
+                setTags(tags.slice(0, tags.length - 1))
+            }
+            // const clonedArray = Object.assign([], tags)
+            // const index = tags.indexOf(event.target.value, 0)
+            // clonedArray.splice(index, 1)
+            // setTags(clonedArray)
+        }
+    }
+
+    const handleDeleteTag = (tag: string) => {
+        return () => {
+            const clonedArray = Object.assign([], tags)
+            const index = tags.indexOf(tag, 0)
+            clonedArray.splice(index, 1)
+            setTags(clonedArray)
+        }
     }
 
     const handleDialogClose = () => {
@@ -48,7 +103,7 @@ export function TaskDialog(props: TaskDialogProps) {
 
     function resetState() {
         setTaskTitle("")
-        setListName("main")
+        setListId(DEFAULT_LIST_VALUE)
     }
 
     return (
@@ -56,7 +111,7 @@ export function TaskDialog(props: TaskDialogProps) {
             <DialogTitle>Create a task</DialogTitle>
 
             <TextField
-                id="task_title"
+                id="taskTitle"
                 label="Task"
                 multiline
                 maxRows={2}
@@ -69,15 +124,38 @@ export function TaskDialog(props: TaskDialogProps) {
             <Select
                 labelId="listSelectorLabel"
                 id="listSelector"
-                value={listName}
+                value={listId}
                 onChange={handleListChange}
                 autoWidth
                 label="List"
             >
-                <MenuItem value="main">Main</MenuItem>
-                <MenuItem value="backlog">Backlog</MenuItem>
+                <MenuItem key={DEFAULT_LIST_VALUE} value={DEFAULT_LIST_VALUE} disabled>Choose your list</MenuItem>
+                {lists.map((list: List, index: number) => (
+                    <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
+                ))}
             </Select>
 
-        </Dialog>
+            <TextField
+                id="tags"
+                label="Tags"
+                multiline
+                maxRows={5}
+                onChange={handleTagInputChange}
+                value={tagInputValue}
+                onKeyDown={handleTagsChange(tagInputValue)}
+                variant="standard"
+                InputProps={{
+                    startAdornment: tags.map((tag: string) => (
+                        <Chip
+                            key={tag}
+                            tabIndex={-1}
+                            label={tag}
+                            onDelete={handleDeleteTag(tag)}
+                        />
+                    ))
+                }}
+            />
+
+        </Dialog >
     )
 }

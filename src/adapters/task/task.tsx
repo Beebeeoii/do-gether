@@ -26,7 +26,7 @@ export function createTask(task: Task) {
     })
 }
 
-export function fetchTasks(username: string) {
+export function fetchTasks(list_id: string) {
     return new Promise<RetrieveTaskResponse>((resolve) => {
         setTimeout(() => resolve({
             success: true,
