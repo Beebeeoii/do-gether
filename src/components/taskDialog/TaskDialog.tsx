@@ -1,13 +1,15 @@
-import { Autocomplete, Chip, Dialog, DialogTitle, FormControlLabel, FormGroup, makeStyles, MenuItem, Select, SelectChangeEvent, Stack, Switch, TextField, ThemeProvider } from "@mui/material";
+import { Autocomplete, Chip, Dialog, DialogTitle, FormControlLabel, FormGroup, makeStyles, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, TextField, ThemeProvider } from "@mui/material";
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MomentAdapter from '@mui/lab/AdapterMoment';
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
 import { Task } from "../../interfaces/task/Task";
 import { retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
 import { retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
 import { DatePicker, DateTimePicker } from "@mui/lab";
+import { PriorityHigh } from "@mui/icons-material";
+import { Box } from "@mui/system";
 
 export interface TaskDialogProps {
     open: boolean
@@ -51,6 +53,15 @@ export function TaskDialog(props: TaskDialogProps) {
     const [dueDate, setDueDate] = useState<Date | null>(new Date())
     const [includeTime, setIncludeTime] = useState<boolean>(false)
 
+    const priorityLevelLabels: { [index: string]: string } = {
+        1: 'Trivial',
+        2: 'Normal',
+        3: 'Urgent'
+    }
+    const [priorityLevel, setPriorityLevel] = useState<number | null>(1)
+    const [hoverPriorityLevel, setHoverPriorityLevel] = useState(-1)
+
+
     // let task: Task = {
     //     id: "asd0",
     //     title: "test",
@@ -78,6 +89,14 @@ export function TaskDialog(props: TaskDialogProps) {
         setIncludeTime(checked)
     }
 
+    const handlePriorityLevelChange = (_: SyntheticEvent<Element, Event>, priorityLevel: number | null) => {
+        setPriorityLevel(priorityLevel)
+    }
+
+    const handleHoverPriorityLevelChange = (_: SyntheticEvent<Element, Event>, newHoverPriorityLevel: number) => {
+        setHoverPriorityLevel(newHoverPriorityLevel)
+    }
+
     const handleDialogClose = () => {
         onClose(selected_value)
         resetState()
@@ -88,6 +107,9 @@ export function TaskDialog(props: TaskDialogProps) {
         setListId(DEFAULT_LIST_VALUE)
         setTagsSelected([])
         setDueDate(new Date())
+        setIncludeTime(false)
+        setPriorityLevel(1)
+        setHoverPriorityLevel(-1)
     }
 
     return (
@@ -177,6 +199,28 @@ export function TaskDialog(props: TaskDialogProps) {
                     <FormControlLabel control={<Switch value={includeTime} onChange={handleIncludeTimeChange} />} label="Include time" />
                 </FormGroup>
             </Stack>
+
+            <Box
+                sx={{
+                    width: 200,
+                    display: 'flex',
+                    alignItems: 'center',
+                }}
+            >
+                <Rating
+                    name="hover-feedback"
+                    value={priorityLevel}
+                    precision={1}
+                    max={3}
+                    onChange={handlePriorityLevelChange}
+                    onChangeActive={handleHoverPriorityLevelChange}
+                    icon={<PriorityHigh fontSize="inherit" />}
+                    emptyIcon={<PriorityHigh style={{ opacity: 0.55 }} fontSize="inherit" />}
+                />
+                {priorityLevel !== null && (
+                    <Box sx={{ ml: 2 }}>{priorityLevelLabels[hoverPriorityLevel !== -1 ? hoverPriorityLevel : priorityLevel]}</Box>
+                )}
+            </Box>
         </Dialog >
     )
 }
