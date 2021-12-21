@@ -1,5 +1,5 @@
 import { Task } from "../../interfaces/task/Task";
-import { CreateTaskResponse, RetrieveTaskResponse } from "../../interfaces/task/TaskResponses";
+import { CreateTaskResponse, RetrieveTaskResponse, RetrieveTaskTagsResponse } from "../../interfaces/task/TaskResponses";
 
 export function createTask(task: Task) {
     return new Promise<CreateTaskResponse>((resolve) => {
@@ -93,6 +93,23 @@ export function fetchTasks(list_id: string) {
             }
         }), 500)
     })
+}
+
+export function fetchTagsByListId(list_id: string) {
+    return new Promise<RetrieveTaskTagsResponse>((resolve) => {
+        setTimeout(() => resolve({
+            success: true,
+            error: "",
+            data: {
+                tags: [
+                    "CS2100",
+                    "MA2001",
+                    "MA2002"
+                ]
+            }
+        }))
+    })
+        
 }
 
 export function reorderList(taskList: Array<Task>) {

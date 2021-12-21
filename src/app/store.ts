@@ -4,6 +4,7 @@ import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 // import counterReducer from '../features/counter/counterSlice';
 import authReducer from '../services/auth/authSplice';
 import taskReducer from '../services/task/taskSplice';
+import tagReducer from '../services/task/tagSplice';
 import userReducer from '../services/user/userSplice';
 import listReducer from '../services/list/listSplice';
 
@@ -49,7 +50,8 @@ export const store = configureStore({
         auth: authReducer,
         task: taskReducer,
         user: userReducer,
-        list: listReducer
+        list: listReducer,
+        tag: tagReducer
     },
     preloadedState: loadFromLocalStorage()
 })

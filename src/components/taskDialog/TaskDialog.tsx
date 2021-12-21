@@ -1,9 +1,10 @@
-import { Chip, Dialog, DialogTitle, makeStyles, MenuItem, Select, SelectChangeEvent, Stack, TextField, ThemeProvider } from "@mui/material";
+import { Autocomplete, Chip, Dialog, DialogTitle, makeStyles, MenuItem, Select, SelectChangeEvent, Stack, TextField, ThemeProvider } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
 import { Task } from "../../interfaces/task/Task";
 import { retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
+import { retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
 
 export interface TaskDialogProps {
     open: boolean
@@ -28,8 +29,21 @@ export function TaskDialog(props: TaskDialogProps) {
     }, [listStatus, dispatch])
     let [listId, setListId] = useState<string>(DEFAULT_LIST_VALUE)
 
-    const [tags, setTags] = useState<Array<string>>(["tag1", "tag2"])
-    const [tagInputValue, setTagInputValue] = useState<string>("")
+    const tagStatus = useAppSelector(selectTagStatus)
+    const tagSuggestions = useAppSelector(selectTags)
+    const [tagsSelected, setTagsSelected] = useState<Array<string>>([])
+    const [tagsSuggestionsOpen, setTagsSuggestionsOpen] = useState<boolean>(false)
+    const tagsLoading = tagsSuggestionsOpen && tagSuggestions.length === 0
+
+    useEffect(() => {
+        if (!tagsLoading) {
+            return undefined
+        }
+
+        if (tagStatus === "idle") {
+            dispatch(retrieveTagsByListId("list01"))
+        }
+    }, [tagsLoading])
 
     // let task: Task = {
     //     id: "asd0",
@@ -54,48 +68,6 @@ export function TaskDialog(props: TaskDialogProps) {
         setListId(event.target.value)
     }
 
-    const handleTagInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setTagInputValue(event.target.value)
-    }
-
-    const handleTagsChange = (value: string) => {
-        return (event: React.KeyboardEvent<HTMLDivElement>) => {
-            if (event.key === "Enter") {
-                const newSelectedItem = [...tags]
-                // const duplicatedValues = newSelectedItem.indexOf(
-                //     event.target.value.trim()
-                // );
-
-                // if (duplicatedValues !== -1) {
-                //     setTagInputValue("");
-                //     return;
-                // }
-                if (!value.replace(/\s/g, "").length) return
-
-                newSelectedItem.push(value.trim())
-                setTags(newSelectedItem)
-                setTagInputValue("")
-                console.log(tags)
-            }
-            if (tags.length && !tagInputValue.length && event.key === "Backspace") {
-                setTags(tags.slice(0, tags.length - 1))
-            }
-            // const clonedArray = Object.assign([], tags)
-            // const index = tags.indexOf(event.target.value, 0)
-            // clonedArray.splice(index, 1)
-            // setTags(clonedArray)
-        }
-    }
-
-    const handleDeleteTag = (tag: string) => {
-        return () => {
-            const clonedArray = Object.assign([], tags)
-            const index = tags.indexOf(tag, 0)
-            clonedArray.splice(index, 1)
-            setTags(clonedArray)
-        }
-    }
-
     const handleDialogClose = () => {
         onClose(selected_value)
         resetState()
@@ -104,6 +76,7 @@ export function TaskDialog(props: TaskDialogProps) {
     function resetState() {
         setTaskTitle("")
         setListId(DEFAULT_LIST_VALUE)
+        setTagsSelected([])
     }
 
     return (
@@ -130,32 +103,41 @@ export function TaskDialog(props: TaskDialogProps) {
                 label="List"
             >
                 <MenuItem key={DEFAULT_LIST_VALUE} value={DEFAULT_LIST_VALUE} disabled>Choose your list</MenuItem>
-                {lists.map((list: List, index: number) => (
+                {lists.map((list: List, _: number) => (
                     <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
                 ))}
             </Select>
 
-            <TextField
+            <Autocomplete
+                multiple
+                limitTags={3}
                 id="tags"
-                label="Tags"
-                multiline
-                maxRows={5}
-                onChange={handleTagInputChange}
-                value={tagInputValue}
-                onKeyDown={handleTagsChange(tagInputValue)}
-                variant="standard"
-                InputProps={{
-                    startAdornment: tags.map((tag: string) => (
-                        <Chip
-                            key={tag}
-                            tabIndex={-1}
-                            label={tag}
-                            onDelete={handleDeleteTag(tag)}
-                        />
-                    ))
+                open={tagsSuggestionsOpen}
+                onOpen={() => {
+                    setTagsSuggestionsOpen(true)
                 }}
+                onClose={() => {
+                    setTagsSuggestionsOpen(false)
+                }}
+                freeSolo
+                loading={tagsLoading}
+                loadingText="Loading"
+                options={tagSuggestions}
+                value={tagsSelected}
+                onChange={(_, tagsSelected: Array<string>) => {
+                    setTagsSelected(tagsSelected)
+                }}
+                style={{ width: 500 }}
+                getOptionLabel={(option) => option}
+                renderTags={(value: readonly string[], getTagProps) =>
+                    value.map((option: string, index: number) => (
+                        <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                    ))
+                }
+                renderInput={(params) => (
+                    <TextField {...params} label="Tags" placeholder="Add a tag" />
+                )}
             />
-
         </Dialog >
     )
 }

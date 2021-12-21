@@ -16,6 +16,14 @@ export interface RetrieveTaskResponse {
     }
 }
 
+export interface RetrieveTaskTagsResponse {
+    success: boolean,
+    error: string,
+    data: {
+        tags: Array<string>
+    }
+}
+
 export interface UpdateTaskResponse {
     success: boolean,
     error: string,
