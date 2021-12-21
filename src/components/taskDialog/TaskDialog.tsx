@@ -74,7 +74,7 @@ export function TaskDialog(props: TaskDialogProps) {
         setListId(event.target.value)
     }
 
-    const handleIncludeTimeChange = (event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    const handleIncludeTimeChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
         setIncludeTime(checked)
     }
 
