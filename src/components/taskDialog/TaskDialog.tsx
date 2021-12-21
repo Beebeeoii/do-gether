@@ -1,10 +1,13 @@
-import { Autocomplete, Chip, Dialog, DialogTitle, makeStyles, MenuItem, Select, SelectChangeEvent, Stack, TextField, ThemeProvider } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Autocomplete, Chip, Dialog, DialogTitle, FormControlLabel, FormGroup, makeStyles, MenuItem, Select, SelectChangeEvent, Stack, Switch, TextField, ThemeProvider } from "@mui/material";
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import MomentAdapter from '@mui/lab/AdapterMoment';
+import { ChangeEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
 import { Task } from "../../interfaces/task/Task";
 import { retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
 import { retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
+import { DatePicker, DateTimePicker } from "@mui/lab";
 
 export interface TaskDialogProps {
     open: boolean
@@ -45,6 +48,9 @@ export function TaskDialog(props: TaskDialogProps) {
         }
     }, [tagsLoading])
 
+    const [dueDate, setDueDate] = useState<Date | null>(new Date())
+    const [includeTime, setIncludeTime] = useState<boolean>(false)
+
     // let task: Task = {
     //     id: "asd0",
     //     title: "test",
@@ -68,6 +74,10 @@ export function TaskDialog(props: TaskDialogProps) {
         setListId(event.target.value)
     }
 
+    const handleIncludeTimeChange = (event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        setIncludeTime(checked)
+    }
+
     const handleDialogClose = () => {
         onClose(selected_value)
         resetState()
@@ -77,6 +87,7 @@ export function TaskDialog(props: TaskDialogProps) {
         setTaskTitle("")
         setListId(DEFAULT_LIST_VALUE)
         setTagsSelected([])
+        setDueDate(new Date())
     }
 
     return (
@@ -138,6 +149,34 @@ export function TaskDialog(props: TaskDialogProps) {
                     <TextField {...params} label="Tags" placeholder="Add a tag" />
                 )}
             />
+
+            <Stack direction={"row"} spacing={3}>
+                {!includeTime && <LocalizationProvider dateAdapter={MomentAdapter}>
+                    <DatePicker
+                        renderInput={(params) => <TextField {...params} />}
+                        label="Due date"
+                        value={dueDate}
+                        onChange={(dateSelected) => {
+                            setDueDate(dateSelected);
+                        }}
+                    />
+                </LocalizationProvider>}
+
+                {includeTime && <LocalizationProvider dateAdapter={MomentAdapter}>
+                    <DateTimePicker
+                        renderInput={(props) => <TextField {...props} />}
+                        label="Due date"
+                        value={dueDate}
+                        onChange={(dateSelected) => {
+                            setDueDate(dateSelected)
+                        }}
+                    />
+                </LocalizationProvider>}
+
+                <FormGroup>
+                    <FormControlLabel control={<Switch value={includeTime} onChange={handleIncludeTimeChange} />} label="Include time" />
+                </FormGroup>
+            </Stack>
         </Dialog >
     )
 }
