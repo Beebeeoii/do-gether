@@ -1,11 +1,11 @@
-import { Autocomplete, Button, Chip, Dialog, DialogTitle, FormControlLabel, FormGroup, makeStyles, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, TextField, ThemeProvider } from "@mui/material";
+import { Autocomplete, Button, Chip, Dialog, DialogTitle, FormControlLabel, FormGroup, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, TextField } from "@mui/material";
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MomentAdapter from '@mui/lab/AdapterMoment';
-import { ChangeEvent, FormEvent, SyntheticEvent, useEffect, useState } from "react";
+import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
-import { Task, TaskData } from "../../interfaces/task/Task";
-import { retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
+import { TaskData } from "../../interfaces/task/Task";
+import { selectLists } from "../../services/list/listSplice";
 import { retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
 import { DatePicker, DateTimePicker } from "@mui/lab";
 import { PriorityHigh } from "@mui/icons-material";
@@ -39,13 +39,7 @@ export function TaskDialog(props: TaskDialogProps) {
 
     let [taskTitle, setTaskTitle] = useState<string>(DEFAULT_TASK_TITLE_VALUE)
 
-    const listStatus = useAppSelector(selectListStatus)
     const lists = useAppSelector(selectLists)
-    useEffect(() => {
-        if (listStatus === "idle") {
-            dispatch(retrieveAllLists("beebeeoii"))
-        }
-    }, [listStatus, dispatch])
     let [listId, setListId] = useState<string>(DEFAULT_LIST_VALUE)
 
     const tagStatus = useAppSelector(selectTagStatus)
@@ -102,6 +96,7 @@ export function TaskDialog(props: TaskDialogProps) {
             completed: false
         }
         onClose(task)
+        resetState()
     }
 
     const handleDialogClose = () => {
