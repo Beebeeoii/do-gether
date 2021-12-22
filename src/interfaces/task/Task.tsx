@@ -4,11 +4,11 @@ export interface Task {
     tags: Array<string>
     list_id: string
     list_order: number
-    priority: "low" | "medium" | "high"
+    priority: "Trivial" | "Normal" | "Urgent" | null
     due: number | null
     completed: boolean
-    planned_start: number | null
-    planned_end: number | null
+    // planned_start: number | null
+    // planned_end: number | null
     owner_id: string
     private: boolean
 }
@@ -18,10 +18,10 @@ export interface TaskData {
     tags: Array<string>
     list_id: string
     list_order: number
-    priority: "low" | "medium" | "high"
+    priority: "Trivial" | "Normal" | "Urgent" | null
     due: number | null
     completed: boolean
-    planned_start: number | null
-    planned_end: number | null
+    // planned_start: number | null
+    // planned_end: number | null
     private: boolean
 }

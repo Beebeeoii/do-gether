@@ -1,29 +1,43 @@
-import { Autocomplete, Chip, Dialog, DialogTitle, FormControlLabel, FormGroup, makeStyles, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, TextField, ThemeProvider } from "@mui/material";
+import { Autocomplete, Button, Chip, Dialog, DialogTitle, FormControlLabel, FormGroup, makeStyles, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, TextField, ThemeProvider } from "@mui/material";
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MomentAdapter from '@mui/lab/AdapterMoment';
-import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, SyntheticEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
-import { Task } from "../../interfaces/task/Task";
+import { Task, TaskData } from "../../interfaces/task/Task";
 import { retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
 import { retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
 import { DatePicker, DateTimePicker } from "@mui/lab";
 import { PriorityHigh } from "@mui/icons-material";
+import CreateIcon from '@mui/icons-material/Create';
 import { Box } from "@mui/system";
+import moment from "moment";
 
 export interface TaskDialogProps {
     open: boolean
-    selected_value: string
-    onClose: (value: string) => void
+    onClose: (newTask: TaskData | null) => void
 }
 
+const DEFAULT_TASK_TITLE_VALUE = ""
 const DEFAULT_LIST_VALUE = "defaultList"
+const DEFAULT_TAGS_SELECTED_VALUE: Array<string> = []
+const DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE = false
+const DEFAULT_INCLUDE_TIME_VALUE = false
+const DEFAULT_PRIORITY_LEVEL_VALUE = 1
+const DEFAULT_HOVER_PRIORITY_LEVEL_VALUE = -1
+
+const priorityLevelLabels: { [index: string]: string | null } = {
+    null: null,
+    1: 'Trivial',
+    2: 'Normal',
+    3: 'Urgent'
+}
 
 export function TaskDialog(props: TaskDialogProps) {
     const dispatch = useAppDispatch()
-    const { onClose, selected_value, open } = props
+    const { onClose, open } = props
 
-    let [taskTitle, setTaskTitle] = useState<string>("")
+    let [taskTitle, setTaskTitle] = useState<string>(DEFAULT_TASK_TITLE_VALUE)
 
     const listStatus = useAppSelector(selectListStatus)
     const lists = useAppSelector(selectLists)
@@ -36,8 +50,8 @@ export function TaskDialog(props: TaskDialogProps) {
 
     const tagStatus = useAppSelector(selectTagStatus)
     const tagSuggestions = useAppSelector(selectTags)
-    const [tagsSelected, setTagsSelected] = useState<Array<string>>([])
-    const [tagsSuggestionsOpen, setTagsSuggestionsOpen] = useState<boolean>(false)
+    const [tagsSelected, setTagsSelected] = useState<Array<string>>(DEFAULT_TAGS_SELECTED_VALUE)
+    const [tagsSuggestionsOpen, setTagsSuggestionsOpen] = useState<boolean>(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
     const tagsLoading = tagsSuggestionsOpen && tagSuggestions.length === 0
 
     useEffect(() => {
@@ -51,31 +65,10 @@ export function TaskDialog(props: TaskDialogProps) {
     }, [tagsLoading])
 
     const [dueDate, setDueDate] = useState<Date | null>(new Date())
-    const [includeTime, setIncludeTime] = useState<boolean>(false)
+    const [includeTime, setIncludeTime] = useState<boolean>(DEFAULT_INCLUDE_TIME_VALUE)
 
-    const priorityLevelLabels: { [index: string]: string } = {
-        1: 'Trivial',
-        2: 'Normal',
-        3: 'Urgent'
-    }
-    const [priorityLevel, setPriorityLevel] = useState<number | null>(1)
-    const [hoverPriorityLevel, setHoverPriorityLevel] = useState(-1)
-
-
-    // let task: Task = {
-    //     id: "asd0",
-    //     title: "test",
-    //     tags: [],
-    //     priority: "low",
-    //     private: true,
-    //     planned_end: Date.now(),
-    //     planned_start: Date.now(),
-    //     owner_id: "beebeeoii",
-    //     list_id: "defaultList",
-    //     due: Date.now(),
-    //     list_order: -1,
-    //     completed: false
-    // }
+    const [priorityLevel, setPriorityLevel] = useState<number | null>(DEFAULT_PRIORITY_LEVEL_VALUE)
+    const [hoverPriorityLevel, setHoverPriorityLevel] = useState(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTaskTitle(event.target.value)
@@ -97,19 +90,34 @@ export function TaskDialog(props: TaskDialogProps) {
         setHoverPriorityLevel(newHoverPriorityLevel)
     }
 
+    const handleCreateTask = () => {
+        let task: TaskData = {
+            title: taskTitle,
+            tags: tagsSelected,
+            priority: priorityLevelLabels[priorityLevel!] as "Trivial" | "Normal" | "Urgent" | null,
+            private: true,
+            list_id: listId,
+            due: moment(dueDate).valueOf(),
+            list_order: -1,
+            completed: false
+        }
+        onClose(task)
+    }
+
     const handleDialogClose = () => {
-        onClose(selected_value)
+        onClose(null)
         resetState()
     }
 
     function resetState() {
-        setTaskTitle("")
+        setTaskTitle(DEFAULT_TASK_TITLE_VALUE)
         setListId(DEFAULT_LIST_VALUE)
-        setTagsSelected([])
+        setTagsSelected(DEFAULT_TAGS_SELECTED_VALUE)
+        setTagsSuggestionsOpen(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
         setDueDate(new Date())
-        setIncludeTime(false)
-        setPriorityLevel(1)
-        setHoverPriorityLevel(-1)
+        setIncludeTime(DEFAULT_INCLUDE_TIME_VALUE)
+        setPriorityLevel(DEFAULT_PRIORITY_LEVEL_VALUE)
+        setHoverPriorityLevel(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
     }
 
     return (
@@ -119,9 +127,6 @@ export function TaskDialog(props: TaskDialogProps) {
             <TextField
                 id="taskTitle"
                 label="Task"
-                multiline
-                maxRows={2}
-
                 value={taskTitle}
                 onChange={handleTitleChange}
                 variant="standard"
@@ -208,7 +213,7 @@ export function TaskDialog(props: TaskDialogProps) {
                 }}
             >
                 <Rating
-                    name="hover-feedback"
+                    name="priority"
                     value={priorityLevel}
                     precision={1}
                     max={3}
@@ -221,6 +226,14 @@ export function TaskDialog(props: TaskDialogProps) {
                     <Box sx={{ ml: 2 }}>{priorityLevelLabels[hoverPriorityLevel !== -1 ? hoverPriorityLevel : priorityLevel]}</Box>
                 )}
             </Box>
+
+            <Button
+                variant="contained"
+                endIcon={<CreateIcon />}
+                onClick={handleCreateTask}
+            >
+                Create Task
+            </Button>
         </Dialog >
     )
 }
