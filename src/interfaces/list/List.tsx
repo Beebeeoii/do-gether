@@ -4,3 +4,8 @@ export interface List {
     owner: string
     private: boolean
 }
+
+export interface ListData {
+    name: string
+    private: boolean
+}

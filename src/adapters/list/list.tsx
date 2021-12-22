@@ -8,9 +8,9 @@ export function createList(list: List) {
             error: "",
             data: {
                 list: {
-                    id: "list01",
+                    id: "list06",
                     name: list.name,
-                    owner: list.owner,
+                    owner: "beebeeoii",
                     private: list.private
                 },
             }

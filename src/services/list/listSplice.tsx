@@ -32,20 +32,21 @@ export const listSlice = createSlice({
     initialState: initialState,
     reducers: {},
     extraReducers: (builder) => {
-        // builder.addCase(addList.pending, (state, action) => {
-        //     state.status = "loading"
-        // })
+        builder.addCase(addList.pending, (state, action) => {
+            state.status = "loading"
+        })
 
-        // builder.addCase(addList.fulfilled, (state, action) => {
-        //     state.status = "succeeded"
-        //     if (action.payload.success) {
-        //         state.lists.push(action.payload.data.task)
-        //     }
-        // })
+        builder.addCase(addList.fulfilled, (state, action) => {
+            if (action.payload.success) {
+                state.lists.push(action.payload.data.list)
+            }
+            state.status = "succeeded"
+        })
 
         builder.addCase(retrieveAllLists.fulfilled, (state, action) => {
             if (action.payload.success) {
                 state.lists = action.payload.data.lists
+                state.status = "succeeded"
             }
         })
     }

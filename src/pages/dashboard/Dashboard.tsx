@@ -4,15 +4,21 @@ import { NavBar } from "../../components/nav/NavBar"
 import { selectTasks, retrieveTasks, addTask, selectTaskStatus, reorderTasks } from "../../services/task/taskSplice";
 import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDraggingStyle } from 'react-beautiful-dnd';
 import "./Dashboard.css"
-import { Task } from "../../interfaces/task/Task";
-import { Card, Fab, IconButton, Input, SpeedDial, SpeedDialAction, SpeedDialIcon, TextField, Typography } from "@mui/material";
+import { Task, TaskData } from "../../interfaces/task/Task";
+import { Button, Card, Divider, Fab, FormControl, IconButton, Input, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
-import { AddTask, AddToQueue, Archive } from "@mui/icons-material";
+import AddIcon from '@mui/icons-material/Add';
+import { AddTask } from "@mui/icons-material";
 import { TaskDialog } from "../../components/taskDialog/TaskDialog";
+import { addList, retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
+import { List, ListData } from "../../interfaces/list/List";
+import { PayloadAction } from "@reduxjs/toolkit";
+import { RetrieveListByUserIdResponse } from "../../interfaces/list/ListResponses";
+import { NewListDialog } from "../../components/newListDialog/NewListDialog";
 
-const grid = 8;
+const grid = 8
 
 const getListStyle = (isDraggingOver: boolean) => ({
     background: isDraggingOver ? "lightblue" : "lightgrey",
@@ -28,14 +34,12 @@ const reorder = (list: Array<Task>, startIndex: number, endIndex: number) => {
 
     if (startIndex > endIndex) {
         for (let i = endIndex; i < startIndex; i++) {
-            console.log("1")
             result[i].list_order += 1
         }
     }
 
     if (endIndex > startIndex) {
         for (let i = startIndex + 1; i < endIndex + 1; i++) {
-            console.log("2")
             result[i].list_order -= 1
         }
     }
@@ -54,47 +58,69 @@ const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDr
 
     // styles we need to apply on draggables
     ...draggableStyle
-} as React.CSSProperties);
+} as React.CSSProperties)
 
-const fabActions = [
-    { icon: <AddTask />, name: 'main' },
-    { icon: <Archive />, name: 'backlog' }
-];
+const DEFAULT_LIST: List = {
+    id: "",
+    name: "",
+    owner: "",
+    private: true
+}
+
+const CREATE_LIST = "New List"
 
 export function Dashboard() {
     const dispatch = useAppDispatch()
-    const [dataLoadState, setDataLoadState] = useState<boolean>(false)
 
-    const [taskDialogOpen, setTaskDialogOpen] = useState<boolean>(false)
-    // const [taskDialogDefaultList, setTaskDialogDefaultList] = useState<string>("main")
-    const [selectedValue, setSelectedValue] = useState("")
-
-    const handleDialogOpen = () => {
-        setTaskDialogOpen(true)
-    }
-
-    const handleDialogClose = (value: string) => {
-        setTaskDialogOpen(false)
-        setSelectedValue(value)
-    }
-
-    // const [tasks, setTasks] = useState<Array<Task>>([])
     const taskStatus = useAppSelector(selectTaskStatus)
-
-
+    const tasks = useAppSelector(selectTasks)
     useEffect(() => {
         if (taskStatus === "idle") {
             dispatch(retrieveTasks("beebeeoii"))
-            setDataLoadState(true)
         }
     }, [taskStatus, dispatch])
 
-    const tasks = useAppSelector(selectTasks)
+    const listStatus = useAppSelector(selectListStatus)
+    const lists = useAppSelector(selectLists)
+    const [selectedList, setSelectedList] = useState<List>(DEFAULT_LIST)
+    useEffect(() => {
+        if (listStatus === "idle") {
+            dispatch(retrieveAllLists("beebeeoii")).then((value) => {
+                let payload: RetrieveListByUserIdResponse = value.payload as RetrieveListByUserIdResponse
+                let mainList = payload.data.lists.filter((value: List, _: number, __: List[]) => {
+                    return value.name === "main"
+                })
+                setSelectedList(mainList[0])
+            })
+        }
+    }, [listStatus, dispatch])
+    const handleListChange = (event: SelectChangeEvent) => {
+        if (event.target.value === CREATE_LIST) {
+            console.log(CREATE_LIST)
+            return
+        }
+
+        let selected = lists.filter((value: List, _: number, __: List[]) => {
+            return value.id === event.target.value
+        })
+        setSelectedList(selected[0])
+    }
+    const [newListDialogOpen, setNewListDialogOpen] = useState<boolean>(false)
+    const handleNewListDialogOpen = () => {
+        setNewListDialogOpen(true)
+    }
+    const handleNewListDialogClose = (newList: ListData | null) => {
+        setNewListDialogOpen(false)
+
+        if (newList) {
+            console.log(newList as List)
+            dispatch(addList(newList as List))
+        }
+    }
 
     const onDragEnd = (result: DropResult) => {
-        // dropped outside the list
         if (!result.destination) {
-            return;
+            return
         }
 
         dispatch(reorderTasks(reorder(
@@ -104,9 +130,49 @@ export function Dashboard() {
         )))
     }
 
+    const [taskDialogOpen, setTaskDialogOpen] = useState<boolean>(false)
+    const handleTaskDialogOpen = () => {
+        setTaskDialogOpen(true)
+    }
+    const handleTaskDialogClose = (newTask: TaskData | null) => {
+        setTaskDialogOpen(false)
+
+        if (newTask) {
+            console.log(newTask)
+            dispatch(addTask(newTask as Task))
+        }
+    }
+
     return (
         <div className="dashboard">
             <NavBar />
+
+            <Stack direction="row" justifyContent="space-between">
+                {listStatus !== "idle" && <FormControl sx={{ m: 1, width: 300 }}>
+                    <InputLabel id="list-select-label">List</InputLabel>
+                    <Select
+                        labelId="list-select-label"
+                        id="list-select"
+                        value={selectedList.id}
+                        label="List"
+                        onChange={handleListChange}
+                    >
+                        {lists.map((list: List, _: number) => (
+                            <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
+                        ))}
+                        <Divider/>
+                        <MenuItem key={CREATE_LIST} value={CREATE_LIST} onClick={handleNewListDialogOpen}>
+                            <AddIcon />
+                            <ListItemText primary={CREATE_LIST} />
+                        </MenuItem>
+                    </Select>
+                </FormControl>}
+
+                <Fab color="primary" aria-label="addTask" onClick={handleTaskDialogOpen} variant="extended">
+                    <AddTask sx={{ mr: 1 }} />
+                    Add task
+                </Fab>
+            </Stack>
 
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="droppable">
@@ -135,13 +201,18 @@ export function Dashboard() {
                                             </Typography>
 
                                             <div className="menu">
-                                                <IconButton aria-label="edit">
-                                                    <EditIcon />
-                                                </IconButton>
+                                                <Tooltip title="Edit">
+                                                    <IconButton aria-label="edit">
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                </Tooltip>
 
-                                                <IconButton aria-label="archive">
-                                                    <ArchiveIcon />
-                                                </IconButton>
+                                                <Tooltip title="Move to Backlog">
+                                                    <IconButton aria-label="archive" >
+                                                        <ArchiveIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+
                                             </div>
                                         </Card>
                                     )}
@@ -153,12 +224,8 @@ export function Dashboard() {
                 </Droppable>
             </DragDropContext>
 
-            <Fab color="primary" aria-label="addTask" onClick={handleDialogOpen} variant="extended">
-                <AddTask sx={{ mr: 1 }} />
-                Add task
-            </Fab>
-
-            <TaskDialog open={taskDialogOpen} selected_value={selectedValue} onClose={handleDialogClose} />
+            <NewListDialog open={newListDialogOpen} onClose={handleNewListDialogClose} />
+            <TaskDialog open={taskDialogOpen} onClose={handleTaskDialogClose} />
         </div>
     )
 }
