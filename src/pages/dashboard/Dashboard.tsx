@@ -1,12 +1,11 @@
-import { MouseEventHandler, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
 import { selectTasks, retrieveTasks, addTask, selectTaskStatus, reorderTasks } from "../../services/task/taskSplice";
 import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDraggingStyle } from 'react-beautiful-dnd';
 import "./Dashboard.css"
 import { Task, TaskData } from "../../interfaces/task/Task";
-import { Button, Card, Divider, Fab, FormControl, IconButton, Input, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, TextField, Tooltip, Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Card, Divider, Fab, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Stack, Tooltip, Typography } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import AddIcon from '@mui/icons-material/Add';
@@ -14,7 +13,6 @@ import { AddTask } from "@mui/icons-material";
 import { TaskDialog } from "../../components/taskDialog/TaskDialog";
 import { addList, retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
 import { List, ListData } from "../../interfaces/list/List";
-import { PayloadAction } from "@reduxjs/toolkit";
 import { RetrieveListByUserIdResponse } from "../../interfaces/list/ListResponses";
 import { NewListDialog } from "../../components/newListDialog/NewListDialog";
 

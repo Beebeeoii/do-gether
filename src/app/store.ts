@@ -1,7 +1,6 @@
 import { TaskState } from './../services/task/taskSplice';
 import { AuthState } from './../services/auth/authSplice';
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-// import counterReducer from '../features/counter/counterSlice';
 import authReducer from '../services/auth/authSplice';
 import taskReducer from '../services/task/taskSplice';
 import tagReducer from '../services/task/tagSplice';

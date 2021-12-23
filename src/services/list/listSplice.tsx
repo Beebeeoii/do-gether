@@ -1,7 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
-import { Task } from '../../interfaces/task/Task';
-import { createTask, fetchTasks, reorderList } from '../../adapters/task/task';
 import { List } from '../../interfaces/list/List';
 import { createList, fetchListsByUserId } from '../../adapters/list/list';
 
