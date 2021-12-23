@@ -27,6 +27,32 @@ export function createTask(task: Task) {
 }
 
 export function fetchTasks(list_id: string) {
+    if (list_id === "list02") {
+        return new Promise<RetrieveTaskResponse>((resolve) => {
+            setTimeout(() => resolve({
+                success: true,
+                error: "",
+                data: {
+                    tasks: [
+                        {
+                            id: "asd02v",
+                            title: "CVWO Assignment",
+                            tags: ["CVWO", "Programming"],
+                            priority: "Normal",
+                            list_id: "main",
+                            list_order: 0,
+                            due: Date.now(),
+                            completed: false,
+                            // planned_start: Date.now(),
+                            // planned_end: Date.now(),
+                            owner_id: "beebeeoii",
+                            private: true
+                        }
+                    ]
+                }
+            }), 500)
+        })
+    }
     return new Promise<RetrieveTaskResponse>((resolve) => {
         setTimeout(() => resolve({
             success: true,
@@ -38,7 +64,7 @@ export function fetchTasks(list_id: string) {
                         title: "CVWO Assignment",
                         tags: ["CVWO", "Programming"],
                         priority: "Normal",
-                        list_id: "main",
+                        list_id: "list01",
                         list_order: 0,
                         due: Date.now(),
                         completed: false,
@@ -52,7 +78,7 @@ export function fetchTasks(list_id: string) {
                         title: "Sunday Service",
                         tags: ["Church"],
                         priority: "Urgent",
-                        list_id: "main",
+                        list_id: "list01",
                         list_order: 1,
                         due: Date.now(),
                         completed: false,
@@ -66,7 +92,7 @@ export function fetchTasks(list_id: string) {
                         title: "Meetup with ABC",
                         tags: ["Friends"],
                         priority: "Trivial",
-                        list_id: "main",
+                        list_id: "list01",
                         list_order: 2,
                         due: Date.now(),
                         completed: false,
@@ -80,7 +106,7 @@ export function fetchTasks(list_id: string) {
                         title: "Discuss YF exco stuff with ben and wx",
                         tags: ["Church", "Friends"],
                         priority: "Urgent",
-                        list_id: "main",
+                        list_id: "list01",
                         list_order: 3,
                         due: Date.now(),
                         completed: true,
@@ -109,7 +135,7 @@ export function fetchTagsByListId(list_id: string) {
             }
         }))
     })
-        
+
 }
 
 export function reorderList(taskList: Array<Task>) {

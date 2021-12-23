@@ -4,7 +4,7 @@ import MomentAdapter from '@mui/lab/AdapterMoment';
 import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
-import { TaskData } from "../../interfaces/task/Task";
+import { Task, TaskData } from "../../interfaces/task/Task";
 import { selectLists } from "../../services/list/listSplice";
 import { retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
 import { DatePicker, DateTimePicker } from "@mui/lab";
@@ -15,6 +15,7 @@ import moment from "moment";
 
 export interface TaskDialogProps {
     open: boolean
+    data: Task | null
     onClose: (newTask: TaskData | null) => void
 }
 
@@ -35,16 +36,16 @@ const priorityLevelLabels: { [index: string]: string | null } = {
 
 export function TaskDialog(props: TaskDialogProps) {
     const dispatch = useAppDispatch()
-    const { onClose, open } = props
+    const { onClose, data, open } = props
 
-    let [taskTitle, setTaskTitle] = useState<string>(DEFAULT_TASK_TITLE_VALUE)
+    let [taskTitle, setTaskTitle] = useState<string>(data ? data.title : DEFAULT_TASK_TITLE_VALUE)
 
     const lists = useAppSelector(selectLists)
-    let [listId, setListId] = useState<string>(DEFAULT_LIST_VALUE)
+    let [listId, setListId] = useState<string>(data ? data.list_id : DEFAULT_LIST_VALUE)
 
     const tagStatus = useAppSelector(selectTagStatus)
     const tagSuggestions = useAppSelector(selectTags)
-    const [tagsSelected, setTagsSelected] = useState<Array<string>>(DEFAULT_TAGS_SELECTED_VALUE)
+    const [tagsSelected, setTagsSelected] = useState<Array<string>>(data ? data.tags : DEFAULT_TAGS_SELECTED_VALUE)
     const [tagsSuggestionsOpen, setTagsSuggestionsOpen] = useState<boolean>(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
     const tagsLoading = tagsSuggestionsOpen && tagSuggestions.length === 0
 
@@ -58,10 +59,13 @@ export function TaskDialog(props: TaskDialogProps) {
         }
     }, [tagsLoading])
 
-    const [dueDate, setDueDate] = useState<Date | null>(new Date())
+    const [dueDate, setDueDate] = useState<Date | null>(data ? moment(data.due).toDate() : new Date())
     const [includeTime, setIncludeTime] = useState<boolean>(DEFAULT_INCLUDE_TIME_VALUE)
 
-    const [priorityLevel, setPriorityLevel] = useState<number | null>(DEFAULT_PRIORITY_LEVEL_VALUE)
+    const [priorityLevel, setPriorityLevel] = useState<number | null>(
+        data ? (Object.keys(priorityLevelLabels).find(k => priorityLevelLabels[k] === data.priority) ? Number(Object.keys(priorityLevelLabels).find(k => priorityLevelLabels[k] === data.priority)) : null)
+            : DEFAULT_PRIORITY_LEVEL_VALUE
+    )
     const [hoverPriorityLevel, setHoverPriorityLevel] = useState(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,7 +121,9 @@ export function TaskDialog(props: TaskDialogProps) {
 
     return (
         <Dialog onClose={handleDialogClose} open={open}>
-            <DialogTitle>Create a task</DialogTitle>
+            <DialogTitle>
+                {data ? "Edit a Task" : "Create a task"}
+            </DialogTitle>
 
             <TextField
                 id="taskTitle"
@@ -227,7 +233,7 @@ export function TaskDialog(props: TaskDialogProps) {
                 endIcon={<CreateIcon />}
                 onClick={handleCreateTask}
             >
-                Create Task
+                {data ? "Edit Task" : "Create Task"}
             </Button>
         </Dialog >
     )

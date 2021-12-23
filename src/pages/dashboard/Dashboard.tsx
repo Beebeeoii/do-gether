@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
 import { selectTasks, retrieveTasks, addTask, selectTaskStatus, reorderTasks } from "../../services/task/taskSplice";
@@ -74,11 +74,18 @@ export function Dashboard() {
 
     const taskStatus = useAppSelector(selectTaskStatus)
     const tasks = useAppSelector(selectTasks)
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null)
     useEffect(() => {
         if (taskStatus === "idle") {
             dispatch(retrieveTasks("beebeeoii"))
         }
     }, [taskStatus, dispatch])
+    const handleEditTask = (task: Task) => {
+        return () => {
+            setSelectedTask(task)
+            setTaskDialogOpen(true)
+        }
+    }
 
     const listStatus = useAppSelector(selectListStatus)
     const lists = useAppSelector(selectLists)
@@ -96,7 +103,6 @@ export function Dashboard() {
     }, [listStatus, dispatch])
     const handleListChange = (event: SelectChangeEvent) => {
         if (event.target.value === CREATE_LIST) {
-            console.log(CREATE_LIST)
             return
         }
 
@@ -104,6 +110,7 @@ export function Dashboard() {
             return value.id === event.target.value
         })
         setSelectedList(selected[0])
+        dispatch(retrieveTasks(selected[0].id))
     }
     const [newListDialogOpen, setNewListDialogOpen] = useState<boolean>(false)
     const handleNewListDialogOpen = () => {
@@ -113,7 +120,6 @@ export function Dashboard() {
         setNewListDialogOpen(false)
 
         if (newList) {
-            console.log(newList as List)
             dispatch(addList(newList as List))
         }
     }
@@ -132,6 +138,7 @@ export function Dashboard() {
 
     const [taskDialogOpen, setTaskDialogOpen] = useState<boolean>(false)
     const handleTaskDialogOpen = () => {
+        setSelectedTask(null)
         setTaskDialogOpen(true)
     }
     const handleTaskDialogClose = (newTask: TaskData | null) => {
@@ -202,7 +209,7 @@ export function Dashboard() {
 
                                             <div className="menu">
                                                 <Tooltip title="Edit">
-                                                    <IconButton aria-label="edit">
+                                                    <IconButton aria-label="edit" onClick={handleEditTask(item)}>
                                                         <EditIcon />
                                                     </IconButton>
                                                 </Tooltip>
@@ -225,7 +232,7 @@ export function Dashboard() {
             </DragDropContext>
 
             <NewListDialog open={newListDialogOpen} onClose={handleNewListDialogClose} />
-            <TaskDialog open={taskDialogOpen} onClose={handleTaskDialogClose} />
+            {taskDialogOpen && <TaskDialog open={taskDialogOpen} data={selectedTask} onClose={handleTaskDialogClose} />}
         </div>
     )
 }
