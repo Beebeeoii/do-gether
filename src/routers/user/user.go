@@ -21,18 +21,38 @@ func Register(c *gin.Context) {
 	reqBodyErr := c.BindJSON(&requestBody)
 	if reqBodyErr != nil {
 		log.Println(reqBodyErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqBodyErr.Error(),
+		})
+		return
 	}
 
 	hashedPassword, hashPwErr := authService.HashPassword(requestBody.Password)
 	if hashPwErr != nil {
 		log.Println(hashPwErr)
-	}
-
-	createUserErr := userService.CreateUser(requestBody.Username, hashedPassword)
-	if createUserErr != nil {
-		c.JSON(http.StatusOK, interfaces.CreateUserResponse{BaseResponse: interfaces.BaseResponse{Success: false, Error: createUserErr.Error()}})
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   hashPwErr.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, interfaces.CreateUserResponse{BaseResponse: interfaces.BaseResponse{Success: true, Error: ""}})
+	newUser, createUserErr := userService.CreateUser(requestBody.Username, hashedPassword)
+	if createUserErr != nil {
+		log.Println(createUserErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   createUserErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.CreateUserResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: newUser,
+	})
 }
