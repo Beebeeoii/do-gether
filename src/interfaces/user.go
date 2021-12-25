@@ -10,4 +10,5 @@ type User struct {
 
 type CreateUserResponse struct {
 	BaseResponse
+	Data User `json:"data"`
 }
