@@ -9,7 +9,7 @@ import (
 
 func Init(address string) {
 	router := gin.Default()
-	router.GET("/user/auth", auth.AuthenticateUser)
+	router.GET("/user/authenticate", auth.AuthenticateUser)
 	router.POST("/user", user.Register)
 
 	router.Run(address)

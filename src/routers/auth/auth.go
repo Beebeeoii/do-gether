@@ -5,23 +5,68 @@ import (
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
+	authService "github.com/beebeeoii/do-gether/services/auth"
+	userService "github.com/beebeeoii/do-gether/services/user"
 	"github.com/gin-gonic/gin"
 )
 
-type authBody struct {
-	username string
-	password string
-}
+const (
+	USERNAME_PARAM_KEY        = "username"
+	PASSWORD_PARAM_KEY        = "password"
+	INVALID_USERNAME_ERROR    = "sql: no rows in result set"
+	INVALID_USERNAME_RESPONSE = "Incorrect username/password"
+	INVALID_PASSWORD_RESPONSE = "Incorrect username/password"
+)
 
 func AuthenticateUser(c *gin.Context) {
-	var requestBody authBody
+	reqParams := c.Request.URL.Query()
+	username := reqParams.Get(USERNAME_PARAM_KEY)
+	password := reqParams.Get(PASSWORD_PARAM_KEY)
 
-	reqBodyErr := c.BindJSON(&requestBody)
-	if reqBodyErr != nil {
-		log.Println(reqBodyErr)
+	hashedPassword, retrieveErr := userService.RetrieveUserHashedPassword(username)
+	if retrieveErr != nil {
+		log.Println(retrieveErr)
+
+		if retrieveErr.Error() == INVALID_USERNAME_ERROR {
+			c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+				Success: false,
+				Error:   INVALID_USERNAME_RESPONSE,
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+				Success: false,
+				Error:   retrieveErr.Error(),
+			})
+		}
+		return
 	}
 
-	// hashed := "$2a$14$nZkXQxK3nXOvHodvaxMJYO8rERWc.sNsHpo0Qn2JlutSoF01EyPuS"
-	// log.Println(hashed)
-	c.JSON(http.StatusOK, interfaces.AuthResponse{BaseResponse: interfaces.BaseResponse{Success: true, Error: ""}, Data: interfaces.AuthData{Token: hashed}})
+	isMatch := authService.CheckPasswordHash(password, hashedPassword)
+
+	if isMatch {
+		jwtToken, jwtTokenErr := authService.GenerateJwt(username)
+		if jwtTokenErr != nil {
+			log.Println(jwtTokenErr)
+			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+				Success: false,
+				Error:   jwtTokenErr.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, interfaces.AuthResponse{
+			BaseResponse: interfaces.BaseResponse{
+				Success: true,
+				Error:   "",
+			},
+			Data: interfaces.AuthData{
+				Token: jwtToken,
+			},
+		})
+	} else {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   INVALID_PASSWORD_RESPONSE,
+		})
+	}
 }
