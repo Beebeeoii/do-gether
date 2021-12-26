@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
+	routerWrapper "github.com/beebeeoii/do-gether/routers/wrapper"
 	authService "github.com/beebeeoii/do-gether/services/auth"
 	userService "github.com/beebeeoii/do-gether/services/user"
 	"github.com/gin-gonic/gin"
@@ -28,12 +29,12 @@ func AuthenticateUser(c *gin.Context) {
 		log.Println(retrieveErr)
 
 		if retrieveErr.Error() == INVALID_USERNAME_ERROR {
-			c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			routerWrapper.JSON(c, http.StatusUnauthorized, interfaces.BaseResponse{
 				Success: false,
 				Error:   INVALID_USERNAME_RESPONSE,
 			})
 		} else {
-			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			routerWrapper.JSON(c, http.StatusInternalServerError, interfaces.BaseResponse{
 				Success: false,
 				Error:   retrieveErr.Error(),
 			})
@@ -54,17 +55,28 @@ func AuthenticateUser(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, interfaces.AuthResponse{
+		userId, userIdErr := userService.RetrieveUserIdByUsername(username)
+		if userIdErr != nil {
+			log.Println(userIdErr)
+			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+				Success: false,
+				Error:   userIdErr.Error(),
+			})
+			return
+		}
+
+		routerWrapper.JSON(c, http.StatusOK, interfaces.AuthResponse{
 			BaseResponse: interfaces.BaseResponse{
 				Success: true,
 				Error:   "",
 			},
 			Data: interfaces.AuthData{
-				Token: jwtToken,
+				Token:  jwtToken,
+				UserId: userId,
 			},
 		})
 	} else {
-		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+		routerWrapper.JSON(c, http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   INVALID_PASSWORD_RESPONSE,
 		})
