@@ -65,6 +65,26 @@ func Register(c *gin.Context) {
 func RetrieveUserById(c *gin.Context) {
 	userId := c.Param("id")
 
+	authData, authDataErr := authService.ExtractAuthData(c.Request.Header)
+	if authDataErr != nil {
+		log.Println(authDataErr)
+		routerWrapper.JSON(c, http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataErr.Error(),
+		})
+		return
+	}
+
+	isValid, validationErr := authService.ValidateAuthData(authData.Token, authData.UserId)
+	if validationErr != nil || !isValid {
+		log.Println(validationErr)
+		routerWrapper.JSON(c, http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
 	user, retrieveErr := userService.RetrieveUserById(userId)
 	if retrieveErr != nil {
 		log.Println(retrieveErr)

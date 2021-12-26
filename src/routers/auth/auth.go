@@ -44,23 +44,23 @@ func AuthenticateUser(c *gin.Context) {
 
 	isMatch := authService.CheckPasswordHash(password, hashedPassword)
 
+	userId, userIdErr := userService.RetrieveUserIdByUsername(username)
+	if userIdErr != nil {
+		log.Println(userIdErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   userIdErr.Error(),
+		})
+		return
+	}
+
 	if isMatch {
-		jwtToken, jwtTokenErr := authService.GenerateJwt(username)
+		jwtToken, jwtTokenErr := authService.GenerateJwt(userId)
 		if jwtTokenErr != nil {
 			log.Println(jwtTokenErr)
 			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 				Success: false,
 				Error:   jwtTokenErr.Error(),
-			})
-			return
-		}
-
-		userId, userIdErr := userService.RetrieveUserIdByUsername(username)
-		if userIdErr != nil {
-			log.Println(userIdErr)
-			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
-				Success: false,
-				Error:   userIdErr.Error(),
 			})
 			return
 		}
