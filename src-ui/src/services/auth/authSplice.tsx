@@ -2,29 +2,47 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { authenticate, createUser } from '../../adapters/auth/auth';
 import { Credentials } from '../../interfaces/auth/Credentials';
+import { AxiosError } from 'axios';
 
 export interface AuthState {
-    userId: string | null
-    username: string | null
     authenticated: boolean
+    id: string | null
     token: string | null
+    status: 'idle' | 'loading' | 'succeeded' | 'failed',
 }
 
 const initialState: AuthState = {
-    userId: null,
-    username: null,
     authenticated: false,
-    token: null
+    id: null,
+    token: null,
+    status: "idle"
 }
 
-export const register = createAsyncThunk("auth/register", async (credentials: Credentials) => {
-    const response = await createUser(credentials.username, credentials.password)
-    return response
+export const register = createAsyncThunk("auth/register", async (credentials: Credentials, { rejectWithValue }) => {
+    try {
+        await createUser(credentials.username, credentials.password)
+        const loginResponse = await authenticate(credentials.username, credentials.password)
+        return loginResponse.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
 })
 
-export const login = createAsyncThunk("auth/authenticate", async (credentials: Credentials) => {
-    const response = await authenticate(credentials.username, credentials.password)
-    return response
+export const login = createAsyncThunk("auth/authenticate", async (credentials: Credentials, { rejectWithValue }) => {
+    try {
+        const response = await authenticate(credentials.username, credentials.password)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
 })
 
 export const authSlice = createSlice({
@@ -32,26 +50,26 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         logout: (state: AuthState) => {
-            state.userId = null
-            state.username = null
             state.authenticated = false
+            state.id = null
             state.token = null
         }
     },
     extraReducers: (builder) => {
         builder.addCase(register.fulfilled, (state, action) => {
             if (action.payload.success) {
-                state.authenticated = action.payload.data.authenticated
-                state.userId = action.payload.data.user.id
-                state.username = action.payload.data.user.username
+                state.status = "succeeded"
+                state.authenticated = true
+                state.id = action.payload.data.id
                 state.token = action.payload.data.token
             }
         })
+
         builder.addCase(login.fulfilled, (state, action) => {
-            if (action.payload.success && action.payload.data.user) {
-                state.authenticated = action.payload.data.authenticated
-                state.userId = action.payload.data.user.id
-                state.username = action.payload.data.user.username
+            if (action.payload.success && action.payload.data.token) {
+                state.status = "succeeded"
+                state.authenticated = true
+                state.id = action.payload.data.id
                 state.token = action.payload.data.token
             }
         })
@@ -60,9 +78,8 @@ export const authSlice = createSlice({
 
 export const { logout } = authSlice.actions
 
-export const selectUsername = (state: RootState) => state.auth.username
-export const selectUserId = (state: RootState) => state.auth.userId
 export const selectAuthenticated = (state: RootState) => state.auth.authenticated
+export const selectId = (state: RootState) => state.auth.id
 export const selectToken = (state: RootState) => state.auth.token
 
 export default authSlice.reducer
