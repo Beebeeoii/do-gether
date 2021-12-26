@@ -11,6 +11,7 @@ func Init(address string) {
 	router := gin.Default()
 	router.GET("/user/authenticate", auth.AuthenticateUser)
 	router.POST("/user", user.Register)
+	router.GET("/user/:id", user.RetrieveUserById)
 
 	router.Run(address)
 }

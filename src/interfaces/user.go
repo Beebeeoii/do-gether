@@ -12,3 +12,8 @@ type CreateUserResponse struct {
 	BaseResponse
 	Data User `json:"data"`
 }
+
+type RetrieveUserResponse struct {
+	BaseResponse
+	Data User `json:"data"`
+}

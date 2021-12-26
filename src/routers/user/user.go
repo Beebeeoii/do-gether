@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
+	routerWrapper "github.com/beebeeoii/do-gether/routers/wrapper"
 	authService "github.com/beebeeoii/do-gether/services/auth"
 	userService "github.com/beebeeoii/do-gether/services/user"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,10 @@ type registerBody struct {
 	Username string
 	Password string
 }
+
+const (
+	USER_ID_PARAM_KEY = "id"
+)
 
 func Register(c *gin.Context) {
 	var requestBody registerBody
@@ -54,5 +59,33 @@ func Register(c *gin.Context) {
 			Error:   "",
 		},
 		Data: newUser,
+	})
+}
+
+func RetrieveUserById(c *gin.Context) {
+	userId := c.Param("id")
+
+	user, retrieveErr := userService.RetrieveUserById(userId)
+	if retrieveErr != nil {
+		log.Println(retrieveErr)
+		routerWrapper.JSON(c, http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveErr.Error(),
+		})
+		return
+	}
+
+	routerWrapper.JSON(c, http.StatusOK, interfaces.RetrieveUserResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: interfaces.User{
+			Id:           user.Id,
+			Username:     user.Username,
+			Friends:      user.Friends,
+			Outgoing_req: user.Outgoing_req,
+			Incoming_req: user.Incoming_req,
+		},
 	})
 }
