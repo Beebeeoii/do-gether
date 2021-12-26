@@ -4,10 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../app/hooks";
 import { LoginResponse } from "../../interfaces/auth/AuthResponse";
 import { Credentials } from "../../interfaces/auth/Credentials";
-import { UserRequest } from "../../interfaces/user/UserRequest";
-import { RetrieveUserResponse } from "../../interfaces/user/UserResponse";
 import { login } from "../../services/auth/authSplice";
-import { retrieveUserInfo } from "../../services/user/userSplice";
 import "./Login.css"
 
 interface SnackBarState {
@@ -56,13 +53,7 @@ export function Login() {
                     let authPayload = authRes.payload as LoginResponse
 
                     if (authPayload.success) {
-                        let userRequest: UserRequest = {
-                            userId: authPayload.data.user!.id,
-                            token: authPayload.data.token
-                        }
-                        let userRes = await dispatch(retrieveUserInfo(userRequest))
-                        let userPayload = userRes.payload as RetrieveUserResponse
-                        navigate(`/dashboard/${userPayload.data.user.username}`)
+                        navigate("/dashboard")
                     } else {
                         openSnackBar({
                             open: true,

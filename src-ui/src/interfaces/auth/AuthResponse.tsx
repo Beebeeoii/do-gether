@@ -12,10 +12,9 @@ export interface RegisterResponse {
 
 export interface LoginResponse {
     success: boolean,
-    error: string | null,
+    error: string,
     data: {
-        user?: User
-        authenticated: boolean,
-        token: string
+        token: string,
+        id: string
     }
 }

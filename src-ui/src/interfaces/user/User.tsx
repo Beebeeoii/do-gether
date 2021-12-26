@@ -4,5 +4,4 @@ export interface User {
     friends: Array<string>
     outgoing_requests: Array<string>
     incoming_requests: Array<string>
-    points: number
 }

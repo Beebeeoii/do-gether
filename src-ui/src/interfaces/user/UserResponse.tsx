@@ -4,6 +4,10 @@ export interface RetrieveUserResponse {
     success: boolean
     error: string | null
     data: {
-        user: User
+        id: string,
+        username: string,
+        friends: Array<string>,
+        outgoing_req: Array<string>,
+        incoming_req: Array<string>
     }
 }
