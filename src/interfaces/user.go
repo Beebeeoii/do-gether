@@ -1,11 +1,11 @@
 package interfaces
 
 type User struct {
-	Id           string
-	Username     string
-	Friends      []string
-	Outgoing_req []string
-	Incoming_req []string
+	Id           string   `json:"id"`
+	Username     string   `json:"username"`
+	Friends      []string `json:"friends"`
+	Outgoing_req []string `json:"outgoing_req"`
+	Incoming_req []string `json:"incoming_req"`
 }
 
 type CreateUserResponse struct {
