@@ -13,16 +13,16 @@ interface StoreState {
 }
 
 interface AuthStateToStore {
-    userId: string | null
     authenticated: boolean
+    id: string | null
     token: string | null
 }
 
 const saveToLocalStorage = (state: StoreState) => {
     try {
         let authStateToStore: AuthStateToStore = {
-            userId: state.auth.userId,
             authenticated: state.auth.authenticated,
+            id: state.auth.id,
             token: state.auth.token
         }
         localStorage.setItem('auth', JSON.stringify(authStateToStore))

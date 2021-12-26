@@ -5,35 +5,26 @@ import { Login } from './pages/login/Login';
 import { Register } from './pages/register/Register';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { useAppSelector } from './app/hooks';
-import { selectAuthenticated, selectToken, selectUserId, selectUsername } from './services/auth/authSplice';
-import { retrieveUserInfo, selectUser } from './services/user/userSplice';
-import { useDispatch } from 'react-redux';
-import { UserRequest } from './interfaces/user/UserRequest';
+import { selectId, selectToken } from './services/auth/authSplice';
 
 function App() {
-    const isLoggedIn = useAppSelector(selectAuthenticated)
     const token = useAppSelector(selectToken)
-    const userId = useAppSelector(selectUserId)
-    const username = useAppSelector(selectUsername)
-    const user = useAppSelector(selectUser)
-    const dispatch = useDispatch()
+    const userId = useAppSelector(selectId)
 
-    if (isLoggedIn && !user) {
-        let userRequest: UserRequest = {
-            userId: userId!,
-            token: token
-        }
-        dispatch(retrieveUserInfo(userRequest))
+    let isLoggedIn = false
+
+    if (token && userId) {
+        isLoggedIn = true
     }
 
     return (
         <div className="App">
             <Router>
                 <Routes>
-                    <Route path="/" element={isLoggedIn ? <Navigate replace to={`/dashboard/${username}`} /> : <Home />}></Route>
-                    <Route path="/login" element={isLoggedIn ? <Navigate replace to={`/dashboard/${username}`} /> : <Login />}></Route>
-                    <Route path="/register" element={isLoggedIn ? <Navigate replace to={`/dashboard/${username}`} /> : <Register />}></Route>
-                    <Route path="/dashboard/:username" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />}></Route>
+                    <Route path="/" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Home />}></Route>
+                    <Route path="/login" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Login />}></Route>
+                    <Route path="/register" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Register />}></Route>
+                    <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />}></Route>
                 </Routes>
             </Router>
         </div>
