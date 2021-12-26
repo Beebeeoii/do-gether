@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
-	routerWrapper "github.com/beebeeoii/do-gether/routers/wrapper"
 	authService "github.com/beebeeoii/do-gether/services/auth"
 	userService "github.com/beebeeoii/do-gether/services/user"
 	"github.com/gin-gonic/gin"
@@ -68,7 +67,7 @@ func RetrieveUserById(c *gin.Context) {
 	authData, authDataErr := authService.ExtractAuthData(c.Request.Header)
 	if authDataErr != nil {
 		log.Println(authDataErr)
-		routerWrapper.JSON(c, http.StatusUnauthorized, interfaces.BaseResponse{
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataErr.Error(),
 		})
@@ -78,7 +77,7 @@ func RetrieveUserById(c *gin.Context) {
 	isValid, validationErr := authService.ValidateAuthData(authData.Token, authData.UserId)
 	if validationErr != nil || !isValid {
 		log.Println(validationErr)
-		routerWrapper.JSON(c, http.StatusUnauthorized, interfaces.BaseResponse{
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   validationErr.Error(),
 		})
@@ -88,14 +87,14 @@ func RetrieveUserById(c *gin.Context) {
 	user, retrieveErr := userService.RetrieveUserById(userId)
 	if retrieveErr != nil {
 		log.Println(retrieveErr)
-		routerWrapper.JSON(c, http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveErr.Error(),
 		})
 		return
 	}
 
-	routerWrapper.JSON(c, http.StatusOK, interfaces.RetrieveUserResponse{
+	c.JSON(http.StatusOK, interfaces.RetrieveUserResponse{
 		BaseResponse: interfaces.BaseResponse{
 			Success: true,
 			Error:   "",

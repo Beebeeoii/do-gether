@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
-	routerWrapper "github.com/beebeeoii/do-gether/routers/wrapper"
 	authService "github.com/beebeeoii/do-gether/services/auth"
 	userService "github.com/beebeeoii/do-gether/services/user"
 	"github.com/gin-gonic/gin"
@@ -29,12 +28,12 @@ func AuthenticateUser(c *gin.Context) {
 		log.Println(retrieveErr)
 
 		if retrieveErr.Error() == INVALID_USERNAME_ERROR {
-			routerWrapper.JSON(c, http.StatusUnauthorized, interfaces.BaseResponse{
+			c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 				Success: false,
 				Error:   INVALID_USERNAME_RESPONSE,
 			})
 		} else {
-			routerWrapper.JSON(c, http.StatusInternalServerError, interfaces.BaseResponse{
+			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 				Success: false,
 				Error:   retrieveErr.Error(),
 			})
@@ -65,7 +64,7 @@ func AuthenticateUser(c *gin.Context) {
 			return
 		}
 
-		routerWrapper.JSON(c, http.StatusOK, interfaces.AuthResponse{
+		c.JSON(http.StatusOK, interfaces.AuthResponse{
 			BaseResponse: interfaces.BaseResponse{
 				Success: true,
 				Error:   "",
@@ -76,7 +75,7 @@ func AuthenticateUser(c *gin.Context) {
 			},
 		})
 	} else {
-		routerWrapper.JSON(c, http.StatusUnauthorized, interfaces.BaseResponse{
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   INVALID_PASSWORD_RESPONSE,
 		})
