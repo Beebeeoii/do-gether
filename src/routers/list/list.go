@@ -18,7 +18,7 @@ type createListBody struct {
 }
 
 const (
-	USER_ID_PARAM_KEY = "id"
+	USER_ID_PARAM_KEY = "userId"
 )
 
 func CreateList(c *gin.Context) {
