@@ -14,8 +14,8 @@ type CreateListResponse struct {
 }
 
 type BasicListData struct {
-	Id   string
-	Name string
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type RetrieveListsResponse struct {
