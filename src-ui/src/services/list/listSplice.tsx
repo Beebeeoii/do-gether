@@ -2,6 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { List } from '../../interfaces/list/List';
 import { createList, fetchListsByUserId } from '../../adapters/list/list';
+import { AxiosError } from 'axios';
+import { CreateListRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
 
 export interface ListState {
     lists: Array<List>
@@ -15,14 +17,30 @@ const initialState: ListState = {
     error: null
 }
 
-export const addList = createAsyncThunk("list/create", async (list: List) => {
-    const response = await createList(list)
-    return response
+export const addList = createAsyncThunk("list/create", async (listRequest: CreateListRequest, { rejectWithValue }) => {
+    try {
+        const response = await createList(listRequest.authData, listRequest.name, listRequest.owner, listRequest.private)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
 })
 
-export const retrieveAllLists = createAsyncThunk("list/fetchAll", async (user_id: string) => {
-    const response = await fetchListsByUserId(user_id)
-    return response
+export const retrieveAllLists = createAsyncThunk("list/fetchAll", async (listRequest: RetrieveListsByUserIdRequest, { rejectWithValue }) => {
+    try {
+        const response = await fetchListsByUserId(listRequest.authData, listRequest.userId)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
 })
 
 export const listSlice = createSlice({
@@ -36,14 +54,19 @@ export const listSlice = createSlice({
 
         builder.addCase(addList.fulfilled, (state, action) => {
             if (action.payload.success) {
-                state.lists.push(action.payload.data.list)
+                state.lists.push({
+                    id: action.payload.data.id,
+                    name: action.payload.data.name,
+                    owner: action.payload.data.owner,
+                    private: action.payload.data.private
+                })
             }
             state.status = "succeeded"
         })
 
         builder.addCase(retrieveAllLists.fulfilled, (state, action) => {
             if (action.payload.success) {
-                state.lists = action.payload.data.lists
+                state.lists = action.payload.data
                 state.status = "succeeded"
             }
         })

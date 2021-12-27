@@ -18,6 +18,8 @@ import { RetrieveListByUserIdResponse } from "../../interfaces/list/ListResponse
 import { NewListDialog } from "../../components/newListDialog/NewListDialog";
 import { retrieveUserInfo, selectUser, selectUserStatus } from "../../services/user/userSplice";
 import { selectId, selectToken } from "../../services/auth/authSplice";
+import { AuthData } from "../../interfaces/auth/Auth";
+import { CreateListRequest, RetrieveListsByUserIdRequest } from "../../interfaces/list/ListRequest";
 
 const grid = 8
 
@@ -75,17 +77,20 @@ export function Dashboard() {
     const authId = useAppSelector(selectId)
     const authToken = useAppSelector(selectToken)
 
+    const authData: AuthData = {
+        id: authId!,
+        token: authToken!
+    }
+
     const userStatus = useAppSelector(selectUserStatus)
     const user = useAppSelector(selectUser)
     useEffect(() => {
         if (userStatus === "idle") {
             let userRequest: UserRequest = {
-                authData: {
-                    id: authId!,
-                    token: authToken!
-                },
+                authData: authData,
                 userId: authId!
             }
+
             dispatch(retrieveUserInfo(userRequest))
         }
     }, [userStatus, dispatch])
@@ -110,9 +115,14 @@ export function Dashboard() {
     const [selectedList, setSelectedList] = useState<List>(DEFAULT_LIST)
     useEffect(() => {
         if (listStatus === "idle") {
-            dispatch(retrieveAllLists("beebeeoii")).then((value) => {
+            let listRequest: RetrieveListsByUserIdRequest = {
+                authData: authData,
+                userId: authId!
+            }
+
+            dispatch(retrieveAllLists(listRequest)).then((value) => {
                 let payload: RetrieveListByUserIdResponse = value.payload as RetrieveListByUserIdResponse
-                let mainList = payload.data.lists.filter((value: List, _: number, __: List[]) => {
+                let mainList = payload.data.filter((value: List, _: number, __: List[]) => {
                     return value.name === "main"
                 })
                 setSelectedList(mainList[0])
@@ -138,7 +148,14 @@ export function Dashboard() {
         setNewListDialogOpen(false)
 
         if (newList) {
-            dispatch(addList(newList as List))
+            let listRequest: CreateListRequest = {
+                authData: authData,
+                name: newList.name,
+                owner: authId!,
+                private: newList.private 
+            }
+
+            dispatch(addList(listRequest))
         }
     }
 
@@ -185,7 +202,7 @@ export function Dashboard() {
                         {lists.map((list: List, _: number) => (
                             <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
                         ))}
-                        <Divider/>
+                        <Divider />
                         <MenuItem key={CREATE_LIST} value={CREATE_LIST} onClick={handleNewListDialogOpen}>
                             <AddIcon />
                             <ListItemText primary={CREATE_LIST} />

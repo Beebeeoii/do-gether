@@ -4,14 +4,16 @@ export interface CreateListResponse {
     success: boolean,
     error: string,
     data: {
-        list: List
+        id: string,
+        name: string,
+        owner: string,
+        private: boolean,
+        members: Array<string>
     }
 }
 
 export interface RetrieveListByUserIdResponse {
     success: boolean,
     error: string,
-    data: {
-        lists: Array<List>
-    }
+    data: Array<List>
 }
