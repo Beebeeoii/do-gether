@@ -52,5 +52,6 @@ export const userSlice = createSlice({
 })
 
 export const selectUser = (state: RootState) => state.user.user
+export const selectUserStatus = (state: RootState) => state.user.status
 
 export default userSlice.reducer

@@ -5,6 +5,7 @@ import { selectTasks, retrieveTasks, addTask, selectTaskStatus, reorderTasks } f
 import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDraggingStyle } from 'react-beautiful-dnd';
 import "./Dashboard.css"
 import { Task, TaskData } from "../../interfaces/task/Task";
+import { UserRequest } from "../../interfaces/user/UserRequest";
 import { Card, Divider, Fab, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Stack, Tooltip, Typography } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
@@ -15,6 +16,8 @@ import { addList, retrieveAllLists, selectLists, selectListStatus } from "../../
 import { List, ListData } from "../../interfaces/list/List";
 import { RetrieveListByUserIdResponse } from "../../interfaces/list/ListResponses";
 import { NewListDialog } from "../../components/newListDialog/NewListDialog";
+import { retrieveUserInfo, selectUser, selectUserStatus } from "../../services/user/userSplice";
+import { selectId, selectToken } from "../../services/auth/authSplice";
 
 const grid = 8
 
@@ -69,6 +72,23 @@ const CREATE_LIST = "New List"
 
 export function Dashboard() {
     const dispatch = useAppDispatch()
+    const authId = useAppSelector(selectId)
+    const authToken = useAppSelector(selectToken)
+
+    const userStatus = useAppSelector(selectUserStatus)
+    const user = useAppSelector(selectUser)
+    useEffect(() => {
+        if (userStatus === "idle") {
+            let userRequest: UserRequest = {
+                authData: {
+                    id: authId!,
+                    token: authToken!
+                },
+                userId: authId!
+            }
+            dispatch(retrieveUserInfo(userRequest))
+        }
+    }, [userStatus, dispatch])
 
     const taskStatus = useAppSelector(selectTaskStatus)
     const tasks = useAppSelector(selectTasks)
