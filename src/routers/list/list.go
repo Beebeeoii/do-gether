@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
-	router "github.com/beebeeoii/do-gether/routers/validator"
+	validator "github.com/beebeeoii/do-gether/routers/validator"
 	listService "github.com/beebeeoii/do-gether/services/list"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +29,7 @@ func CreateList(c *gin.Context) {
 		return
 	}
 
-	validationErr := router.Validate.Struct(requestBody)
+	validationErr := validator.Validate.Struct(requestBody)
 	if validationErr != nil {
 		log.Println(validationErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
