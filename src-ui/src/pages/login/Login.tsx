@@ -4,13 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../app/hooks";
 import { LoginResponse } from "../../interfaces/auth/AuthResponse";
 import { Credentials } from "../../interfaces/auth/Credentials";
+import { SnackBarState } from "../../interfaces/utils/Snackbar";
 import { login } from "../../services/auth/authSplice";
 import "./Login.css"
-
-interface SnackBarState {
-    open: boolean
-    message: string
-}
 
 export function Login() {
     const defaultSnackBarState = {
