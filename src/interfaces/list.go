@@ -12,3 +12,13 @@ type CreateListResponse struct {
 	BaseResponse
 	Data List `json:"data"`
 }
+
+type BasicListData struct {
+	Id   string
+	Name string
+}
+
+type RetrieveListsResponse struct {
+	BaseResponse
+	Data []BasicListData `json:"data"`
+}

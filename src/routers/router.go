@@ -18,7 +18,9 @@ func Init(address string) {
 	router.GET("/user/authenticate", auth.AuthenticateUser)
 	router.POST("/user", user.Register)
 	router.GET("/user/:id", user.RetrieveUserById)
+
 	router.POST("/list", list.CreateList)
+	router.GET("/list", list.RetrieveListsByUserId)
 
 	router.Run(address)
 }

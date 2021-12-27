@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -16,7 +17,21 @@ type createListBody struct {
 	Private bool   `json:"private" validate:"required"`
 }
 
+const (
+	USER_ID_PARAM_KEY = "id"
+)
+
 func CreateList(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
 	var requestBody createListBody
 
 	reqBodyErr := c.BindJSON(&requestBody)
@@ -39,6 +54,15 @@ func CreateList(c *gin.Context) {
 		return
 	}
 
+	if requestBody.Owner != c.GetHeader("id") {
+		log.Println("Id mismatch")
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("id mismatch").Error(),
+		})
+		return
+	}
+
 	newList, createListErr := listService.CreateList(requestBody.Name, requestBody.Owner, requestBody.Private)
 	if createListErr != nil {
 		log.Println(createListErr)
@@ -55,5 +79,39 @@ func CreateList(c *gin.Context) {
 			Error:   "",
 		},
 		Data: newList,
+	})
+}
+
+func RetrieveListsByUserId(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	reqParams := c.Request.URL.Query()
+	ownerId := reqParams.Get(USER_ID_PARAM_KEY)
+	userId := c.GetHeader("id")
+
+	lists, retrieveListsErr := listService.RetrieveListsByUserId(ownerId, userId)
+	if retrieveListsErr != nil {
+		log.Println(retrieveListsErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListsErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.RetrieveListsResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: lists,
 	})
 }

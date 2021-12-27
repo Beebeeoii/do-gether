@@ -22,6 +22,39 @@ func CreateList(name string, ownerId string, private bool) (interfaces.List, err
 	return newList, execErr
 }
 
+func RetrieveListsByUserId(ownerId string, userId string) ([]interfaces.BasicListData, error) {
+	var listsBasicData []interfaces.BasicListData
+	var sqlCommand string
+
+	if ownerId == userId {
+		sqlCommand = "SELECT id, name FROM lists WHERE owner = $1 OR members @> ARRAY[$1]::varchar[]"
+	} else {
+		sqlCommand = "SELECT id, name FROM lists WHERE private = false AND owner = $1 OR members @> ARRAY[$1]::varchar[]"
+	}
+
+	rows, queryErr := db.Database.Query(sqlCommand, ownerId)
+	if queryErr != nil {
+		return listsBasicData, queryErr
+	}
+
+	for rows.Next() {
+		listBasicData := interfaces.BasicListData{}
+		scanErr := rows.Scan(&listBasicData.Id, &listBasicData.Name)
+		if scanErr != nil {
+			return listsBasicData, scanErr
+		}
+
+		listsBasicData = append(listsBasicData, listBasicData)
+	}
+
+	rowsErr := rows.Err()
+	if rowsErr != nil {
+		return listsBasicData, rowsErr
+	}
+
+	return listsBasicData, nil
+}
+
 func generateUid() string {
 	return xid.New().String()
 }
