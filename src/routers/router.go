@@ -21,6 +21,7 @@ func Init(address string) {
 
 	router.POST("/list", list.CreateList)
 	router.GET("/list", list.RetrieveListsByUserId)
+	router.GET("/list/:id", list.RetrieveListById)
 
 	router.Run(address)
 }

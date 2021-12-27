@@ -122,3 +122,42 @@ func RetrieveListsByUserId(c *gin.Context) {
 		Data: lists,
 	})
 }
+
+func RetrieveListById(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	listId := c.Param("id")
+	if listId == "" {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("invalid id provided").Error(),
+		})
+		return
+	}
+
+	list, retrieveListErr := listService.RetrieveListById(listId)
+	if retrieveListErr != nil {
+		log.Println(retrieveListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.RetrieveListResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: list,
+	})
+}

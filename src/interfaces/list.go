@@ -20,6 +20,11 @@ type BasicListData struct {
 	Private bool   `json:"private"`
 }
 
+type RetrieveListResponse struct {
+	BaseResponse
+	Data List `json:"data"`
+}
+
 type RetrieveListsResponse struct {
 	BaseResponse
 	Data []BasicListData `json:"data"`

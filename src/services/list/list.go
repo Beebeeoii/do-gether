@@ -55,6 +55,19 @@ func RetrieveListsByUserId(ownerId string, userId string) ([]interfaces.BasicLis
 	return listsBasicData, nil
 }
 
+func RetrieveListById(listId string) (interfaces.List, error) {
+	var list interfaces.List
+
+	sqlCommand := "SELECT id, name, owner, private, members FROM lists WHERE id = $1"
+
+	queryErr := db.Database.QueryRow(sqlCommand, listId).Scan(&list.Id, &list.Name, &list.Owner, &list.Private, pq.Array(&list.Members))
+	if queryErr != nil {
+		return list, queryErr
+	}
+
+	return list, nil
+}
+
 func generateUid() string {
 	return xid.New().String()
 }
