@@ -14,7 +14,7 @@ import (
 type createListBody struct {
 	Name    string `json:"name" validate:"min=1,max=20,required"`
 	Owner   string `json:"owner" validate:"min=1,max=20,required"`
-	Private bool   `json:"private" validate:"required"`
+	Private bool   `json:"private"`
 }
 
 const (
