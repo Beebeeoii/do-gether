@@ -4,15 +4,21 @@ import (
 	"github.com/gin-gonic/gin"
 
 	auth "github.com/beebeeoii/do-gether/routers/auth"
+	list "github.com/beebeeoii/do-gether/routers/list"
 	user "github.com/beebeeoii/do-gether/routers/user"
+	validator "github.com/beebeeoii/do-gether/routers/validator"
 )
 
 func Init(address string) {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
+
+	validator.Init()
+
 	router.GET("/user/authenticate", auth.AuthenticateUser)
 	router.POST("/user", user.Register)
 	router.GET("/user/:id", user.RetrieveUserById)
+	router.POST("/list", list.CreateList)
 
 	router.Run(address)
 }
