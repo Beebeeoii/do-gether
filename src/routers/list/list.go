@@ -95,6 +95,13 @@ func RetrieveListsByUserId(c *gin.Context) {
 
 	reqParams := c.Request.URL.Query()
 	ownerId := reqParams.Get(USER_ID_PARAM_KEY)
+	if ownerId == "" {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("invalid userId provided").Error(),
+		})
+		return
+	}
 	userId := c.GetHeader("id")
 
 	lists, retrieveListsErr := listService.RetrieveListsByUserId(ownerId, userId)
