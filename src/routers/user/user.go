@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
+	validator "github.com/beebeeoii/do-gether/routers/validator"
 	authService "github.com/beebeeoii/do-gether/services/auth"
 	userService "github.com/beebeeoii/do-gether/services/user"
 	"github.com/gin-gonic/gin"
@@ -62,27 +63,17 @@ func Register(c *gin.Context) {
 }
 
 func RetrieveUserById(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
 	userId := c.Param("id")
-
-	authData, authDataErr := authService.ExtractAuthData(c.Request.Header)
-	if authDataErr != nil {
-		log.Println(authDataErr)
-		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
-			Success: false,
-			Error:   authDataErr.Error(),
-		})
-		return
-	}
-
-	isValid, validationErr := authService.ValidateAuthData(authData.Token, authData.UserId)
-	if validationErr != nil || !isValid {
-		log.Println(validationErr)
-		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
-			Success: false,
-			Error:   validationErr.Error(),
-		})
-		return
-	}
 
 	user, retrieveErr := userService.RetrieveUserById(userId)
 	if retrieveErr != nil {
