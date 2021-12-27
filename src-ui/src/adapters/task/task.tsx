@@ -11,23 +11,22 @@ export function createTask(task: Task) {
                     id: "0asgn3",
                     title: "CVWO Assignment",
                     tags: ["CVWO", "Programming"],
-                    list_id: "main",
-                    priority: "Urgent",
-                    list_order: 1,
+                    listId: "main",
+                    priority: 2,
+                    listOrder: 1,
                     due: Date.now(),
                     completed: false,
-                    // planned_start: Date.now(),
-                    // planned_end: Date.now(),
-                    owner_id: "beebeeoii",
-                    private: true
+                    plannedStart: null,
+                    plannedEnd: null,
+                    ownerId: "beebeeoii"
                 }
             }
         }), 500)
     })
 }
 
-export function fetchTasks(list_id: string) {
-    if (list_id === "list02") {
+export function fetchTasks(listId: string) {
+    if (listId === "c74k5s21detok95e8s5g") {
         return new Promise<RetrieveTaskResponse>((resolve) => {
             setTimeout(() => resolve({
                 success: true,
@@ -38,15 +37,14 @@ export function fetchTasks(list_id: string) {
                             id: "asd02v",
                             title: "CVWO Assignment",
                             tags: ["CVWO", "Programming"],
-                            priority: "Normal",
-                            list_id: "main",
-                            list_order: 0,
+                            priority: 1,
+                            listId: "main",
+                            listOrder: 0,
                             due: Date.now(),
                             completed: false,
-                            // planned_start: Date.now(),
-                            // planned_end: Date.now(),
-                            owner_id: "beebeeoii",
-                            private: true
+                            plannedStart: null,
+                            plannedEnd: null,
+                            ownerId: "c74iusi1detpc265l08g"
                         }
                     ]
                 }
@@ -63,57 +61,53 @@ export function fetchTasks(list_id: string) {
                         id: "asd02v",
                         title: "CVWO Assignment",
                         tags: ["CVWO", "Programming"],
-                        priority: "Normal",
-                        list_id: "list01",
-                        list_order: 0,
+                        priority: 1,
+                        listId: "c74jkqa1detok95e8s50",
+                        listOrder: 0,
                         due: Date.now(),
                         completed: false,
-                        // planned_start: Date.now(),
-                        // planned_end: Date.now(),
-                        owner_id: "beebeeoii",
-                        private: true
+                        plannedStart: null,
+                        plannedEnd: null,
+                        ownerId: "c74iusi1detpc265l08g"
                     },
                     {
                         id: "pgam03bvv",
                         title: "Sunday Service",
                         tags: ["Church"],
-                        priority: "Urgent",
-                        list_id: "list01",
-                        list_order: 1,
+                        priority: 2,
+                        listId: "c74jkqa1detok95e8s50",
+                        listOrder: 1,
                         due: Date.now(),
                         completed: false,
-                        // planned_start: Date.now(),
-                        // planned_end: Date.now(),
-                        owner_id: "beebeeoii",
-                        private: false
+                        plannedStart: null,
+                        plannedEnd: null,
+                        ownerId: "c74iusi1detpc265l08g"
                     },
                     {
                         id: "tba0j3",
                         title: "Meetup with ABC",
                         tags: ["Friends"],
-                        priority: "Trivial",
-                        list_id: "list01",
-                        list_order: 2,
+                        priority: 0,
+                        listId: "c74jkqa1detok95e8s50",
+                        listOrder: 2,
                         due: Date.now(),
                         completed: false,
-                        // planned_start: Date.now(),
-                        // planned_end: Date.now(),
-                        owner_id: "beebeeoii",
-                        private: true
+                        plannedStart: null,
+                        plannedEnd: null,
+                        ownerId: "c74iusi1detpc265l08g"
                     },
                     {
                         id: "sjkg04",
                         title: "Discuss YF exco stuff with ben and wx",
                         tags: ["Church", "Friends"],
-                        priority: "Urgent",
-                        list_id: "list01",
-                        list_order: 3,
+                        priority: 2,
+                        listId: "c74jkqa1detok95e8s50",
+                        listOrder: 3,
                         due: Date.now(),
                         completed: true,
-                        // planned_start: Date.now(),
-                        // planned_end: Date.now(),
-                        owner_id: "beebeeoii",
-                        private: true
+                        plannedStart: null,
+                        plannedEnd: null,
+                        ownerId: "c74iusi1detpc265l08g"
                     }
                 ]
             }
@@ -149,57 +143,53 @@ export function reorderList(taskList: Array<Task>) {
                         id: "asd02v",
                         title: "CVWO Assignment",
                         tags: ["CVWO", "Programming"],
-                        priority: "Normal",
-                        list_id: "main",
-                        list_order: 2,
+                        priority: 1,
+                        listId: "c74jkqa1detok95e8s50",
+                        listOrder: 2,
                         due: Date.now(),
                         completed: false,
-                        // planned_start: Date.now(),
-                        // planned_end: Date.now(),
-                        owner_id: "beebeeoii",
-                        private: true
+                        plannedStart: null,
+                        plannedEnd: null,
+                        ownerId: "c74iusi1detpc265l08g"
                     },
                     {
                         id: "pgam03bvv",
                         title: "Sunday Service",
                         tags: ["Church"],
-                        priority: "Urgent",
-                        list_id: "main",
-                        list_order: 0,
+                        priority: 2,
+                        listId: "c74jkqa1detok95e8s50",
+                        listOrder: 0,
                         due: Date.now(),
                         completed: false,
-                        // planned_start: Date.now(),
-                        // planned_end: Date.now(),
-                        owner_id: "beebeeoii",
-                        private: false
+                        plannedStart: null,
+                        plannedEnd: null,
+                        ownerId: "c74iusi1detpc265l08g"
                     },
                     {
                         id: "tba0j3",
                         title: "Meetup with ABC",
                         tags: ["Friends"],
-                        priority: "Trivial",
-                        list_id: "main",
-                        list_order: 1,
+                        priority: 0,
+                        listId: "c74jkqa1detok95e8s50",
+                        listOrder: 1,
                         due: Date.now(),
                         completed: false,
-                        // planned_start: Date.now(),
-                        // planned_end: Date.now(),
-                        owner_id: "beebeeoii",
-                        private: true
+                        plannedStart: null,
+                        plannedEnd: null,
+                        ownerId: "c74iusi1detpc265l08g"
                     },
                     {
                         id: "sjkg04",
                         title: "Discuss YF exco stuff with ben and wx",
                         tags: ["Church", "Friends"],
-                        priority: "Urgent",
-                        list_id: "main",
-                        list_order: 3,
+                        priority: 2,
+                        listId: "c74jkqa1detok95e8s50",
+                        listOrder: 3,
                         due: Date.now(),
                         completed: true,
-                        // planned_start: Date.now(),
-                        // planned_end: Date.now(),
-                        owner_id: "beebeeoii",
-                        private: true
+                        plannedStart: null,
+                        plannedEnd: null,
+                        ownerId: "c74iusi1detpc265l08g"
                     }
                 ]
             }

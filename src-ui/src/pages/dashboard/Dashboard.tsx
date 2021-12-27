@@ -33,17 +33,17 @@ const reorder = (list: Array<Task>, startIndex: number, endIndex: number) => {
     const result: Array<Task> = []
     list.forEach((task: Task) => result.push(Object.assign({}, task)))
 
-    result[startIndex].list_order = endIndex
+    result[startIndex].listOrder = endIndex
 
     if (startIndex > endIndex) {
         for (let i = endIndex; i < startIndex; i++) {
-            result[i].list_order += 1
+            result[i].listOrder += 1
         }
     }
 
     if (endIndex > startIndex) {
         for (let i = startIndex + 1; i < endIndex + 1; i++) {
-            result[i].list_order -= 1
+            result[i].listOrder -= 1
         }
     }
 

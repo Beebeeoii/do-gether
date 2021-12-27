@@ -48,19 +48,19 @@ export const taskSlice = createSlice({
 
         builder.addCase(retrieveTasks.fulfilled, (state, action) => {
             if (action.payload.success) {
-                state.tasks = action.payload.data.tasks.sort((a: Task, b: Task) => a.list_order - b.list_order)
+                state.tasks = action.payload.data.tasks.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
             }
         })
 
         builder.addCase(reorderTasks.pending, (state, action) => {
             state.status = "loading"
-            state.tasks = action.meta.arg.sort((a: Task, b: Task) => a.list_order - b.list_order)
+            state.tasks = action.meta.arg.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
         })
         
         builder.addCase(reorderTasks.fulfilled, (state, action) => {
             state.status = "succeeded"
             if (action.payload.success) {
-                state.tasks = action.payload.data.tasks.sort((a: Task, b: Task) => a.list_order - b.list_order)
+                state.tasks = action.payload.data.tasks.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
             }
         })
     }

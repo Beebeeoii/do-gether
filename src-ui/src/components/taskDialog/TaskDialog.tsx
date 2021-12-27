@@ -24,11 +24,11 @@ const DEFAULT_LIST_VALUE = "defaultList"
 const DEFAULT_TAGS_SELECTED_VALUE: Array<string> = []
 const DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE = false
 const DEFAULT_INCLUDE_TIME_VALUE = false
-const DEFAULT_PRIORITY_LEVEL_VALUE = 1
+const DEFAULT_PRIORITY_LEVEL_VALUE = -1
 const DEFAULT_HOVER_PRIORITY_LEVEL_VALUE = -1
 
-const priorityLevelLabels: { [index: string]: string | null } = {
-    null: null,
+const priorityLevelLabels: { [index: number]: string | null } = {
+    [-1]: 'Unset',
     1: 'Trivial',
     2: 'Normal',
     3: 'Urgent'
@@ -41,7 +41,7 @@ export function TaskDialog(props: TaskDialogProps) {
     let [taskTitle, setTaskTitle] = useState<string>(data ? data.title : DEFAULT_TASK_TITLE_VALUE)
 
     const lists = useAppSelector(selectLists)
-    let [listId, setListId] = useState<string>(data ? data.list_id : DEFAULT_LIST_VALUE)
+    let [listId, setListId] = useState<string>(data ? data.listId : DEFAULT_LIST_VALUE)
 
     const tagStatus = useAppSelector(selectTagStatus)
     const tagSuggestions = useAppSelector(selectTags)
@@ -62,10 +62,7 @@ export function TaskDialog(props: TaskDialogProps) {
     const [dueDate, setDueDate] = useState<Date | null>(data ? moment(data.due).toDate() : new Date())
     const [includeTime, setIncludeTime] = useState<boolean>(DEFAULT_INCLUDE_TIME_VALUE)
 
-    const [priorityLevel, setPriorityLevel] = useState<number | null>(
-        data ? (Object.keys(priorityLevelLabels).find(k => priorityLevelLabels[k] === data.priority) ? Number(Object.keys(priorityLevelLabels).find(k => priorityLevelLabels[k] === data.priority)) : null)
-            : DEFAULT_PRIORITY_LEVEL_VALUE
-    )
+    const [priorityLevel, setPriorityLevel] = useState<number | null>(data ? data.priority : DEFAULT_PRIORITY_LEVEL_VALUE)
     const [hoverPriorityLevel, setHoverPriorityLevel] = useState(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +78,11 @@ export function TaskDialog(props: TaskDialogProps) {
     }
 
     const handlePriorityLevelChange = (_: SyntheticEvent<Element, Event>, priorityLevel: number | null) => {
-        setPriorityLevel(priorityLevel)
+        if (priorityLevel == null) {
+            setPriorityLevel(-1)
+        } else {
+            setPriorityLevel(priorityLevel)
+        }
     }
 
     const handleHoverPriorityLevelChange = (_: SyntheticEvent<Element, Event>, newHoverPriorityLevel: number) => {
@@ -92,11 +93,12 @@ export function TaskDialog(props: TaskDialogProps) {
         let task: TaskData = {
             title: taskTitle,
             tags: tagsSelected,
-            priority: priorityLevelLabels[priorityLevel!] as "Trivial" | "Normal" | "Urgent" | null,
-            private: true,
-            list_id: listId,
-            due: moment(dueDate).valueOf(),
-            list_order: -1,
+            priority: priorityLevel!,
+            listId: listId,
+            listOrder: -1,
+            due: moment(dueDate).unix(),
+            plannedStart: null,
+            plannedEnd: null,
             completed: false
         }
         onClose(task)
