@@ -14,8 +14,10 @@ type CreateListResponse struct {
 }
 
 type BasicListData struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id      string `json:"id"`
+	Name    string `json:"name"`
+	Owner   string `json:"owner"`
+	Private bool   `json:"private"`
 }
 
 type RetrieveListsResponse struct {

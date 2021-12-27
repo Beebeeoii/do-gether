@@ -27,9 +27,9 @@ func RetrieveListsByUserId(ownerId string, userId string) ([]interfaces.BasicLis
 	var sqlCommand string
 
 	if ownerId == userId {
-		sqlCommand = "SELECT id, name FROM lists WHERE owner = $1 OR members @> ARRAY[$1]::varchar[]"
+		sqlCommand = "SELECT id, name, owner, private FROM lists WHERE owner = $1 OR members @> ARRAY[$1]::varchar[]"
 	} else {
-		sqlCommand = "SELECT id, name FROM lists WHERE private = false AND owner = $1 OR members @> ARRAY[$1]::varchar[]"
+		sqlCommand = "SELECT id, name, owner, private FROM lists WHERE private = false AND owner = $1 OR members @> ARRAY[$1]::varchar[]"
 	}
 
 	rows, queryErr := db.Database.Query(sqlCommand, ownerId)
@@ -39,7 +39,7 @@ func RetrieveListsByUserId(ownerId string, userId string) ([]interfaces.BasicLis
 
 	for rows.Next() {
 		listBasicData := interfaces.BasicListData{}
-		scanErr := rows.Scan(&listBasicData.Id, &listBasicData.Name)
+		scanErr := rows.Scan(&listBasicData.Id, &listBasicData.Name, &listBasicData.Owner, &listBasicData.Private)
 		if scanErr != nil {
 			return listsBasicData, scanErr
 		}
