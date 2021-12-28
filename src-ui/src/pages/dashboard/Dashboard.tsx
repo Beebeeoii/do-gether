@@ -297,7 +297,7 @@ export function Dashboard() {
             </DragDropContext>
 
             <NewListDialog open={newListDialogOpen} onClose={handleNewListDialogClose} />
-            {taskDialogOpen && <TaskDialog open={taskDialogOpen} data={selectedTask} onClose={handleTaskDialogClose} />}
+            {taskDialogOpen && <TaskDialog open={taskDialogOpen} data={selectedTask} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
         </div>
     )
 }

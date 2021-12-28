@@ -6,16 +6,20 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
 import { Task, TaskData } from "../../interfaces/task/Task";
 import { selectLists } from "../../services/list/listSplice";
-import { retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
+import { resetTags, retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
 import { DatePicker, DateTimePicker } from "@mui/lab";
 import { PriorityHigh } from "@mui/icons-material";
 import CreateIcon from '@mui/icons-material/Create';
 import { Box } from "@mui/system";
 import moment from "moment";
+import { RetrieveTagsByListIdRequest } from "../../interfaces/task/TaskRequest";
+import { AuthData } from "../../interfaces/auth/Auth";
 
 export interface TaskDialogProps {
     open: boolean
-    data: Task | null
+    data: Task | null,
+    authData: AuthData,
+    currentListId: string,
     onClose: (newTask: TaskData | null) => void
 }
 
@@ -36,7 +40,7 @@ const priorityLevelLabels: { [index: number]: string | null } = {
 
 export function TaskDialog(props: TaskDialogProps) {
     const dispatch = useAppDispatch()
-    const { onClose, data, open } = props
+    const { onClose, data, authData, currentListId, open } = props
 
     let [taskTitle, setTaskTitle] = useState<string>(data ? data.title : DEFAULT_TASK_TITLE_VALUE)
 
@@ -47,7 +51,7 @@ export function TaskDialog(props: TaskDialogProps) {
     const tagSuggestions = useAppSelector(selectTags)
     const [tagsSelected, setTagsSelected] = useState<Array<string>>(data ? data.tags : DEFAULT_TAGS_SELECTED_VALUE)
     const [tagsSuggestionsOpen, setTagsSuggestionsOpen] = useState<boolean>(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
-    const tagsLoading = tagsSuggestionsOpen && tagSuggestions.length === 0
+    const tagsLoading = tagsSuggestionsOpen && tagStatus === "idle"
 
     useEffect(() => {
         if (!tagsLoading) {
@@ -55,7 +59,11 @@ export function TaskDialog(props: TaskDialogProps) {
         }
 
         if (tagStatus === "idle") {
-            dispatch(retrieveTagsByListId("list01"))
+            let tagRequest: RetrieveTagsByListIdRequest = {
+                authData: authData,
+                listId: currentListId
+            }
+            dispatch(retrieveTagsByListId(tagRequest))
         }
     }, [tagsLoading])
 
@@ -119,6 +127,7 @@ export function TaskDialog(props: TaskDialogProps) {
         setIncludeTime(DEFAULT_INCLUDE_TIME_VALUE)
         setPriorityLevel(DEFAULT_PRIORITY_LEVEL_VALUE)
         setHoverPriorityLevel(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
+        dispatch(resetTags())
     }
 
     return (
@@ -162,7 +171,6 @@ export function TaskDialog(props: TaskDialogProps) {
                 }}
                 freeSolo
                 loading={tagsLoading}
-                loadingText="Loading"
                 options={tagSuggestions}
                 value={tagsSelected}
                 onChange={(_, tagsSelected: Array<string>) => {

@@ -16,3 +16,8 @@ export interface RetrieveTasksByListIdRequest {
     authData: AuthData
     listId: string
 }
+
+export interface RetrieveTagsByListIdRequest {
+    authData: AuthData
+    listId: string
+}
