@@ -161,16 +161,6 @@ export function Dashboard() {
     const taskStatus = useAppSelector(selectTaskStatus)
     const tasks = useAppSelector(selectTasks)
     const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-    // useEffect(() => {
-    //     if (taskStatus === "idle") {
-    //         let taskRequest: RetrieveTasksByListIdRequest = {
-    //             authData: authData,
-    //             listId: selectedList.id
-    //         }
-
-    //         dispatch(retrieveTasks(taskRequest))
-    //     }
-    // }, [taskStatus, dispatch])
     const handleEditTask = (task: Task) => {
         return () => {
             setSelectedTask(task)
@@ -199,7 +189,6 @@ export function Dashboard() {
         setTaskDialogOpen(false)
 
         if (newTask) {
-            console.log(newTask)
             let createTaskRequest: CreateTaskRequest = {
                 authData: authData,
                 owner: user!.id,

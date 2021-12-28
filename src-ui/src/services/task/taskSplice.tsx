@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
-import { Task, TaskData } from '../../interfaces/task/Task';
+import { Task } from '../../interfaces/task/Task';
 import { createTask, fetchTasks, reorderList } from '../../adapters/task/task';
 import { AxiosError } from 'axios';
 import { CreateTaskRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
