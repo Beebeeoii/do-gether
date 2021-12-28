@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"github.com/beebeeoii/do-gether/interfaces"
 	authService "github.com/beebeeoii/do-gether/services/auth"
 	"github.com/go-playground/validator/v10"
 )
@@ -25,4 +26,21 @@ func ValidateAuthDataFromHeader(header http.Header) error {
 	}
 
 	return nil
+}
+
+func HasListPermission(list interfaces.List, userId string) bool {
+	if list.Private && list.Owner != userId && !contains(list.Members, userId) {
+		return false
+	}
+
+	return true
+}
+
+func contains(slice []string, element string) bool {
+	for _, a := range slice {
+		if a == element {
+			return true
+		}
+	}
+	return false
 }

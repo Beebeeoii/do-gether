@@ -5,6 +5,7 @@ import (
 
 	auth "github.com/beebeeoii/do-gether/routers/auth"
 	list "github.com/beebeeoii/do-gether/routers/list"
+	task "github.com/beebeeoii/do-gether/routers/task"
 	user "github.com/beebeeoii/do-gether/routers/user"
 	validator "github.com/beebeeoii/do-gether/routers/validator"
 )
@@ -22,6 +23,9 @@ func Init(address string) {
 	router.POST("/list", list.CreateList)
 	router.GET("/list", list.RetrieveListsByUserId)
 	router.GET("/list/:id", list.RetrieveListById)
+
+	router.POST("/task", task.CreateTask)
+	router.GET("/task", task.RetrieveTasksByListId)
 
 	router.Run(address)
 }
