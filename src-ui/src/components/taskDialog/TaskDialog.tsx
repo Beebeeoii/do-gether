@@ -170,7 +170,6 @@ export function TaskDialog(props: TaskDialogProps) {
                     setTagsSuggestionsOpen(false)
                 }}
                 freeSolo
-                loading={tagsLoading}
                 options={tagSuggestions}
                 value={tagsSelected}
                 onChange={(_, tagsSelected: Array<string>) => {
