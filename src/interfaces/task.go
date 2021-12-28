@@ -34,3 +34,8 @@ type RetrieveTasksResponse struct {
 	BaseResponse
 	Data []Task `json:"data"`
 }
+
+type RetrieveTagsResponse struct {
+	BaseResponse
+	Data []string `json:"data"`
+}

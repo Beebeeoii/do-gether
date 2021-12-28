@@ -79,3 +79,30 @@ func RetrieveTasksByListId(listId string) ([]interfaces.Task, error) {
 
 	return tasks, nil
 }
+
+func RetrieveTagsByListId(listId string) ([]string, error) {
+	var tags []string
+	sqlCommand := "SELECT tags FROM tasks WHERE \"listId\" = $1"
+
+	rows, queryErr := db.Database.Query(sqlCommand, listId)
+	if queryErr != nil {
+		return tags, queryErr
+	}
+
+	for rows.Next() {
+		taskTags := []string{}
+		scanErr := rows.Scan(pq.Array(&taskTags))
+		if scanErr != nil {
+			return tags, scanErr
+		}
+
+		tags = append(tags, taskTags...)
+	}
+
+	rowsErr := rows.Err()
+	if rowsErr != nil {
+		return tags, rowsErr
+	}
+
+	return tags, nil
+}

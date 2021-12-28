@@ -26,6 +26,7 @@ func Init(address string) {
 
 	router.POST("/task", task.CreateTask)
 	router.GET("/task", task.RetrieveTasksByListId)
+	router.GET("/task/tagSuggestion", task.RetrieveTagSuggestion)
 
 	router.Run(address)
 }

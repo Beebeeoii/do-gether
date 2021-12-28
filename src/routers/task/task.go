@@ -177,3 +177,62 @@ func RetrieveTasksByListId(c *gin.Context) {
 		Data: tasks,
 	})
 }
+
+func RetrieveTagSuggestion(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	reqParams := c.Request.URL.Query()
+	listId := reqParams.Get(LIST_ID_PARAM_KEY)
+	if listId == "" {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("invalid listId provided").Error(),
+		})
+		return
+	}
+	userId := c.GetHeader("id")
+
+	list, retrieveListErr := listService.RetrieveListById(listId)
+	if retrieveListErr != nil {
+		log.Println(retrieveListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListErr.Error(),
+		})
+		return
+	}
+
+	if !validator.HasListPermission(list, userId) {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
+	tags, retrieveTagsErr := taskService.RetrieveTagsByListId(listId)
+	if retrieveTagsErr != nil {
+		log.Println(retrieveTagsErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveTagsErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.RetrieveTagsResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: tags,
+	})
+}
