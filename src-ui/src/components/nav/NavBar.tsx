@@ -5,7 +5,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { selectAuthenticated, logout } from '../../services/auth/authSplice'
-import { selectUser } from '../../services/user/userSplice'
+import { resetLists } from '../../services/list/listSplice'
+import { resetTasks } from '../../services/task/taskSplice'
+import { resetUsers, selectUser } from '../../services/user/userSplice'
 import './NavBar.css'
 
 function stringToColor(string: string) {
@@ -114,6 +116,9 @@ export function NavBar() {
                 <Divider />
                 <MenuItem onClick={() => {
                     dispatch(logout())
+                    dispatch(resetLists())
+                    dispatch(resetTasks())
+                    dispatch(resetUsers())
                     navigate("/login")
                 }}>
                     <ListItemIcon>
