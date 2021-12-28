@@ -97,8 +97,8 @@ export function TaskDialog(props: TaskDialogProps) {
             listId: listId,
             listOrder: -1,
             due: moment(dueDate).unix(),
-            plannedStart: null,
-            plannedEnd: null,
+            plannedStart: -1,
+            plannedEnd: -1,
             completed: false
         }
         onClose(task)

@@ -1,14 +1,14 @@
 export interface Task {
     id: string
-    ownerId: string
+    owner: string
     title: string
     tags: Array<string>
     listId: string
     listOrder: number
     priority: number
-    due: number | null
-    plannedStart: number | null
-    plannedEnd: number | null
+    due: number
+    plannedStart: number
+    plannedEnd: number
     completed: boolean
 }
 
@@ -18,8 +18,8 @@ export interface TaskData {
     listId: string
     listOrder: number
     priority: number
-    due: number | null
-    plannedStart: number | null
-    plannedEnd: number | null
+    due: number
+    plannedStart: number
+    plannedEnd: number
     completed: boolean
 }

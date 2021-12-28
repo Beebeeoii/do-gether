@@ -20,6 +20,7 @@ import { retrieveUserInfo, selectUser, selectUserStatus } from "../../services/u
 import { selectId, selectToken } from "../../services/auth/authSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { CreateListRequest, RetrieveListsByUserIdRequest } from "../../interfaces/list/ListRequest";
+import { CreateTaskRequest, RetrieveTasksByListIdRequest } from "../../interfaces/task/TaskRequest";
 
 const grid = 8
 
@@ -95,21 +96,6 @@ export function Dashboard() {
         }
     }, [userStatus, dispatch])
 
-    const taskStatus = useAppSelector(selectTaskStatus)
-    const tasks = useAppSelector(selectTasks)
-    const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-    useEffect(() => {
-        if (taskStatus === "idle") {
-            dispatch(retrieveTasks("beebeeoii"))
-        }
-    }, [taskStatus, dispatch])
-    const handleEditTask = (task: Task) => {
-        return () => {
-            setSelectedTask(task)
-            setTaskDialogOpen(true)
-        }
-    }
-
     const listStatus = useAppSelector(selectListStatus)
     const lists = useAppSelector(selectLists)
     const [selectedList, setSelectedList] = useState<List>(DEFAULT_LIST)
@@ -126,6 +112,15 @@ export function Dashboard() {
                     return value.name === "main"
                 })
                 setSelectedList(mainList[0])
+
+                if (taskStatus === "idle") {
+                    let taskRequest: RetrieveTasksByListIdRequest = {
+                        authData: authData,
+                        listId: mainList[0].id
+                    }
+        
+                    dispatch(retrieveTasks(taskRequest))
+                }
             })
         }
     }, [listStatus, dispatch])
@@ -138,7 +133,11 @@ export function Dashboard() {
             return value.id === event.target.value
         })
         setSelectedList(selected[0])
-        dispatch(retrieveTasks(selected[0].id))
+        let taskRequest: RetrieveTasksByListIdRequest = {
+            authData: authData,
+            listId: selected[0].id
+        }
+        dispatch(retrieveTasks(taskRequest))
     }
     const [newListDialogOpen, setNewListDialogOpen] = useState<boolean>(false)
     const handleNewListDialogOpen = () => {
@@ -156,6 +155,26 @@ export function Dashboard() {
             }
 
             dispatch(addList(listRequest))
+        }
+    }
+
+    const taskStatus = useAppSelector(selectTaskStatus)
+    const tasks = useAppSelector(selectTasks)
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+    // useEffect(() => {
+    //     if (taskStatus === "idle") {
+    //         let taskRequest: RetrieveTasksByListIdRequest = {
+    //             authData: authData,
+    //             listId: selectedList.id
+    //         }
+
+    //         dispatch(retrieveTasks(taskRequest))
+    //     }
+    // }, [taskStatus, dispatch])
+    const handleEditTask = (task: Task) => {
+        return () => {
+            setSelectedTask(task)
+            setTaskDialogOpen(true)
         }
     }
 
@@ -181,7 +200,18 @@ export function Dashboard() {
 
         if (newTask) {
             console.log(newTask)
-            dispatch(addTask(newTask as Task))
+            let createTaskRequest: CreateTaskRequest = {
+                authData: authData,
+                owner: user!.id,
+                title: newTask.title,
+                tags: newTask.tags,
+                listId: newTask.listId,
+                priority: newTask.priority,
+                due: newTask.due,
+                plannedStart: newTask.plannedStart,
+                plannedEnd: newTask.plannedEnd
+            }
+            dispatch(addTask(createTaskRequest))
         }
     }
 
