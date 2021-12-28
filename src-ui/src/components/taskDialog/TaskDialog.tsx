@@ -7,7 +7,7 @@ import { List } from "../../interfaces/list/List";
 import { Task, TaskData } from "../../interfaces/task/Task";
 import { selectLists } from "../../services/list/listSplice";
 import { resetTags, retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
-import { DatePicker, DateTimePicker } from "@mui/lab";
+import { DateTimePicker } from "@mui/lab";
 import { PriorityHigh } from "@mui/icons-material";
 import CreateIcon from '@mui/icons-material/Create';
 import { Box } from "@mui/system";
@@ -27,7 +27,6 @@ const DEFAULT_TASK_TITLE_VALUE = ""
 const DEFAULT_LIST_VALUE = "defaultList"
 const DEFAULT_TAGS_SELECTED_VALUE: Array<string> = []
 const DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE = false
-const DEFAULT_INCLUDE_TIME_VALUE = false
 const DEFAULT_PRIORITY_LEVEL_VALUE = -1
 const DEFAULT_HOVER_PRIORITY_LEVEL_VALUE = -1
 
@@ -67,8 +66,14 @@ export function TaskDialog(props: TaskDialogProps) {
         }
     }, [tagsLoading])
 
-    const [dueDate, setDueDate] = useState<Date | null>(data ? moment(data.due).toDate() : new Date())
-    const [includeTime, setIncludeTime] = useState<boolean>(DEFAULT_INCLUDE_TIME_VALUE)
+    const [dueDateActive, setDueDateActive] = useState<boolean>(data ? data.due != -1 : false)
+    const [dueDate, setDueDate] = useState<Date | null>(data ? dueDateActive ? moment.unix(data.due).toDate() : null : dueDateActive ? new Date() : null)
+
+    const [plannedStartActive, setPlannedStartActive] = useState<boolean>(data ? data.plannedStart != -1 : false)
+    const [plannedStart, setPlannedStart] = useState<Date | null>(data ? plannedStartActive ? moment.unix(data.plannedStart).toDate() : null : plannedStartActive ? new Date() : null)
+
+    const [plannedEndActive, setPlannedEndActive] = useState<boolean>(data ? data.plannedEnd != -1 : false)
+    const [plannedEnd, setPlannedEnd] = useState<Date | null>(data ? plannedEndActive ? moment.unix(data.plannedEnd).toDate() : null : plannedEndActive ? new Date() : null)
 
     const [priorityLevel, setPriorityLevel] = useState<number | null>(data ? data.priority : DEFAULT_PRIORITY_LEVEL_VALUE)
     const [hoverPriorityLevel, setHoverPriorityLevel] = useState(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
@@ -81,8 +86,16 @@ export function TaskDialog(props: TaskDialogProps) {
         setListId(event.target.value)
     }
 
-    const handleIncludeTimeChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
-        setIncludeTime(checked)
+    const handleDueDateActiveChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        setDueDateActive(checked)
+    }
+
+    const handlePlannedStartActiveChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        setPlannedStartActive(checked)
+    }
+
+    const handlePlannedEndActiveChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        setPlannedEndActive(checked)
     }
 
     const handlePriorityLevelChange = (_: SyntheticEvent<Element, Event>, priorityLevel: number | null) => {
@@ -105,8 +118,8 @@ export function TaskDialog(props: TaskDialogProps) {
             listId: listId,
             listOrder: -1,
             due: moment(dueDate).unix(),
-            plannedStart: -1,
-            plannedEnd: -1,
+            plannedStart: moment(plannedStart).unix(),
+            plannedEnd: moment(plannedEnd).unix(),
             completed: false
         }
         onClose(task)
@@ -124,7 +137,6 @@ export function TaskDialog(props: TaskDialogProps) {
         setTagsSelected(DEFAULT_TAGS_SELECTED_VALUE)
         setTagsSuggestionsOpen(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
         setDueDate(new Date())
-        setIncludeTime(DEFAULT_INCLUDE_TIME_VALUE)
         setPriorityLevel(DEFAULT_PRIORITY_LEVEL_VALUE)
         setHoverPriorityLevel(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
         dispatch(resetTags())
@@ -187,32 +199,61 @@ export function TaskDialog(props: TaskDialogProps) {
                 )}
             />
 
-            <Stack direction={"row"} spacing={3}>
-                {!includeTime && <LocalizationProvider dateAdapter={MomentAdapter}>
-                    <DatePicker
-                        renderInput={(params) => <TextField {...params} />}
-                        label="Due date"
-                        value={dueDate}
-                        onChange={(dateSelected) => {
-                            setDueDate(dateSelected);
-                        }}
-                    />
-                </LocalizationProvider>}
-
-                {includeTime && <LocalizationProvider dateAdapter={MomentAdapter}>
-                    <DateTimePicker
-                        renderInput={(props) => <TextField {...props} />}
-                        label="Due date"
-                        value={dueDate}
-                        onChange={(dateSelected) => {
-                            setDueDate(dateSelected)
-                        }}
-                    />
-                </LocalizationProvider>}
-
+            <Stack direction={"column"} spacing={3}>
                 <FormGroup>
-                    <FormControlLabel control={<Switch value={includeTime} onChange={handleIncludeTimeChange} />} label="Include time" />
+                    <FormControlLabel control={<Switch checked={dueDateActive} value={dueDateActive} onChange={handleDueDateActiveChange} />} label="Include due date" />
                 </FormGroup>
+
+                {dueDateActive && <Stack direction={"row"} spacing={3}>
+                    <LocalizationProvider dateAdapter={MomentAdapter}>
+                        <DateTimePicker
+                            renderInput={(props) => <TextField {...props} />}
+                            label="Due date"
+                            value={dueDate}
+                            onChange={(dateSelected) => {
+                                setDueDate(dateSelected)
+                            }}
+                        />
+                    </LocalizationProvider>
+                </Stack>}
+            </Stack>
+
+            <Stack direction={"column"} spacing={3}>
+                <FormGroup>
+                    <FormControlLabel control={<Switch value={plannedStartActive} onChange={handlePlannedStartActiveChange} />} label="Include date to start" />
+                </FormGroup>
+
+                {plannedStartActive && <Stack direction={"row"} spacing={3}>
+                    <LocalizationProvider dateAdapter={MomentAdapter}>
+                        <DateTimePicker
+                            renderInput={(props) => <TextField {...props} />}
+                            label="Planned start date"
+                            value={plannedStart}
+                            onChange={(dateSelected) => {
+                                setPlannedStart(dateSelected)
+                            }}
+                        />
+                    </LocalizationProvider>
+                </Stack>}
+            </Stack>
+
+            <Stack direction={"column"} spacing={3}>
+                <FormGroup>
+                    <FormControlLabel control={<Switch value={plannedEndActive} onChange={handlePlannedEndActiveChange} />} label="Include end date" />
+                </FormGroup>
+
+                {plannedEndActive && <Stack direction={"row"} spacing={3}>
+                    <LocalizationProvider dateAdapter={MomentAdapter}>
+                        <DateTimePicker
+                            renderInput={(props) => <TextField {...props} />}
+                            label="Planned end date"
+                            value={plannedEnd}
+                            onChange={(dateSelected) => {
+                                setPlannedEnd(dateSelected)
+                            }}
+                        />
+                    </LocalizationProvider>
+                </Stack>}
             </Stack>
 
             <Box
