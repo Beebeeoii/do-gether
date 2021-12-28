@@ -53,6 +53,7 @@ export const authSlice = createSlice({
             state.authenticated = false
             state.id = null
             state.token = null
+            state.status = "idle"
         }
     },
     extraReducers: (builder) => {

@@ -53,7 +53,14 @@ export const reorderTasks = createAsyncThunk("task/reorder", async (taskList: Ar
 export const taskSlice = createSlice({
     name: 'task',
     initialState: initialState,
-    reducers: {},
+    reducers: {
+        resetTasks: (state) => {
+            state.tasks = []
+            state.listId = null
+            state.status = "idle"
+            state.error = null
+        }
+    },
     extraReducers: (builder) => {
         builder.addCase(addTask.pending, (state, action) => {
             state.status = "loading"
@@ -104,6 +111,8 @@ export const taskSlice = createSlice({
         })
     }
 })
+
+export const { resetTasks } = taskSlice.actions
 
 export const selectTasks = (state: RootState) => state.task.tasks
 export const selectTaskListId = (state: RootState) => state.task.listId

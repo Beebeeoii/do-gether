@@ -43,6 +43,7 @@ export const tagSlice = createSlice({
         resetTags: (state) => {
             state.tags = []
             state.status = "idle"
+            state.error = null
         }
     },
     extraReducers: (builder) => {

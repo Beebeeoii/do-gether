@@ -34,7 +34,13 @@ export const retrieveUserInfo = createAsyncThunk("user/retrieve", async (userReq
 export const userSlice = createSlice({
     name: 'user',
     initialState,
-    reducers: {},
+    reducers: {
+        resetUsers: (state) => {
+            state.user = null
+            state.status = "idle"
+            state.error = null
+        }
+    },
     extraReducers: (builder) => {
         builder.addCase(retrieveUserInfo.fulfilled, (state, action) => {
             if (action.payload.success) {
@@ -50,6 +56,8 @@ export const userSlice = createSlice({
         })
     }
 })
+
+export const { resetUsers } = userSlice.actions
 
 export const selectUser = (state: RootState) => state.user.user
 export const selectUserStatus = (state: RootState) => state.user.status

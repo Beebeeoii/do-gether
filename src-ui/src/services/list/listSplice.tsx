@@ -46,7 +46,13 @@ export const retrieveAllLists = createAsyncThunk("list/fetchAll", async (listReq
 export const listSlice = createSlice({
     name: 'list',
     initialState: initialState,
-    reducers: {},
+    reducers: {
+        resetLists: (state) => {
+            state.lists = []
+            state.status = "idle"
+            state.error = null
+        }
+    },
     extraReducers: (builder) => {
         builder.addCase(addList.pending, (state, action) => {
             state.status = "loading"
@@ -72,6 +78,8 @@ export const listSlice = createSlice({
         })
     }
 })
+
+export const { resetLists } = listSlice.actions
 
 export const selectLists = (state: RootState) => state.list.lists
 export const selectListStatus = (state: RootState) => state.list.status
