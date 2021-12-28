@@ -81,7 +81,11 @@ export const taskSlice = createSlice({
 
         builder.addCase(retrieveTasks.fulfilled, (state, action) => {
             if (action.payload.success) {
-                state.tasks = action.payload.data.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
+                if (action.payload.data) {
+                    state.tasks = action.payload.data.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
+                } else {
+                    state.tasks = []
+                }
                 state.listId = action.meta.arg.listId
             }
             state.status = "succeeded"
