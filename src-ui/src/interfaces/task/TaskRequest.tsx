@@ -1,5 +1,5 @@
 import { AuthData } from "../auth/Auth";
-import { Task, TaskReorderData } from "./Task";
+import { Task } from "./Task";
 
 export interface CreateTaskRequest {
     authData: AuthData
