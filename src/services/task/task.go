@@ -113,7 +113,7 @@ func RetrieveTagsByListId(listId string) ([]string, error) {
 		return tags, rowsErr
 	}
 
-	return tags, nil
+	return removeDuplicateStr(tags), nil
 }
 
 func ReorderTasksInList(tasks []interfaces.BasicTaskReorderData) ([]interfaces.Task, error) {
@@ -143,4 +143,18 @@ func ReorderTasksInList(tasks []interfaces.BasicTaskReorderData) ([]interfaces.T
 	}
 
 	return updatedTasks, nil
+}
+
+func removeDuplicateStr(tagSlice []string) []string {
+	tags := make(map[string]bool)
+	uniqueTagSlice := []string{}
+
+	for _, tag := range tagSlice {
+		if _, value := tags[tag]; !value {
+			tags[tag] = true
+			uniqueTagSlice = append(uniqueTagSlice, tag)
+		}
+	}
+
+	return uniqueTagSlice
 }
