@@ -12,8 +12,9 @@ import { PriorityHigh } from "@mui/icons-material";
 import CreateIcon from '@mui/icons-material/Create';
 import { Box } from "@mui/system";
 import moment from "moment";
-import { RetrieveTagsByListIdRequest } from "../../interfaces/task/TaskRequest";
+import { CreateTaskRequest, EditTaskRequest, RetrieveTagsByListIdRequest } from "../../interfaces/task/TaskRequest";
 import { AuthData } from "../../interfaces/auth/Auth";
+import { addTask, editTask } from "../../services/task/taskSplice";
 
 export interface TaskDialogProps {
     open: boolean
@@ -44,7 +45,7 @@ export function TaskDialog(props: TaskDialogProps) {
     let [taskTitle, setTaskTitle] = useState<string>(data ? data.title : DEFAULT_TASK_TITLE_VALUE)
 
     const lists = useAppSelector(selectLists)
-    let [listId, setListId] = useState<string>(data ? data.listId : DEFAULT_LIST_VALUE)
+    let [listId, setListId] = useState<string>(currentListId ? currentListId : DEFAULT_LIST_VALUE)
 
     const tagStatus = useAppSelector(selectTagStatus)
     const tagSuggestions = useAppSelector(selectTags)
@@ -111,17 +112,34 @@ export function TaskDialog(props: TaskDialogProps) {
     }
 
     const handleCreateTask = () => {
-        let task: TaskData = {
-            title: taskTitle,
-            tags: tagsSelected,
-            priority: priorityLevel!,
-            listId: listId,
-            listOrder: -1,
-            due: dueDate ? moment(dueDate).unix() : -1,
-            plannedStart: plannedStart ? moment(plannedStart).unix() : -1,
-            plannedEnd: plannedEnd ? moment(plannedEnd).unix() : -1,
-            completed: false
+        if (data) {
+            let editTaskRequest: EditTaskRequest = {
+                authData: authData,
+                id: data.id,
+                listId: listId,
+                title: taskTitle,
+                tags: tagsSelected,
+                priority: priorityLevel!,
+                due: dueDate ? moment(dueDate).unix() : -1,
+                plannedStart: plannedStart ? moment(plannedStart).unix() : -1,
+                plannedEnd: plannedEnd ? moment(plannedEnd).unix() : -1
+            }
+            dispatch(editTask(editTaskRequest))
+        } else {
+            let createTaskRequest: CreateTaskRequest = {
+                authData: authData,
+                owner: authData.id,
+                title: taskTitle,
+                tags: tagsSelected,
+                listId: listId,
+                priority: priorityLevel!,
+                due: dueDate ? moment(dueDate).unix() : -1,
+                plannedStart: plannedStart ? moment(plannedStart).unix() : -1,
+                plannedEnd: plannedEnd ? moment(plannedEnd).unix() : -1
+            }
+            dispatch(addTask(createTaskRequest))
         }
+
         onClose()
         resetState()
     }

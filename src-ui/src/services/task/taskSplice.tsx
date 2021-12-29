@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { Task, TaskReorderData } from '../../interfaces/task/Task';
-import { createTask, fetchTasks, reorderList } from '../../adapters/task/task';
+import { createTask, editExistingTask, fetchTasks, reorderList } from '../../adapters/task/task';
 import { AxiosError } from 'axios';
-import { CreateTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
+import { CreateTaskRequest, EditTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
 
 export interface TaskState {
     tasks: Array<Task>
@@ -22,6 +22,19 @@ const initialState: TaskState = {
 export const addTask = createAsyncThunk("task/create", async (taskRequest: CreateTaskRequest, { rejectWithValue }) => {
     try {
         const response = await createTask(taskRequest)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const editTask = createAsyncThunk("task/edit", async (taskRequest: EditTaskRequest, { rejectWithValue }) => {
+    try {
+        const response = await editExistingTask(taskRequest)
         return response.data
     } catch (err) {
         let error = err as AxiosError
@@ -96,6 +109,36 @@ export const taskSlice = createSlice({
                     completed: action.payload.data.completed
                 }
                 state.tasks.push(task)
+            }
+            state.status = "succeeded"
+        })
+
+        builder.addCase(editTask.fulfilled, (state, action) => {
+            if (action.payload.success && state.listId == action.payload.data.listId) {
+                let updatedTasks: Array<Task> = []
+                for (let task of state.tasks) {
+                    if (task.id !== action.payload.data.id) {
+                        updatedTasks.push(task)
+                    } else {
+                        let updatedTask: Task = {
+                            id: action.payload.data.id,
+                            owner: action.payload.data.owner,
+                            title: action.payload.data.title,
+                            tags: action.payload.data.tags,
+                            listId: action.payload.data.listId,
+                            listOrder: action.payload.data.listOrder,
+                            priority: action.payload.data.priority,
+                            due: action.payload.data.due,
+                            plannedStart: action.payload.data.plannedStart,
+                            plannedEnd: action.payload.data.plannedEnd,
+                            completed: action.payload.data.completed
+                        }
+
+                        updatedTasks.push(updatedTask)
+                    }
+                }
+
+                state.tasks = updatedTasks
             }
             state.status = "succeeded"
         })

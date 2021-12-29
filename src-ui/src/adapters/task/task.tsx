@@ -1,6 +1,6 @@
 import { AuthData } from "../../interfaces/auth/Auth";
 import { TaskReorderData } from "../../interfaces/task/Task";
-import { CreateTaskRequest } from "../../interfaces/task/TaskRequest";
+import { CreateTaskRequest, EditTaskRequest } from "../../interfaces/task/TaskRequest";
 import { sendGet, sendPost } from "../adapter";
 
 export function createTask(data: CreateTaskRequest) {
@@ -21,6 +21,26 @@ export function createTask(data: CreateTaskRequest) {
     }
 
     return sendPost("/task", body, headers)
+}
+
+export function editExistingTask(data: EditTaskRequest) {
+    let headers = {
+        "Authorization": `Bearer ${data.authData.token}`,
+        "id": data.authData.id
+    }
+
+    let body = {
+        "id": data.id,
+        "listId": data.listId,
+        "title": data.title,
+        "tags": data.tags,
+        "priority": data.priority,
+        "due": data.due,
+        "plannedStart": data.plannedStart,
+        "plannedEnd": data.plannedEnd
+    }
+
+    return sendPost("/task/edit", body, headers)
 }
 
 export function fetchTasks(authData: AuthData, listId: string) {

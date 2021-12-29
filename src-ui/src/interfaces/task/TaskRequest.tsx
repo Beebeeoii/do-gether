@@ -13,6 +13,18 @@ export interface CreateTaskRequest {
     plannedEnd: number,
 }
 
+export interface EditTaskRequest {
+    authData: AuthData
+    id: string,
+    listId: string,
+    title: string,
+    tags: Array<string>,
+    priority: number,
+    due: number,
+    plannedStart: number,
+    plannedEnd: number,
+}
+
 export interface RetrieveTasksByListIdRequest {
     authData: AuthData
     listId: string
