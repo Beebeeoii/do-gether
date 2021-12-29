@@ -50,6 +50,36 @@ func CreateTask(task interfaces.TaskCreationData) (interfaces.Task, error) {
 	return newTask, execErr
 }
 
+func EditTask(task interfaces.TaskEditionData) (interfaces.Task, error) {
+	var updatedTask interfaces.Task
+	sqlCommand := "UPDATE tasks SET title = $1, tags = $2, priority = $3, due = $4, \"plannedStart\" = $5, \"plannedEnd\" = $6 WHERE id = $7 RETURNING *;"
+
+	queryErr := db.Database.QueryRow(
+		sqlCommand,
+		task.Title,
+		pq.Array(task.Tags),
+		task.Priority,
+		task.Due,
+		task.PlannedStart,
+		task.PlannedEnd,
+		task.Id,
+	).Scan(
+		&updatedTask.Id,
+		&updatedTask.Owner,
+		&updatedTask.Title,
+		pq.Array(&updatedTask.Tags),
+		&updatedTask.ListId,
+		&updatedTask.ListOrder,
+		&updatedTask.Priority,
+		&updatedTask.Due,
+		&updatedTask.PlannedStart,
+		&updatedTask.PlannedEnd,
+		&updatedTask.Completed,
+	)
+
+	return updatedTask, queryErr
+}
+
 func RetrieveTasksByListId(listId string) ([]interfaces.Task, error) {
 	var tasks []interfaces.Task
 	sqlCommand := "SELECT * FROM tasks WHERE \"listId\" = $1"

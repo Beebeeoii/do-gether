@@ -19,11 +19,26 @@ type CreateTaskResponse struct {
 	Data Task `json:"data"`
 }
 
+type EditTaskResponse struct {
+	BaseResponse
+	Data Task `json:"data"`
+}
+
 type TaskCreationData struct {
 	Owner        string   `json:"owner"`
 	Title        string   `json:"title"`
 	Tags         []string `json:"tags"`
 	ListId       string   `json:"listId"`
+	Priority     int      `json:"priority"`
+	Due          int      `json:"due"`          // -1 if nil
+	PlannedStart int      `json:"plannedStart"` // -1 if nil
+	PlannedEnd   int      `json:"plannedEnd"`   // -1 if nil
+}
+
+type TaskEditionData struct {
+	Id           string   `json:"id"`
+	Title        string   `json:"title"`
+	Tags         []string `json:"tags"`
 	Priority     int      `json:"priority"`
 	Due          int      `json:"due"`          // -1 if nil
 	PlannedStart int      `json:"plannedStart"` // -1 if nil

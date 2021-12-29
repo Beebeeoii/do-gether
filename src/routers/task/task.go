@@ -23,6 +23,17 @@ type createTaskBody struct {
 	PlannedEnd   int      `json:"plannedEnd" validate:"required"`
 }
 
+type editTaskBody struct {
+	Id           string   `json:"id" validate:"min=1,max=20,required"`
+	ListId       string   `json:"listId" validate:"min=1,max=20,required"`
+	Title        string   `json:"title" validate:"required"`
+	Tags         []string `json:"tags" validate:"required"`
+	Priority     int      `json:"priority"`
+	Due          int      `json:"due" validate:"required"`
+	PlannedStart int      `json:"plannedStart" validate:"required"`
+	PlannedEnd   int      `json:"plannedEnd" validate:"required"`
+}
+
 type reorderTasksBody struct {
 	ListId string                            `json:"listId" validate:"min=1,max=20,required"`
 	Tasks  []interfaces.BasicTaskReorderData `json:"tasks" validate:"required"`
@@ -121,6 +132,115 @@ func CreateTask(c *gin.Context) {
 			Error:   "",
 		},
 		Data: newTask,
+	})
+}
+
+func EditTask(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	var requestBody editTaskBody
+
+	reqBodyErr := c.BindJSON(&requestBody)
+	if reqBodyErr != nil {
+		log.Println(reqBodyErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqBodyErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(requestBody)
+	if validationErr != nil {
+		log.Println(validationErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader("id")
+
+	list, retrieveListErr := listService.RetrieveListById(requestBody.ListId)
+	if retrieveListErr != nil {
+		log.Println(retrieveListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListErr.Error(),
+		})
+		return
+	}
+
+	if !validator.HasListPermission(list, userId) {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
+	tasks, retrieveTasksErr := taskService.RetrieveTasksByListId(requestBody.ListId)
+	if retrieveTasksErr != nil {
+		log.Println(retrieveTasksErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveTasksErr.Error(),
+		})
+		return
+	}
+
+	doesTaskExistInList := false
+
+	for _, task := range tasks {
+		if task.Id == requestBody.Id {
+			doesTaskExistInList = true
+			break
+		}
+	}
+
+	if !doesTaskExistInList {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("task does not exist in the list").Error(),
+		})
+		return
+	}
+
+	taskEditionData := interfaces.TaskEditionData{
+		Id:           requestBody.Id,
+		Title:        requestBody.Title,
+		Tags:         requestBody.Tags,
+		Priority:     requestBody.Priority,
+		Due:          requestBody.Due,
+		PlannedStart: requestBody.PlannedStart,
+		PlannedEnd:   requestBody.PlannedEnd,
+	}
+
+	updatedTask, editTaskErr := taskService.EditTask(taskEditionData)
+	if editTaskErr != nil {
+		log.Println(editTaskErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   editTaskErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.EditTaskResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: updatedTask,
 	})
 }
 
