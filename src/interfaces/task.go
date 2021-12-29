@@ -30,6 +30,11 @@ type TaskCreationData struct {
 	PlannedEnd   int      `json:"plannedEnd"`   // -1 if nil
 }
 
+type BasicTaskReorderData struct {
+	Id        string `json:"id"`
+	ListOrder int    `json:"listOrder"`
+}
+
 type RetrieveTasksResponse struct {
 	BaseResponse
 	Data []Task `json:"data"`

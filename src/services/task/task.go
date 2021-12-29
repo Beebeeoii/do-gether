@@ -8,7 +8,15 @@ import (
 )
 
 func CreateTask(task interfaces.TaskCreationData) (interfaces.Task, error) {
-	sqlCommand := "INSERT INTO tasks (id, owner, title, tags, \"listId\", \"listOrder\", priority, due, \"plannedStart\", \"plannedEnd\", completed) VALUES ($1, $2, $3, $4, $5, DEFAULT, $6, $7, $8, $9, $10);"
+	var nTasksInList int
+	getTotalCommand := "SELECT COUNT(*) FROM tasks where \"listId\" = $1;"
+
+	queryErr := db.Database.QueryRow(getTotalCommand, task.ListId).Scan(&nTasksInList)
+	if queryErr != nil {
+		return interfaces.Task{}, queryErr
+	}
+
+	sqlCommand := "INSERT INTO tasks (id, owner, title, tags, \"listId\", \"listOrder\", priority, due, \"plannedStart\", \"plannedEnd\", completed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);"
 
 	newTask := interfaces.Task{
 		Id:           utils.GenerateUid(),
@@ -16,7 +24,7 @@ func CreateTask(task interfaces.TaskCreationData) (interfaces.Task, error) {
 		Title:        task.Title,
 		Tags:         task.Tags,
 		ListId:       task.ListId,
-		ListOrder:    -1, // default auto-increment
+		ListOrder:    nTasksInList,
 		Priority:     task.Priority,
 		Due:          task.Due,
 		PlannedStart: task.PlannedStart,
@@ -31,6 +39,7 @@ func CreateTask(task interfaces.TaskCreationData) (interfaces.Task, error) {
 		newTask.Title,
 		pq.Array(newTask.Tags),
 		newTask.ListId,
+		newTask.ListOrder,
 		newTask.Priority,
 		newTask.Due,
 		newTask.PlannedStart,
@@ -105,4 +114,33 @@ func RetrieveTagsByListId(listId string) ([]string, error) {
 	}
 
 	return tags, nil
+}
+
+func ReorderTasksInList(tasks []interfaces.BasicTaskReorderData) ([]interfaces.Task, error) {
+	var updatedTasks []interfaces.Task
+	sqlCommand := "UPDATE tasks SET \"listOrder\" = $1 WHERE id = $2 RETURNING *"
+
+	for _, task := range tasks {
+		updatedTask := interfaces.Task{}
+		queryErr := db.Database.QueryRow(sqlCommand, task.ListOrder, task.Id).Scan(
+			&updatedTask.Id,
+			&updatedTask.Owner,
+			&updatedTask.Title,
+			pq.Array(&updatedTask.Tags),
+			&updatedTask.ListId,
+			&updatedTask.ListOrder,
+			&updatedTask.Priority,
+			&updatedTask.Due,
+			&updatedTask.PlannedStart,
+			&updatedTask.PlannedEnd,
+			&updatedTask.Completed,
+		)
+
+		if queryErr != nil {
+			return updatedTasks, queryErr
+		}
+		updatedTasks = append(updatedTasks, updatedTask)
+	}
+
+	return updatedTasks, nil
 }

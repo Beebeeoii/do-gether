@@ -23,6 +23,11 @@ type createTaskBody struct {
 	PlannedEnd   int      `json:"plannedEnd" validate:"required"`
 }
 
+type reorderTasksBody struct {
+	ListId string                            `json:"listId" validate:"min=1,max=20,required"`
+	Tasks  []interfaces.BasicTaskReorderData `json:"tasks" validate:"required"`
+}
+
 const (
 	LIST_ID_PARAM_KEY = "listId"
 )
@@ -234,5 +239,77 @@ func RetrieveTagSuggestion(c *gin.Context) {
 			Error:   "",
 		},
 		Data: tags,
+	})
+}
+
+func ReorderTasks(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	var requestBody reorderTasksBody
+
+	reqBodyErr := c.BindJSON(&requestBody)
+	if reqBodyErr != nil {
+		log.Println(reqBodyErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqBodyErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(requestBody)
+	if validationErr != nil {
+		log.Println(validationErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader("id")
+
+	list, retrieveListErr := listService.RetrieveListById(requestBody.ListId)
+	if retrieveListErr != nil {
+		log.Println(retrieveListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListErr.Error(),
+		})
+		return
+	}
+
+	if !validator.HasListPermission(list, userId) {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
+	tasks, reorderTasksErr := taskService.ReorderTasksInList(requestBody.Tasks)
+	if reorderTasksErr != nil {
+		log.Println(reorderTasksErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reorderTasksErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.RetrieveTasksResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: tasks,
 	})
 }
