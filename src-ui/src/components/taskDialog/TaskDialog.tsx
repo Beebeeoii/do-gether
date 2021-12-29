@@ -20,7 +20,7 @@ export interface TaskDialogProps {
     data: Task | null,
     authData: AuthData,
     currentListId: string,
-    onClose: (newTask: TaskData | null) => void
+    onClose: () => void
 }
 
 const DEFAULT_TASK_TITLE_VALUE = ""
@@ -122,12 +122,12 @@ export function TaskDialog(props: TaskDialogProps) {
             plannedEnd: plannedEnd ? moment(plannedEnd).unix() : -1,
             completed: false
         }
-        onClose(task)
+        onClose()
         resetState()
     }
 
     const handleDialogClose = () => {
-        onClose(null)
+        onClose()
         resetState()
     }
 
