@@ -32,7 +32,12 @@ const getListStyle = (isDraggingOver: boolean) => ({
 
 const reorder = (list: Array<Task>, startIndex: number, endIndex: number) => {
     const result: Array<Task> = []
-    list.forEach((task: Task) => result.push(Object.assign({}, task)))
+    for (let index in list) {
+        result.push({
+            ...list[index],
+            listOrder: Number(index)
+        })
+    }
 
     result[startIndex].listOrder = endIndex
 
