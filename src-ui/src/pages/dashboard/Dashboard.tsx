@@ -6,21 +6,17 @@ import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDr
 import "./Dashboard.css"
 import { Task, TaskData } from "../../interfaces/task/Task";
 import { UserRequest } from "../../interfaces/user/UserRequest";
-import { Card, Divider, Fab, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Stack, Tooltip, Typography } from "@mui/material";
+import { Card, Fab, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
-import AddIcon from '@mui/icons-material/Add';
 import { AddTask } from "@mui/icons-material";
 import { TaskDialog } from "../../components/taskDialog/TaskDialog";
-import { addList, retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
-import { List, ListData } from "../../interfaces/list/List";
-import { RetrieveListByUserIdResponse } from "../../interfaces/list/ListResponses";
-import { NewListDialog } from "../../components/newListDialog/NewListDialog";
+import { List } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUser, selectUserStatus } from "../../services/user/userSplice";
 import { selectId, selectToken } from "../../services/auth/authSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
-import { CreateListRequest, RetrieveListsByUserIdRequest } from "../../interfaces/list/ListRequest";
 import { CreateTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from "../../interfaces/task/TaskRequest";
+import { ListSelect } from "../../components/listSelect/ListSelect";
 
 const grid = 8
 
@@ -76,8 +72,6 @@ const DEFAULT_LIST: List = {
     private: true
 }
 
-const CREATE_LIST = "New List"
-
 export function Dashboard() {
     const dispatch = useAppDispatch()
     const authId = useAppSelector(selectId)
@@ -101,66 +95,16 @@ export function Dashboard() {
         }
     }, [userStatus, dispatch])
 
-    const listStatus = useAppSelector(selectListStatus)
-    const lists = useAppSelector(selectLists)
+
     const [selectedList, setSelectedList] = useState<List>(DEFAULT_LIST)
-    useEffect(() => {
-        if (listStatus === "idle") {
-            let listRequest: RetrieveListsByUserIdRequest = {
-                authData: authData,
-                userId: authId!
-            }
 
-            dispatch(retrieveAllLists(listRequest)).then((value) => {
-                let payload: RetrieveListByUserIdResponse = value.payload as RetrieveListByUserIdResponse
-                let mainList = payload.data.filter((value: List, _: number, __: List[]) => {
-                    return value.name === "main"
-                })
-                setSelectedList(mainList[0])
-
-                if (taskStatus === "idle") {
-                    let taskRequest: RetrieveTasksByListIdRequest = {
-                        authData: authData,
-                        listId: mainList[0].id
-                    }
-
-                    dispatch(retrieveTasks(taskRequest))
-                }
-            })
-        }
-    }, [listStatus, dispatch])
-    const handleListChange = (event: SelectChangeEvent) => {
-        if (event.target.value === CREATE_LIST) {
-            return
-        }
-
-        let selected = lists.filter((value: List, _: number, __: List[]) => {
-            return value.id === event.target.value
-        })
-        setSelectedList(selected[0])
+    const handleListChange = (list: List) => {
         let taskRequest: RetrieveTasksByListIdRequest = {
             authData: authData,
-            listId: selected[0].id
+            listId: list.id
         }
+        setSelectedList(list)
         dispatch(retrieveTasks(taskRequest))
-    }
-    const [newListDialogOpen, setNewListDialogOpen] = useState<boolean>(false)
-    const handleNewListDialogOpen = () => {
-        setNewListDialogOpen(true)
-    }
-    const handleNewListDialogClose = (newList: ListData | null) => {
-        setNewListDialogOpen(false)
-
-        if (newList) {
-            let listRequest: CreateListRequest = {
-                authData: authData,
-                name: newList.name,
-                owner: authId!,
-                private: newList.private
-            }
-
-            dispatch(addList(listRequest))
-        }
     }
 
     const taskStatus = useAppSelector(selectTaskStatus)
@@ -220,55 +164,8 @@ export function Dashboard() {
             <NavBar />
 
             <Stack direction="row" justifyContent="space-between">
-                {listStatus !== "idle" && <FormControl sx={{ m: 1, width: 300 }}>
-                    <InputLabel id="list-select-label">List</InputLabel>
-                    <Select
-                        labelId="list-select-label"
-                        id="list-select"
-                        value={selectedList.id}
-                        label="List"
-                        onChange={handleListChange}
-                    >
-                        <li>
-                            <Typography
-                                sx={{ mt: 0.5, ml: 2 }}
-                                color="text.secondary"
-                                display="block"
-                                variant="caption"
-                            >
-                                Your lists
-                            </Typography>
-                        </li>
-
-                        {lists.map((list: List, _: number) => (
-                            (list.owner == authData.id && <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>)
-                        ))}
-
-                        <Divider component="li" />
-                        <li>
-                            <Typography
-                                sx={{ mt: 0.5, ml: 2 }}
-                                color="text.secondary"
-                                display="block"
-                                variant="caption"
-                            >
-                                Lists owned by others
-                            </Typography>
-                        </li>
-
-                        {lists.map((list: List, _: number) => (
-                            (list.owner != authData.id && <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>)
-                        ))}
-
-                        <Divider />
-
-                        <MenuItem key={CREATE_LIST} value={CREATE_LIST} onClick={handleNewListDialogOpen}>
-                            <AddIcon />
-                            <ListItemText primary={CREATE_LIST} />
-                        </MenuItem>
-                    </Select>
-                </FormControl>}
-
+                <ListSelect authData={authData} userId={authData.id} onSelect={handleListChange}/>
+ 
                 <Fab color="primary" aria-label="addTask" onClick={handleTaskDialogOpen} variant="extended">
                     <AddTask sx={{ mr: 1 }} />
                     Add task
@@ -325,7 +222,6 @@ export function Dashboard() {
                 </Droppable>
             </DragDropContext>
 
-            <NewListDialog open={newListDialogOpen} onClose={handleNewListDialogClose} />
             {taskDialogOpen && <TaskDialog open={taskDialogOpen} data={selectedTask} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
         </div>
     )

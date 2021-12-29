@@ -72,7 +72,7 @@ export const listSlice = createSlice({
 
         builder.addCase(retrieveAllLists.fulfilled, (state, action) => {
             if (action.payload.success) {
-                state.lists = action.payload.data
+                state.lists = action.payload.data ? action.payload.data : []
                 state.status = "succeeded"
             }
         })
