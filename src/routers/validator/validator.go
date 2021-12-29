@@ -5,6 +5,7 @@ import (
 
 	"github.com/beebeeoii/do-gether/interfaces"
 	authService "github.com/beebeeoii/do-gether/services/auth"
+	utils "github.com/beebeeoii/do-gether/services/utils"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -29,18 +30,9 @@ func ValidateAuthDataFromHeader(header http.Header) error {
 }
 
 func HasListPermission(list interfaces.List, userId string) bool {
-	if list.Private && list.Owner != userId && !contains(list.Members, userId) {
+	if list.Private && list.Owner != userId && !utils.Contains(list.Members, userId) {
 		return false
 	}
 
 	return true
-}
-
-func contains(slice []string, element string) bool {
-	for _, a := range slice {
-		if a == element {
-			return true
-		}
-	}
-	return false
 }

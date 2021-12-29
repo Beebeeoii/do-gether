@@ -8,6 +8,11 @@ type User struct {
 	Incoming_req []string `json:"incoming_req"`
 }
 
+type BasicUser struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+}
+
 type CreateUserResponse struct {
 	BaseResponse
 	Data User `json:"data"`
@@ -17,3 +22,8 @@ type RetrieveUserResponse struct {
 	BaseResponse
 	Data User `json:"data"`
 }
+
+// type FindUserResponse struct {
+// 	BaseResponse
+// 	Data BasicUser `json:"data"`
+// }
