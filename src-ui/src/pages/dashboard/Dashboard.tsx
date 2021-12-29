@@ -25,7 +25,7 @@ import { CreateTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } 
 const grid = 8
 
 const getListStyle = (isDraggingOver: boolean) => ({
-    background: isDraggingOver ? "lightblue" : "lightgrey",
+    background: "white",
     padding: grid,
     width: 250
 });
@@ -60,10 +60,10 @@ const getItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDr
     // some basic styles to make the items look a bit nicer
     userSelect: "none",
     padding: grid * 2,
-    margin: `0 0 ${grid}px 0`,
+    margin: `0 0 ${grid * 2}px 0`,
 
     // change background colour if dragging
-    background: isDragging ? "lightgreen" : "grey",
+    background: isDragging ? "lightgreen" : "lightgrey",
 
     // styles we need to apply on draggables
     ...draggableStyle
@@ -123,7 +123,7 @@ export function Dashboard() {
                         authData: authData,
                         listId: mainList[0].id
                     }
-        
+
                     dispatch(retrieveTasks(taskRequest))
                 }
             })
@@ -156,7 +156,7 @@ export function Dashboard() {
                 authData: authData,
                 name: newList.name,
                 owner: authId!,
-                private: newList.private 
+                private: newList.private
             }
 
             dispatch(addList(listRequest))
@@ -229,10 +229,39 @@ export function Dashboard() {
                         label="List"
                         onChange={handleListChange}
                     >
+                        <li>
+                            <Typography
+                                sx={{ mt: 0.5, ml: 2 }}
+                                color="text.secondary"
+                                display="block"
+                                variant="caption"
+                            >
+                                Your lists
+                            </Typography>
+                        </li>
+
                         {lists.map((list: List, _: number) => (
-                            <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
+                            (list.owner == authData.id && <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>)
                         ))}
+
+                        <Divider component="li" />
+                        <li>
+                            <Typography
+                                sx={{ mt: 0.5, ml: 2 }}
+                                color="text.secondary"
+                                display="block"
+                                variant="caption"
+                            >
+                                Lists owned by others
+                            </Typography>
+                        </li>
+
+                        {lists.map((list: List, _: number) => (
+                            (list.owner != authData.id && <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>)
+                        ))}
+
                         <Divider />
+
                         <MenuItem key={CREATE_LIST} value={CREATE_LIST} onClick={handleNewListDialogOpen}>
                             <AddIcon />
                             <ListItemText primary={CREATE_LIST} />
