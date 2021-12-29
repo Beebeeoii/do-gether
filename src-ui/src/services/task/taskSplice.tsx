@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
-import { Task } from '../../interfaces/task/Task';
+import { Task, TaskReorderData } from '../../interfaces/task/Task';
 import { createTask, fetchTasks, reorderList } from '../../adapters/task/task';
 import { AxiosError } from 'axios';
-import { CreateTaskRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
+import { CreateTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
 
 export interface TaskState {
     tasks: Array<Task>
@@ -45,9 +45,23 @@ export const retrieveTasks = createAsyncThunk("task/fetch", async (taskRequest: 
     }
 })
 
-export const reorderTasks = createAsyncThunk("task/reorder", async (taskList: Array<Task>) => {
-    const response = await reorderList(taskList)
-    return response
+export const reorderTasks = createAsyncThunk("task/reorder", async (taskRequest: ReorderTasksRequest, { rejectWithValue }) => {
+    try {
+        let newTaskOrder: Array<TaskReorderData> = taskRequest.newTaskOrder.map(task => (
+            {
+                id: task.id,
+                listOrder: task.listOrder
+            }
+        ) as TaskReorderData)
+        const response = await reorderList(taskRequest.authData, taskRequest.listId, newTaskOrder)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
 })
 
 export const taskSlice = createSlice({
@@ -99,15 +113,15 @@ export const taskSlice = createSlice({
         })
 
         builder.addCase(reorderTasks.pending, (state, action) => {
+            state.tasks = action.meta.arg.newTaskOrder.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
             state.status = "loading"
-            state.tasks = action.meta.arg.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
         })
 
         builder.addCase(reorderTasks.fulfilled, (state, action) => {
-            state.status = "succeeded"
             if (action.payload.success) {
-                state.tasks = action.payload.data.tasks.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
+                state.tasks = action.payload.data.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
             }
+            state.status = "succeeded"
         })
     }
 })

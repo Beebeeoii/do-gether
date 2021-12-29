@@ -23,3 +23,8 @@ export interface TaskData {
     plannedEnd: number
     completed: boolean
 }
+
+export interface TaskReorderData {
+	id: string
+	listOrder: number
+}

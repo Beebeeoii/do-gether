@@ -20,7 +20,7 @@ import { retrieveUserInfo, selectUser, selectUserStatus } from "../../services/u
 import { selectId, selectToken } from "../../services/auth/authSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { CreateListRequest, RetrieveListsByUserIdRequest } from "../../interfaces/list/ListRequest";
-import { CreateTaskRequest, RetrieveTasksByListIdRequest } from "../../interfaces/task/TaskRequest";
+import { CreateTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from "../../interfaces/task/TaskRequest";
 
 const grid = 8
 
@@ -173,11 +173,17 @@ export function Dashboard() {
             return
         }
 
-        dispatch(reorderTasks(reorder(
-            tasks,
-            result.source.index,
-            result.destination.index
-        )))
+        let taskReqeust: ReorderTasksRequest = {
+            authData: authData,
+            listId: selectedList.id,
+            newTaskOrder: reorder(
+                tasks,
+                result.source.index,
+                result.destination.index
+            )
+        }
+
+        dispatch(reorderTasks(taskReqeust))
     }
 
     const [taskDialogOpen, setTaskDialogOpen] = useState<boolean>(false)

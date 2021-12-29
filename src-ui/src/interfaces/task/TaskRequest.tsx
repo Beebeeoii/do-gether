@@ -1,4 +1,5 @@
 import { AuthData } from "../auth/Auth";
+import { Task, TaskReorderData } from "./Task";
 
 export interface CreateTaskRequest {
     authData: AuthData
@@ -20,4 +21,10 @@ export interface RetrieveTasksByListIdRequest {
 export interface RetrieveTagsByListIdRequest {
     authData: AuthData
     listId: string
+}
+
+export interface ReorderTasksRequest {
+    authData: AuthData
+    listId: string
+    newTaskOrder: Array<Task>
 }
