@@ -79,9 +79,9 @@ export const listSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        // builder.addCase(addList.pending, (state, action) => {
-        //     state.status = "loading"
-        // })
+        builder.addCase(addList.pending, (state, action) => {
+            state.status = "loading"
+        })
 
         builder.addCase(addList.fulfilled, (state, action) => {
             if (action.payload.success) {
@@ -126,7 +126,9 @@ export const listSlice = createSlice({
 
         builder.addCase(retrieveAllLists.fulfilled, (state, action) => {
             if (action.payload.success) {
-                action.payload.data.sort((a: List, b: List) => sortAlpha(a.name, b.name))
+                if (action.payload.data) {
+                    action.payload.data.sort((a: List, b: List) => sortAlpha(a.name, b.name))
+                }
                 state.lists = action.payload.data ? action.payload.data : []
                 state.status = "succeeded"
             }
