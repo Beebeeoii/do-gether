@@ -1,4 +1,4 @@
-import { Card, IconButton, Tooltip, Typography } from "@mui/material";
+import { Card, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { AuthData } from "../../interfaces/auth/Auth";
@@ -54,6 +54,23 @@ const reorder = (list: Array<Task>, startIndex: number, endIndex: number) => {
     }
 
     return result
+}
+
+const stringToColour = (str: string) => {
+    let hash = 0
+
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    }
+
+    let hex = '#'
+
+    for (let i = 0; i < 3; i++) {
+        let value = (hash >> (i * 8)) & 0xFF
+        hex += ('00' + value.toString(16)).substring(-2)
+    }
+
+    return hex
 }
 
 export function TaskBoard(props: TaskBoardProps) {
@@ -118,7 +135,7 @@ export function TaskBoard(props: TaskBoardProps) {
                                 <Draggable key={item.id} draggableId={item.id} index={index}>
                                     {(provided, snapshot) => (
                                         <Card
-                                            sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
+                                            sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center' }}
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
@@ -127,9 +144,17 @@ export function TaskBoard(props: TaskBoardProps) {
                                                 provided.draggableProps.style
                                             )}
                                         >
-                                            <Typography variant="subtitle1" component="div">
-                                                {item.title}
-                                            </Typography>
+                                            <Stack direction={"column"} gap={2}>
+                                                <Typography variant="subtitle1" component="div">
+                                                    {item.title}
+                                                </Typography>
+
+                                                <Stack direction={"row"} gap={1}>
+                                                    {item.tags.map((tag, index) => (
+                                                        <Chip key={index} label={tag} color="primary" variant="outlined" />
+                                                    ))}
+                                                </Stack>
+                                            </Stack>
 
                                             <div className="menu">
                                                 <Tooltip title="Edit">
