@@ -3,6 +3,7 @@ export interface List {
     name: string
     owner: string
     private: boolean
+    members: Array<string>
 }
 
 export interface ListData {

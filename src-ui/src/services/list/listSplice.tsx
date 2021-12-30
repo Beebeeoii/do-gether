@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { List } from '../../interfaces/list/List';
-import { createList, fetchListsByUserId } from '../../adapters/list/list';
+import { createList, editExistingList, fetchListsByUserId } from '../../adapters/list/list';
 import { AxiosError } from 'axios';
-import { CreateListRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
+import { CreateListRequest, EditListRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
 
 export interface ListState {
     lists: Array<List>
@@ -30,6 +30,19 @@ export const addList = createAsyncThunk("list/create", async (listRequest: Creat
     }
 })
 
+export const editList = createAsyncThunk("list/edit", async (listRequest: EditListRequest, { rejectWithValue }) => {
+    try {
+        const response = await editExistingList(listRequest)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
 export const retrieveAllLists = createAsyncThunk("list/fetchAll", async (listRequest: RetrieveListsByUserIdRequest, { rejectWithValue }) => {
     try {
         const response = await fetchListsByUserId(listRequest.authData, listRequest.userId)
@@ -43,6 +56,18 @@ export const retrieveAllLists = createAsyncThunk("list/fetchAll", async (listReq
     }
 })
 
+const sortAlpha = (a: string, b: string) => {
+    if (a < b) {
+        return -1
+    }
+
+    if (a > b) {
+        return 1
+    }
+
+    return 0
+}
+
 export const listSlice = createSlice({
     name: 'list',
     initialState: initialState,
@@ -54,9 +79,9 @@ export const listSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        builder.addCase(addList.pending, (state, action) => {
-            state.status = "loading"
-        })
+        // builder.addCase(addList.pending, (state, action) => {
+        //     state.status = "loading"
+        // })
 
         builder.addCase(addList.fulfilled, (state, action) => {
             if (action.payload.success) {
@@ -64,14 +89,44 @@ export const listSlice = createSlice({
                     id: action.payload.data.id,
                     name: action.payload.data.name,
                     owner: action.payload.data.owner,
-                    private: action.payload.data.private
+                    private: action.payload.data.private,
+                    members: []
                 })
+            }
+
+            state.lists.sort((a: List, b: List) => sortAlpha(a.name, b.name))
+            state.status = "succeeded"
+        })
+
+        builder.addCase(editList.fulfilled, (state, action) => {
+            if (action.payload.success) {
+                let updatedLists: Array<List> = []
+
+                for (let list of state.lists) {
+                    if (list.id !== action.payload.data.id) {
+                        updatedLists.push(list)
+                    } else {
+                        let updatedList: List = {
+                            id: action.payload.data.id,
+                            name: action.payload.data.name,
+                            owner: action.payload.data.owner,
+                            private: action.payload.data.private,
+                            members: action.payload.data.tags,
+                        }
+
+                        updatedLists.push(updatedList)
+                    }
+                }
+
+                updatedLists.sort((a: List, b: List) => sortAlpha(a.name, b.name))
+                state.lists = updatedLists
             }
             state.status = "succeeded"
         })
 
         builder.addCase(retrieveAllLists.fulfilled, (state, action) => {
             if (action.payload.success) {
+                action.payload.data.sort((a: List, b: List) => sortAlpha(a.name, b.name))
                 state.lists = action.payload.data ? action.payload.data : []
                 state.status = "succeeded"
             }

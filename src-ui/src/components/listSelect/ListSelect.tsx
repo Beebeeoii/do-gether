@@ -1,13 +1,13 @@
-import { Divider, FormControl, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Box, Divider, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
+import { MouseEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { List, ListData } from "../../interfaces/list/List";
-import { addList, retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
+import { List } from "../../interfaces/list/List";
+import { retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
-import { CreateListRequest, RetrieveListsByUserIdRequest } from "../../interfaces/list/ListRequest";
-import { RetrieveListByUserIdResponse } from "../../interfaces/list/ListResponses";
+import { RetrieveListsByUserIdRequest } from "../../interfaces/list/ListRequest";
 import AddIcon from '@mui/icons-material/Add';
-import { NewListDialog } from "../newListDialog/NewListDialog";
+import { ListDialog } from "../listDialog/listDialog";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export interface ListSelectProps {
     authData: AuthData,
@@ -16,6 +16,11 @@ export interface ListSelectProps {
 }
 
 const CREATE_LIST_VALUE = "new_list"
+const NO_LIST_VALUE = "no_list"
+const NO_LIST_TEXT = "No lists to show"
+
+const getListsOwnedByUser = (lists: Array<List>, userId: string) => lists.filter((list, _, __) => list.owner === userId)
+const getListsNotOwnedByUser = (lists: Array<List>, userId: string) => lists.filter((list, _, __) => list.owner !== userId)
 
 export function ListSelect(props: ListSelectProps) {
     const dispatch = useAppDispatch()
@@ -27,6 +32,9 @@ export function ListSelect(props: ListSelectProps) {
 
     const [userLists, setUserLists] = useState<Array<List>>([])
     const [userJoinedLists, setUserJoinedLists] = useState<Array<List>>([])
+    const [listDialogOpen, setListDialogOpen] = useState<boolean>(false)
+    const [listBeingEdited, setListBeingEdited] = useState<List | null>(null)
+    const [newListId, setNewListId] = useState<string | null>(null)
 
     useEffect(() => {
         if (listStatus === "idle") {
@@ -35,23 +43,29 @@ export function ListSelect(props: ListSelectProps) {
                 userId: userId
             }
 
-            dispatch(retrieveAllLists(listRequest)).then((value) => {
-                let payload: RetrieveListByUserIdResponse = value.payload as RetrieveListByUserIdResponse
+            dispatch(retrieveAllLists(listRequest))
+        } else if (listStatus === "succeeded" && newListId !== "") {
+            let listsOwnedByUser = getListsOwnedByUser(lists, userId)
+            let listsNotOwnedByUser = getListsNotOwnedByUser(lists, userId)
 
-                if (payload.data) {
-                    let listsOwnedByUser = payload.data.filter((list, _, __) => list.owner == userId)
-                    let listsNotOwnedByUser = payload.data.filter((list, _, __) => list.owner != userId)
+            if (lists.length == 0) {
+                return
+            }
 
-                    setUserLists(listsOwnedByUser)
-                    setUserJoinedLists(listsNotOwnedByUser)
-
-                    let listToSelect = listsOwnedByUser.length == 0 ? listsNotOwnedByUser[0] : listsOwnedByUser[0]
-                    setSelectedList(listToSelect)
-                    onSelect(listToSelect)
-                }
-            })
+            setUserLists(listsOwnedByUser)
+            setUserJoinedLists(listsNotOwnedByUser)
+            
+            let listToSelect = listsOwnedByUser.length == 0 ? listsNotOwnedByUser[0] : listsOwnedByUser[0]
+            
+            if (newListId) {
+                listToSelect = listsOwnedByUser.filter((list, _, __) => list.id === newListId)[0]
+                setNewListId("")
+            }
+            
+            setSelectedList(listToSelect)
+            onSelect(listToSelect)
         }
-    }, [listStatus, dispatch])
+    }, [newListId, listStatus, dispatch])
 
     const handleListChange = (event: SelectChangeEvent) => {
         if (event.target.value === CREATE_LIST_VALUE || !event.target.value) {
@@ -66,40 +80,21 @@ export function ListSelect(props: ListSelectProps) {
         onSelect(selected[0])
     }
 
-    const [newListDialogOpen, setNewListDialogOpen] = useState<boolean>(false)
-    
-    const handleNewListDialogOpen = () => {
-        setNewListDialogOpen(true)
+    const handleListSettingsDialogOpen = (event: MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation()
+        setListBeingEdited(userLists[Number(event.currentTarget.value)])
+        setListDialogOpen(true)
+    }    
+
+    const handleListDialogOpen = () => {
+        setListBeingEdited(null)
+        setListDialogOpen(true)
     }
 
-    const handleNewListDialogClose = (newList: ListData | null) => {
-        setNewListDialogOpen(false)
-
-        if (newList) {
-            let listRequest: CreateListRequest = {
-                authData: authData,
-                name: newList.name,
-                owner: authData.id,
-                private: newList.private
-            }
-
-            dispatch(addList(listRequest)).then(value => {
-                let newList: List = {
-                    id: value.payload.data.id,
-                    name: value.payload.data.name,
-                    owner: value.payload.data.owner,
-                    private: value.payload.data.private
-                }
-
-                let newUserLists = userLists
-                newUserLists.push(newList)
-
-                setUserLists(newUserLists)
-
-                setSelectedList(newList)
-                onSelect(newList)
-            })
-        }
+    const handleListDialogClose = (newListId: string | null) => {
+        setListBeingEdited(null)
+        setListDialogOpen(false)
+        setNewListId(newListId)
     }
 
     return (
@@ -115,7 +110,16 @@ export function ListSelect(props: ListSelectProps) {
                     value={selectedList ? selectedList.id : ""}
                     label="List"
                     onChange={handleListChange}
+                    renderValue={() => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {selectedList?.name}
+                        </Box>
+                    )}
                 >
+                    {userLists.length == 0 && <MenuItem disabled value={NO_LIST_VALUE}>
+                        {NO_LIST_TEXT}
+                    </MenuItem>}
+
                     {userLists.length != 0 && <li>
                         <Typography
                             sx={{ mt: 0.5, ml: 2 }}
@@ -127,12 +131,16 @@ export function ListSelect(props: ListSelectProps) {
                         </Typography>
                     </li>}
 
-                    {userLists.map((list: List, _: number) => (
+                    {userLists.map((list: List, index: number) => (
                         <MenuItem
                             key={list.id}
                             value={list.id}
+                            sx={{ justifyContent: "space-between" }}
                         >
                             {list.name}
+                            <IconButton value={index} aria-label="list_settings" onClick={handleListSettingsDialogOpen}>
+                                <SettingsIcon />
+                            </IconButton>
                         </MenuItem>
                     ))}
 
@@ -161,14 +169,15 @@ export function ListSelect(props: ListSelectProps) {
 
                     <Divider />
 
-                    <MenuItem key={CREATE_LIST_VALUE} value={CREATE_LIST_VALUE} onClick={handleNewListDialogOpen}>
+                    <MenuItem key={CREATE_LIST_VALUE} value={CREATE_LIST_VALUE} onClick={handleListDialogOpen}>
                         <AddIcon />
                         <ListItemText primary="New List" />
                     </MenuItem>
                 </Select>
             </FormControl>
 
-            <NewListDialog open={newListDialogOpen} onClose={handleNewListDialogClose} />
+            {!listBeingEdited && <ListDialog open={listDialogOpen} data={null} authData={authData} onClose={handleListDialogClose} />}
+            {listBeingEdited && <ListDialog open={listDialogOpen} data={listBeingEdited} authData={authData} onClose={handleListDialogClose} />}
         </div>
     )
 }
