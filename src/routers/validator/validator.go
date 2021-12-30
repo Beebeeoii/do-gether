@@ -29,10 +29,14 @@ func ValidateAuthDataFromHeader(header http.Header) error {
 	return nil
 }
 
-func HasListPermission(list interfaces.List, userId string) bool {
+func HasListReadWritePermission(list interfaces.List, userId string) bool {
 	if list.Private && list.Owner != userId && !utils.Contains(list.Members, userId) {
 		return false
 	}
 
 	return true
+}
+
+func HasListEditPermission(list interfaces.List, userId string) bool {
+	return list.Owner == userId
 }

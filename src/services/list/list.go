@@ -22,6 +22,26 @@ func CreateList(name string, ownerId string, private bool) (interfaces.List, err
 	return newList, execErr
 }
 
+func EditList(id string, name string, private bool) (interfaces.List, error) {
+	var updatedList interfaces.List
+	sqlCommand := "UPDATE lists set name = $1, private = $2 WHERE id = $3 RETURNING *;"
+
+	queryErr := db.Database.QueryRow(
+		sqlCommand,
+		name,
+		private,
+		id,
+	).Scan(
+		&updatedList.Id,
+		&updatedList.Name,
+		&updatedList.Owner,
+		&updatedList.Private,
+		pq.Array(&updatedList.Members),
+	)
+
+	return updatedList, queryErr
+}
+
 func RetrieveListsByUserId(ownerId string, userId string) ([]interfaces.BasicListData, error) {
 	var listsBasicData []interfaces.BasicListData
 	var sqlCommand string

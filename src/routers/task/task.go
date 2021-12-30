@@ -97,7 +97,7 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	if !validator.HasListPermission(list, userId) {
+	if !validator.HasListReadWritePermission(list, userId) {
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   fmt.Errorf("access denied").Error(),
@@ -180,7 +180,7 @@ func EditTask(c *gin.Context) {
 		return
 	}
 
-	if !validator.HasListPermission(list, userId) {
+	if !validator.HasListReadWritePermission(list, userId) {
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   fmt.Errorf("access denied").Error(),
@@ -276,7 +276,7 @@ func RetrieveTasksByListId(c *gin.Context) {
 		return
 	}
 
-	if !validator.HasListPermission(list, userId) {
+	if !validator.HasListReadWritePermission(list, userId) {
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   fmt.Errorf("access denied").Error(),
@@ -335,7 +335,7 @@ func RetrieveTagSuggestion(c *gin.Context) {
 		return
 	}
 
-	if !validator.HasListPermission(list, userId) {
+	if !validator.HasListReadWritePermission(list, userId) {
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   fmt.Errorf("access denied").Error(),
@@ -407,7 +407,7 @@ func ReorderTasks(c *gin.Context) {
 		return
 	}
 
-	if !validator.HasListPermission(list, userId) {
+	if !validator.HasListReadWritePermission(list, userId) {
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   fmt.Errorf("access denied").Error(),

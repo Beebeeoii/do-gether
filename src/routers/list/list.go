@@ -17,6 +17,12 @@ type createListBody struct {
 	Private bool   `json:"private"`
 }
 
+type editListBody struct {
+	Id      string `json:"id" validate:"min=1,max=20,required"`
+	Name    string `json:"name" validate:"min=1,max=20,required"`
+	Private bool   `json:"private"`
+}
+
 const (
 	USER_ID_PARAM_KEY = "userId"
 )
@@ -79,6 +85,78 @@ func CreateList(c *gin.Context) {
 			Error:   "",
 		},
 		Data: newList,
+	})
+}
+
+func EditList(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	var requestBody editListBody
+
+	reqBodyErr := c.BindJSON(&requestBody)
+	if reqBodyErr != nil {
+		log.Println(reqBodyErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqBodyErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(requestBody)
+	if validationErr != nil {
+		log.Println(validationErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader("id")
+
+	list, retrieveListErr := listService.RetrieveListById(requestBody.Id)
+	if retrieveListErr != nil {
+		log.Println(retrieveListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListErr.Error(),
+		})
+		return
+	}
+
+	if !validator.HasListEditPermission(list, userId) {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
+	updatedList, editListErr := listService.EditList(requestBody.Id, requestBody.Name, requestBody.Private)
+	if editListErr != nil {
+		log.Println(editListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   editListErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.EditListResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: updatedList,
 	})
 }
 

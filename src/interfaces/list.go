@@ -13,6 +13,11 @@ type CreateListResponse struct {
 	Data List `json:"data"`
 }
 
+type EditListResponse struct {
+	BaseResponse
+	Data List `json:"data"`
+}
+
 type BasicListData struct {
 	Id      string `json:"id"`
 	Name    string `json:"name"`

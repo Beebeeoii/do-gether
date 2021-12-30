@@ -26,6 +26,7 @@ func Init(address string) {
 	router.DELETE("/user/friend/deleteReq", user.RemoveFriendRequest)
 
 	router.POST("/list", list.CreateList)
+	router.POST("/list/edit", list.EditList)
 	router.GET("/list", list.RetrieveListsByUserId)
 	router.GET("/list/:id", list.RetrieveListById)
 
