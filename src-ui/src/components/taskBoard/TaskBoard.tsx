@@ -1,4 +1,4 @@
-import { Card, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Card, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { AuthData } from "../../interfaces/auth/Auth";
@@ -73,6 +73,13 @@ const stringToColour = (str: string) => {
     return hex
 }
 
+const priorityLevelColours: { [index: number]: string | null } = {
+    [-1]: "lightgrey",
+    1: 'green',
+    2: 'yellow',
+    3: 'red'
+}
+
 export function TaskBoard(props: TaskBoardProps) {
     const dispatch = useAppDispatch()
     const { authData, listId } = props
@@ -135,7 +142,7 @@ export function TaskBoard(props: TaskBoardProps) {
                                 <Draggable key={item.id} draggableId={item.id} index={index}>
                                     {(provided, snapshot) => (
                                         <Card
-                                            sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center' }}
+                                            sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center', position: 'relative' }}
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
                                             {...provided.dragHandleProps}
@@ -144,6 +151,7 @@ export function TaskBoard(props: TaskBoardProps) {
                                                 provided.draggableProps.style
                                             )}
                                         >
+                                            {item.priority != -1 && <Box sx={{position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: priorityLevelColours[item.priority], width: '4px'}}/>}
                                             <Stack direction={"column"} gap={2}>
                                                 <Typography variant="subtitle1" component="div">
                                                     {item.title}
