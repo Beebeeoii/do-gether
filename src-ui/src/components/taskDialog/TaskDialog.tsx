@@ -4,7 +4,7 @@ import MomentAdapter from '@mui/lab/AdapterMoment';
 import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
-import { Task, TaskData } from "../../interfaces/task/Task";
+import { Task } from "../../interfaces/task/Task";
 import { selectLists } from "../../services/list/listSplice";
 import { resetTags, retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
 import { DateTimePicker } from "@mui/lab";
@@ -45,7 +45,7 @@ export function TaskDialog(props: TaskDialogProps) {
     let [taskTitle, setTaskTitle] = useState<string>(data ? data.title : DEFAULT_TASK_TITLE_VALUE)
 
     const lists = useAppSelector(selectLists)
-    let [listId, setListId] = useState<string>(currentListId ? currentListId : DEFAULT_LIST_VALUE)
+    let [listId, setListId] = useState<string>(currentListId)
 
     const tagStatus = useAppSelector(selectTagStatus)
     const tagSuggestions = useAppSelector(selectTags)

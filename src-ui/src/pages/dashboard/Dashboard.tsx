@@ -35,7 +35,6 @@ export function Dashboard() {
         }
     }, [userStatus, dispatch])
 
-
     const [selectedList, setSelectedList] = useState<List | null>(null)
 
     const handleListChange = (list: List) => {
@@ -56,8 +55,8 @@ export function Dashboard() {
             <NavBar />
 
             <Stack direction="row" justifyContent="space-between">
-                <ListSelect authData={authData} userId={authData.id} onSelect={handleListChange}/>
- 
+                <ListSelect authData={authData} userId={authData.id} onSelect={handleListChange} />
+
                 <Fab color="primary" aria-label="addTask" onClick={handleTaskDialogOpen} variant="extended">
                     <AddTask sx={{ mr: 1 }} />
                     Add task
@@ -65,7 +64,7 @@ export function Dashboard() {
             </Stack>
 
             {selectedList && <TaskBoard authData={authData} listId={selectedList.id} />}
-            {selectedList && <TaskDialog open={taskDialogOpen} data={null} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
+            {taskDialogOpen && selectedList && <TaskDialog open={taskDialogOpen} data={null} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
         </div>
     )
 }
