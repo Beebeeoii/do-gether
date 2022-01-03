@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Chip, Dialog, DialogTitle, FormControlLabel, FormGroup, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, TextField } from "@mui/material";
+import { Autocomplete, Button, Chip, Dialog, DialogActions, DialogTitle, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, Tab, Tabs, TextField, Typography } from "@mui/material";
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MomentAdapter from '@mui/lab/AdapterMoment';
 import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
@@ -8,13 +8,45 @@ import { Task } from "../../interfaces/task/Task";
 import { selectLists } from "../../services/list/listSplice";
 import { resetTags, retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
 import { DateTimePicker } from "@mui/lab";
-import { PriorityHigh } from "@mui/icons-material";
-import CreateIcon from '@mui/icons-material/Create';
+import { Star } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import moment from "moment";
 import { CreateTaskRequest, EditTaskRequest, RetrieveTagsByListIdRequest } from "../../interfaces/task/TaskRequest";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { addTask, editTask } from "../../services/task/taskSplice";
+
+interface TabPanelProps {
+    children?: React.ReactNode
+    index: number
+    value: number
+}
+
+function TabPanel(props: TabPanelProps) {
+    const { children, value, index, ...other } = props
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ paddingTop: 2, paddingBottom: 3, paddingLeft: 3, paddingRight: 3, width: '500px' }}>
+                    {children}
+                </Box>
+            )}
+        </div>
+    )
+}
+
+function tabProps(index: number) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    }
+}
 
 export interface TaskDialogProps {
     open: boolean
@@ -29,14 +61,6 @@ const DEFAULT_LIST_VALUE = "defaultList"
 const DEFAULT_TAGS_SELECTED_VALUE: Array<string> = []
 const DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE = false
 const DEFAULT_PRIORITY_LEVEL_VALUE = -1
-const DEFAULT_HOVER_PRIORITY_LEVEL_VALUE = -1
-
-const priorityLevelLabels: { [index: number]: string | null } = {
-    [-1]: 'Unset',
-    1: 'Trivial',
-    2: 'Normal',
-    3: 'Urgent'
-}
 
 export function TaskDialog(props: TaskDialogProps) {
     const dispatch = useAppDispatch()
@@ -77,7 +101,6 @@ export function TaskDialog(props: TaskDialogProps) {
     const [plannedEnd, setPlannedEnd] = useState<Date | null>(data ? plannedEndActive ? moment.unix(data.plannedEnd).toDate() : null : plannedEndActive ? new Date() : null)
 
     const [priorityLevel, setPriorityLevel] = useState<number | null>(data ? data.priority : DEFAULT_PRIORITY_LEVEL_VALUE)
-    const [hoverPriorityLevel, setHoverPriorityLevel] = useState(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTaskTitle(event.target.value)
@@ -105,10 +128,6 @@ export function TaskDialog(props: TaskDialogProps) {
         } else {
             setPriorityLevel(priorityLevel)
         }
-    }
-
-    const handleHoverPriorityLevelChange = (_: SyntheticEvent<Element, Event>, newHoverPriorityLevel: number) => {
-        setHoverPriorityLevel(newHoverPriorityLevel)
     }
 
     const handleCreateTask = () => {
@@ -156,9 +175,14 @@ export function TaskDialog(props: TaskDialogProps) {
         setTagsSuggestionsOpen(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
         setDueDate(new Date())
         setPriorityLevel(DEFAULT_PRIORITY_LEVEL_VALUE)
-        setHoverPriorityLevel(DEFAULT_HOVER_PRIORITY_LEVEL_VALUE)
         dispatch(resetTags())
     }
+
+    const [tabValue, setTabValue] = useState(0)
+
+    const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+        setTabValue(newValue)
+    };
 
     return (
         <Dialog onClose={handleDialogClose} open={open}>
@@ -166,143 +190,163 @@ export function TaskDialog(props: TaskDialogProps) {
                 {data ? "Edit a Task" : "Create a task"}
             </DialogTitle>
 
-            <TextField
-                id="taskTitle"
-                label="Task"
-                value={taskTitle}
-                onChange={handleTitleChange}
-                variant="standard"
-            />
+            <Box sx={{ padding: '4px' }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
+                        <Tab label="Main" {...tabProps(0)} />
+                        <Tab label="Extra" {...tabProps(1)} />
+                    </Tabs>
+                </Box>
 
-            <Select
-                labelId="listSelectorLabel"
-                id="listSelector"
-                value={listId}
-                onChange={handleListChange}
-                autoWidth
-                label="List"
-            >
-                <MenuItem key={DEFAULT_LIST_VALUE} value={DEFAULT_LIST_VALUE} disabled>Choose your list</MenuItem>
-                {lists.map((list: List, _: number) => (
-                    <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
-                ))}
-            </Select>
-
-            <Autocomplete
-                multiple
-                limitTags={3}
-                id="tags"
-                open={tagsSuggestionsOpen}
-                onOpen={() => {
-                    setTagsSuggestionsOpen(true)
-                }}
-                onClose={() => {
-                    setTagsSuggestionsOpen(false)
-                }}
-                freeSolo
-                options={tagSuggestions}
-                value={tagsSelected}
-                onChange={(_, tagsSelected: Array<string>) => {
-                    setTagsSelected(tagsSelected)
-                }}
-                style={{ width: 500 }}
-                getOptionLabel={(option) => option}
-                renderTags={(value: readonly string[], getTagProps) =>
-                    value.map((option: string, index: number) => (
-                        <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-                    ))
-                }
-                renderInput={(params) => (
-                    <TextField {...params} label="Tags" placeholder="Add a tag" />
-                )}
-            />
-
-            <Stack direction={"column"} spacing={3}>
-                <FormGroup>
-                    <FormControlLabel control={<Switch checked={dueDateActive} value={dueDateActive} onChange={handleDueDateActiveChange} />} label="Include due date" />
-                </FormGroup>
-
-                {dueDateActive && <Stack direction={"row"} spacing={3}>
-                    <LocalizationProvider dateAdapter={MomentAdapter}>
-                        <DateTimePicker
-                            renderInput={(props) => <TextField {...props} />}
-                            label="Due date"
-                            value={dueDate}
-                            onChange={(dateSelected) => {
-                                setDueDate(dateSelected)
-                            }}
+                <TabPanel value={tabValue} index={0}>
+                    <Stack direction={"column"} gap={2}>
+                        <TextField
+                            id="taskTitle"
+                            label="Task"
+                            value={taskTitle}
+                            onChange={handleTitleChange}
+                            variant="standard"
                         />
-                    </LocalizationProvider>
-                </Stack>}
-            </Stack>
 
-            <Stack direction={"column"} spacing={3}>
-                <FormGroup>
-                    <FormControlLabel control={<Switch value={plannedStartActive} onChange={handlePlannedStartActiveChange} />} label="Include date to start" />
-                </FormGroup>
+                        <Stack direction={'row'} justifyContent={'space-between'} gap={4}>
+                            <FormControl sx={{ flexGrow: 1 }}>
+                                <InputLabel id="listSelectorLabel">List</InputLabel>
+                                <Select
+                                    labelId="listSelectorLabel"
+                                    id="listSelector"
+                                    value={listId}
+                                    onChange={handleListChange}
+                                    autoWidth
+                                    label="List"
+                                >
+                                    <MenuItem key={DEFAULT_LIST_VALUE} value={DEFAULT_LIST_VALUE} disabled>Choose your list</MenuItem>
+                                    {lists.map((list: List, _: number) => (
+                                        <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
 
-                {plannedStartActive && <Stack direction={"row"} spacing={3}>
-                    <LocalizationProvider dateAdapter={MomentAdapter}>
-                        <DateTimePicker
-                            renderInput={(props) => <TextField {...props} />}
-                            label="Planned start date"
-                            value={plannedStart}
-                            onChange={(dateSelected) => {
-                                setPlannedStart(dateSelected)
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: "column"
+                                }}
+                            >
+                                <Typography>Priority</Typography>
+
+                                <Rating
+                                    name="priority"
+                                    value={priorityLevel}
+                                    precision={1}
+                                    max={3}
+                                    onChange={handlePriorityLevelChange}
+                                    icon={<Star fontSize="inherit" />}
+                                    emptyIcon={<Star style={{ opacity: 0.50 }} fontSize="inherit" />}
+                                />
+                            </Box>
+                        </Stack>
+
+                        <Autocomplete
+                            multiple
+                            limitTags={3}
+                            id="tags"
+                            open={tagsSuggestionsOpen}
+                            onOpen={() => {
+                                setTagsSuggestionsOpen(true)
                             }}
-                        />
-                    </LocalizationProvider>
-                </Stack>}
-            </Stack>
-
-            <Stack direction={"column"} spacing={3}>
-                <FormGroup>
-                    <FormControlLabel control={<Switch value={plannedEndActive} onChange={handlePlannedEndActiveChange} />} label="Include end date" />
-                </FormGroup>
-
-                {plannedEndActive && <Stack direction={"row"} spacing={3}>
-                    <LocalizationProvider dateAdapter={MomentAdapter}>
-                        <DateTimePicker
-                            renderInput={(props) => <TextField {...props} />}
-                            label="Planned end date"
-                            value={plannedEnd}
-                            onChange={(dateSelected) => {
-                                setPlannedEnd(dateSelected)
+                            onClose={() => {
+                                setTagsSuggestionsOpen(false)
                             }}
+                            freeSolo
+                            options={tagSuggestions}
+                            value={tagsSelected}
+                            onChange={(_, tagsSelected: Array<string>) => {
+                                setTagsSelected(tagsSelected)
+                            }}
+                            getOptionLabel={(option) => option}
+                            renderTags={(value: readonly string[], getTagProps) =>
+                                value.map((option: string, index: number) => (
+                                    <Chip variant="outlined" label={option} {...getTagProps({ index })} />
+                                ))
+                            }
+                            renderInput={(params) => (
+                                <TextField {...params} label="Tags" placeholder="Add a tag" />
+                            )}
                         />
-                    </LocalizationProvider>
-                </Stack>}
-            </Stack>
+                    </Stack>
+                </TabPanel>
 
-            <Box
-                sx={{
-                    width: 200,
-                    display: 'flex',
-                    alignItems: 'center',
-                }}
-            >
-                <Rating
-                    name="priority"
-                    value={priorityLevel}
-                    precision={1}
-                    max={3}
-                    onChange={handlePriorityLevelChange}
-                    onChangeActive={handleHoverPriorityLevelChange}
-                    icon={<PriorityHigh fontSize="inherit" />}
-                    emptyIcon={<PriorityHigh style={{ opacity: 0.55 }} fontSize="inherit" />}
-                />
-                {priorityLevel !== null && (
-                    <Box sx={{ ml: 2 }}>{priorityLevelLabels[hoverPriorityLevel !== -1 ? hoverPriorityLevel : priorityLevel]}</Box>
-                )}
+                <TabPanel value={tabValue} index={1}>
+                    <Stack direction={"column"} gap={2}>
+                        <Stack direction={"row"} justifyContent={"space-between"}>
+                            <FormGroup sx={{ justifyContent: "center" }}>
+                                <FormControlLabel control={<Switch checked={dueDateActive} value={dueDateActive} onChange={handleDueDateActiveChange} />} label="Include due date" />
+                            </FormGroup>
+
+                            {dueDateActive && <LocalizationProvider dateAdapter={MomentAdapter}>
+                                <DateTimePicker
+                                    renderInput={(props) => <TextField {...props} />}
+                                    label="Due date"
+                                    value={dueDate}
+                                    onChange={(dateSelected) => {
+                                        setDueDate(dateSelected)
+                                    }}
+                                />
+                            </LocalizationProvider>}
+                        </Stack>
+
+                        <Stack direction={"row"} justifyContent={"space-between"}>
+                            <FormGroup sx={{ justifyContent: "center" }}>
+                                <FormControlLabel control={<Switch value={plannedStartActive} onChange={handlePlannedStartActiveChange} />} label="Include date to start" />
+                            </FormGroup>
+
+                            {plannedStartActive && <LocalizationProvider dateAdapter={MomentAdapter}>
+                                <DateTimePicker
+                                    renderInput={(props) => <TextField {...props} />}
+                                    label="Planned start date"
+                                    value={plannedStart}
+                                    onChange={(dateSelected) => {
+                                        setPlannedStart(dateSelected)
+                                    }}
+                                />
+                            </LocalizationProvider>}
+                        </Stack>
+
+                        <Stack direction={"row"} justifyContent={"space-between"}>
+                            <FormGroup sx={{ justifyContent: "center" }}>
+                                <FormControlLabel control={<Switch value={plannedEndActive} onChange={handlePlannedEndActiveChange} />} label="Include end date" />
+                            </FormGroup>
+
+                            {plannedEndActive && <LocalizationProvider dateAdapter={MomentAdapter}>
+                                <DateTimePicker
+                                    renderInput={(props) => <TextField {...props} />}
+                                    label="Planned end date"
+                                    value={plannedEnd}
+                                    onChange={(dateSelected) => {
+                                        setPlannedEnd(dateSelected)
+                                    }}
+                                />
+                            </LocalizationProvider>}
+                        </Stack>
+                    </Stack>
+                </TabPanel>
             </Box>
 
-            <Button
-                variant="contained"
-                endIcon={<CreateIcon />}
-                onClick={handleCreateTask}
-            >
-                {data ? "Edit Task" : "Create Task"}
-            </Button>
+            <DialogActions>
+                {data && <Button color="error">
+                    Delete
+                </Button>}
+
+                <div style={{ flex: '1 0 0' }} />
+
+                <Button onClick={handleDialogClose}>
+                    Cancel
+                </Button>
+
+                <Button variant="contained" onClick={handleCreateTask} autoFocus>
+                    {data ? "Edit Task" : "Create Task"}
+                </Button>
+            </DialogActions>
         </Dialog >
     )
 }
