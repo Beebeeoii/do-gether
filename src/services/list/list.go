@@ -42,6 +42,24 @@ func EditList(id string, name string, private bool) (interfaces.List, error) {
 	return updatedList, queryErr
 }
 
+func DeleteList(listId string) (interfaces.List, error) {
+	var deletedList interfaces.List
+	sqlCommand := "DELETE FROM lists WHERE id = $1 RETURNING *;"
+
+	queryErr := db.Database.QueryRow(
+		sqlCommand,
+		listId,
+	).Scan(
+		&deletedList.Id,
+		&deletedList.Name,
+		&deletedList.Owner,
+		&deletedList.Private,
+		pq.Array(&deletedList.Members),
+	)
+
+	return deletedList, queryErr
+}
+
 func RetrieveListsByUserId(ownerId string, userId string) ([]interfaces.BasicListData, error) {
 	var listsBasicData []interfaces.BasicListData
 	var sqlCommand string
@@ -73,6 +91,20 @@ func RetrieveListsByUserId(ownerId string, userId string) ([]interfaces.BasicLis
 	}
 
 	return listsBasicData, nil
+}
+
+func RetrieveOwnerIdByListId(listId string) (string, error) {
+	var ownerId string
+
+	sqlCommand := "SELECT owner FROM lists WHERE id = $1"
+
+	queryErr := db.Database.QueryRow(sqlCommand, listId).Scan(&ownerId)
+
+	if queryErr != nil {
+		return ownerId, queryErr
+	}
+
+	return ownerId, nil
 }
 
 func RetrieveListById(listId string) (interfaces.List, error) {

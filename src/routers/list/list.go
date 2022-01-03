@@ -23,6 +23,10 @@ type editListBody struct {
 	Private bool   `json:"private"`
 }
 
+type deleteListParams struct {
+	Id string `form:"listId" validate:"required,min=1,max=20"`
+}
+
 const (
 	USER_ID_PARAM_KEY = "userId"
 )
@@ -157,6 +161,78 @@ func EditList(c *gin.Context) {
 			Error:   "",
 		},
 		Data: updatedList,
+	})
+}
+
+func DeleteList(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	var reqParams deleteListParams
+
+	reqParamsErr := c.BindQuery(&reqParams)
+	if reqParamsErr != nil {
+		log.Println(reqParamsErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqParamsErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		log.Println(validationErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader("id")
+
+	ownerId, retrieveOwnerIdErr := listService.RetrieveOwnerIdByListId(reqParams.Id)
+	if retrieveOwnerIdErr != nil {
+		log.Println(retrieveOwnerIdErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveOwnerIdErr.Error(),
+		})
+		return
+	}
+
+	if ownerId != userId {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
+	deletedList, deleteListErr := listService.DeleteList(reqParams.Id)
+	if deleteListErr != nil {
+		log.Println(deleteListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   deleteListErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.DeleteListResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: deletedList,
 	})
 }
 
