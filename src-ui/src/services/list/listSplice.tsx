@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { List } from '../../interfaces/list/List';
-import { createList, deleteExistingList, editExistingList, fetchListsByUserId } from '../../adapters/list/list';
+import { createList, deleteExistingList, editExistingList, fetchListMemberUsernames, fetchListsByUserId } from '../../adapters/list/list';
 import { AxiosError } from 'axios';
-import { CreateListRequest, DeleteListRequest, EditListRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
+import { CreateListRequest, DeleteListRequest, EditListRequest, RetrieveListMemberUsernamesRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
 
 export interface ListState {
     lists: Array<List>
@@ -59,6 +59,19 @@ export const deleteList = createAsyncThunk("list/delete", async (listRequest: De
 export const retrieveAllLists = createAsyncThunk("list/fetchAll", async (listRequest: RetrieveListsByUserIdRequest, { rejectWithValue }) => {
     try {
         const response = await fetchListsByUserId(listRequest.authData, listRequest.userId)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const retrieveListMemberUsernames = createAsyncThunk("list/fetchMemberUsernames", async (listRequest: RetrieveListMemberUsernamesRequest, { rejectWithValue }) => {
+    try {
+        const response = await fetchListMemberUsernames(listRequest.authData, listRequest.listId)
         return response.data
     } catch (err) {
         let error = err as AxiosError

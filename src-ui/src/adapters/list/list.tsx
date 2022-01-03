@@ -57,3 +57,16 @@ export function fetchListsByUserId(authData: AuthData, userId: string) {
 
     return sendGet("/list", params, headers)
 }
+
+export function fetchListMemberUsernames(authData: AuthData, listId: string) {
+    let headers = {
+        "Authorization": `Bearer ${authData.token}`,
+        "id": authData.id
+    }
+
+    let params = {
+        "listId": listId
+    }
+
+    return sendGet("/list/members", params, headers)
+}

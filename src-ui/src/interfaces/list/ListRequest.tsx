@@ -23,3 +23,8 @@ export interface RetrieveListsByUserIdRequest {
     authData: AuthData
     userId: string
 }
+
+export interface RetrieveListMemberUsernamesRequest {
+    authData: AuthData
+    listId: string
+}

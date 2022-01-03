@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
 import "./Dashboard.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
-import { Fab, Stack } from "@mui/material";
+import { Avatar, AvatarGroup, Fab, Stack, Tooltip } from "@mui/material";
 import { AddTask } from "@mui/icons-material";
 import { List } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
@@ -12,6 +12,7 @@ import { AuthData } from "../../interfaces/auth/Auth";
 import { ListSelect } from "../../components/listSelect/ListSelect";
 import { TaskBoard } from "../../components/taskBoard/TaskBoard";
 import { TaskDialog } from "../../components/taskDialog/TaskDialog";
+import { ListMemberAvatar } from "../../components/listMemberAvatars/ListMemberAvatars";
 
 export function Dashboard() {
     const dispatch = useAppDispatch()
@@ -56,6 +57,7 @@ export function Dashboard() {
 
             <Stack direction="row" justifyContent="space-between">
                 <ListSelect authData={authData} userId={authData.id} onSelect={handleListChange} />
+                {selectedList && <ListMemberAvatar authData={authData} listId={selectedList.id}/>}
 
                 <Fab color="primary" aria-label="addTask" onClick={handleTaskDialogOpen} variant="extended">
                     <AddTask sx={{ mr: 1 }} />
