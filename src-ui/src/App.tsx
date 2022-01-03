@@ -6,6 +6,7 @@ import { Register } from './pages/register/Register';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { useAppSelector } from './app/hooks';
 import { selectId, selectToken } from './services/auth/authSplice';
+import { Friends } from './pages/friends/Friends';
 
 function App() {
     const token = useAppSelector(selectToken)
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/login" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Login />}></Route>
                     <Route path="/register" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Register />}></Route>
                     <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />}></Route>
+                    <Route path="/friends" element={isLoggedIn ? <Friends /> : <Navigate to="/login" />}></Route>
                 </Routes>
             </Router>
         </div>

@@ -6,6 +6,10 @@
     min-height: 100px;
 }
 
+.logo {
+    cursor: pointer;
+}
+
 .menu {
     display: flex;
     flex-direction: row;

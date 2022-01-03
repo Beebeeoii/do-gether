@@ -1,4 +1,4 @@
-import { Logout, Settings } from '@mui/icons-material'
+import { Logout, Settings, People } from '@mui/icons-material'
 import { Avatar, Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material'
 import Button from '@mui/material/Button'
 import { useState } from 'react'
@@ -35,7 +35,7 @@ export function NavBar() {
 
     return (
         <nav className="navBar">
-            <h1>
+            <h1 className='logo' onClick={() => navigate("/dashboard")}>
                 Do-gether
             </h1>
 
@@ -47,6 +47,7 @@ export function NavBar() {
             {isLoggedIn && <IconButton onClick={handleMenuClick} size="small" sx={{ ml: 2 }}>
                 <Avatar {...stringAvatar(username)} />
             </IconButton>}
+
             <Menu
                 anchorEl={anchorEl}
                 open={isMenuOpen}
@@ -81,13 +82,24 @@ export function NavBar() {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
+                <MenuItem onClick={() => {
+                    navigate("/friends")
+                }}>
+                    <ListItemIcon>
+                        <People fontSize="small" />
+                    </ListItemIcon>
+                    Friends
+                </MenuItem>
+
                 <MenuItem>
                     <ListItemIcon>
                         <Settings fontSize="small" />
                     </ListItemIcon>
                     Settings
                 </MenuItem>
+
                 <Divider />
+
                 <MenuItem onClick={() => {
                     dispatch(logout())
                     dispatch(resetLists())
