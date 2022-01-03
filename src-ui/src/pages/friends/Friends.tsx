@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
-import "./Friends.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
-import { List } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
 import { selectId, selectToken } from "../../services/auth/authSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
-import { Divider, Stack, TextField, Typography } from "@mui/material";
+import { Box, Divider, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { Search } from "@mui/icons-material";
+import { SearchUserDialog } from "../../components/searchUserDialog/SearchUserDialog";
 
 export function Friends() {
     const dispatch = useAppDispatch()
@@ -31,29 +31,36 @@ export function Friends() {
         }
     }, [userStatus, dispatch])
 
-    const [selectedList, setSelectedList] = useState<List | null>(null)
-
-    const handleListChange = (list: List) => {
-        setSelectedList(list)
+    const [usernameInput, setUsernameInput] = useState<string>("")
+    const handleUsernameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUsernameInput(event.target.value)
     }
 
-    const [taskDialogOpen, setTaskDialogOpen] = useState<boolean>(false)
-    const handleTaskDialogOpen = () => {
-        setTaskDialogOpen(true)
+    const [searchUserDialogOpen, setSearchUserDialogOpen] = useState<boolean>(false)
+
+    const handleSearchUserDialogOpen = () => {
+        setSearchUserDialogOpen(true)
     }
 
-    const handleTaskDialogClose = () => {
-        setTaskDialogOpen(false)
+    const handleSearchUserDialogClose = () => {
+        setSearchUserDialogOpen(false)
     }
 
     return (
-        <div className="dashboard">
+        <Box sx={{ width: '1280px' }}>
             <NavBar />
 
             <TextField
                 id="searchFriends"
-                label="Search Friends"
+                label="Search Users"
                 variant="outlined"
+                value={usernameInput}
+                onChange={handleUsernameInputChange}
+                InputProps={{
+                    endAdornment: <IconButton type="submit" sx={{ p: '10px' }} aria-label="search" onClick={handleSearchUserDialogOpen}>
+                        <Search />
+                    </IconButton>
+                }}
             />
 
             <Stack direction={"column"}>
@@ -63,19 +70,7 @@ export function Friends() {
                 <Divider />
             </Stack>
 
-            <Stack direction={"column"}>
-                <Typography>
-                    Pending Friend Requests
-                </Typography>
-                <Divider />
-            </Stack>
-
-            <Stack direction={"column"}>
-                <Typography>
-                    Incoming Friend Requests
-                </Typography>
-                <Divider />
-            </Stack>
-        </div>
+            <SearchUserDialog authData={authData} open={searchUserDialogOpen} username={usernameInput} onClose={handleSearchUserDialogClose}/>
+        </Box>
     )
 }
