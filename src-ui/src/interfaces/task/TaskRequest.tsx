@@ -25,6 +25,11 @@ export interface EditTaskRequest {
     plannedEnd: number,
 }
 
+export interface DeleteTaskRequest {
+    authData: AuthData
+    id: string
+}
+
 export interface RetrieveTasksByListIdRequest {
     authData: AuthData
     listId: string

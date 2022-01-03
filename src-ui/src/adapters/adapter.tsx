@@ -1,9 +1,18 @@
-import axios, { AxiosRequestHeaders } from "axios";
+import axios from "axios";
 
 const BASE_URL = "http://localhost:8080"
 
 export function sendGet(route: string, params?: object, headers?: object) {
     return axios.get(`${BASE_URL}${route}`, {
+        params: params,
+        headers: {
+            ...headers
+        }
+    })
+}
+
+export function sendDelete(route: string, params?: object, headers?: object) {
+    return axios.delete(`${BASE_URL}${route}`, {
         params: params,
         headers: {
             ...headers

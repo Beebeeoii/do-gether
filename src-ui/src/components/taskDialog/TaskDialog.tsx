@@ -11,9 +11,9 @@ import { DateTimePicker } from "@mui/lab";
 import { Star } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import { CreateTaskRequest, EditTaskRequest, RetrieveTagsByListIdRequest } from "../../interfaces/task/TaskRequest";
+import { CreateTaskRequest, DeleteTaskRequest, EditTaskRequest, RetrieveTagsByListIdRequest } from "../../interfaces/task/TaskRequest";
 import { AuthData } from "../../interfaces/auth/Auth";
-import { addTask, editTask } from "../../services/task/taskSplice";
+import { addTask, deleteTask, editTask } from "../../services/task/taskSplice";
 
 interface TabPanelProps {
     children?: ReactNode
@@ -159,6 +159,18 @@ export function TaskDialog(props: TaskDialogProps) {
             dispatch(addTask(createTaskRequest))
         }
 
+        onClose()
+        resetState()
+    }
+
+    const handleDeleteTask = () => {
+        if (data) {
+            let deleteTaskRequest: DeleteTaskRequest = {
+                authData: authData,
+                id: data.id
+            }
+            dispatch(deleteTask(deleteTaskRequest))
+        }
         onClose()
         resetState()
     }
@@ -333,7 +345,7 @@ export function TaskDialog(props: TaskDialogProps) {
             </Box>
 
             <DialogActions>
-                {data && <Button color="error">
+                {data && <Button color="error" onClick={handleDeleteTask}>
                     Delete
                 </Button>}
 

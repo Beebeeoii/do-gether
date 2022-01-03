@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { Task, TaskReorderData } from '../../interfaces/task/Task';
-import { createTask, editExistingTask, fetchTasks, reorderList } from '../../adapters/task/task';
+import { createTask, editExistingTask, deleteExistingTask, fetchTasks, reorderList } from '../../adapters/task/task';
 import { AxiosError } from 'axios';
-import { CreateTaskRequest, EditTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
+import { CreateTaskRequest, DeleteTaskRequest, EditTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
 
 export interface TaskState {
     tasks: Array<Task>
@@ -35,6 +35,19 @@ export const addTask = createAsyncThunk("task/create", async (taskRequest: Creat
 export const editTask = createAsyncThunk("task/edit", async (taskRequest: EditTaskRequest, { rejectWithValue }) => {
     try {
         const response = await editExistingTask(taskRequest)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const deleteTask = createAsyncThunk("task/delete", async (taskRequest: DeleteTaskRequest, { rejectWithValue }) => {
+    try {
+        const response = await deleteExistingTask(taskRequest.authData, taskRequest.id)
         return response.data
     } catch (err) {
         let error = err as AxiosError
@@ -135,6 +148,20 @@ export const taskSlice = createSlice({
                         }
 
                         updatedTasks.push(updatedTask)
+                    }
+                }
+
+                state.tasks = updatedTasks
+            }
+            state.status = "succeeded"
+        })
+
+        builder.addCase(deleteTask.fulfilled, (state, action) => {
+            if (action.payload.success && state.listId == action.payload.data.listId) {
+                let updatedTasks: Array<Task> = []
+                for (let task of state.tasks) {
+                    if (task.id !== action.payload.data.id) {
+                        updatedTasks.push(task)
                     }
                 }
 
