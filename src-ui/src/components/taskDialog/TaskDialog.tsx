@@ -1,7 +1,7 @@
 import { Autocomplete, Button, Chip, Dialog, DialogActions, DialogTitle, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, Tab, Tabs, TextField, Typography } from "@mui/material";
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MomentAdapter from '@mui/lab/AdapterMoment';
-import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
+import { ChangeEvent, ReactNode, SyntheticEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
 import { Task } from "../../interfaces/task/Task";
@@ -16,7 +16,7 @@ import { AuthData } from "../../interfaces/auth/Auth";
 import { addTask, editTask } from "../../services/task/taskSplice";
 
 interface TabPanelProps {
-    children?: React.ReactNode
+    children?: ReactNode
     index: number
     value: number
 }
