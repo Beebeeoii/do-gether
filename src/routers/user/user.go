@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -180,6 +181,15 @@ func SendFriendReq(c *gin.Context) {
 
 	recipientId := requestBody.Id
 	senderId := c.GetHeader("id")
+
+	if recipientId == senderId {
+		log.Println(recipientId, senderId)
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("you cannt send yourself a friend request").Error(),
+		})
+		return
+	}
 
 	sendReqErr := userService.SendFriendRequest(senderId, recipientId)
 	if sendReqErr != nil {
