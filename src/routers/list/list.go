@@ -30,6 +30,7 @@ type deleteListParams struct {
 
 const (
 	USER_ID_PARAM_KEY = "userId"
+	LIST_ID_PARAM_KEY = "listId"
 )
 
 func CreateList(c *gin.Context) {
@@ -285,6 +286,65 @@ func RetrieveListsByUserId(c *gin.Context) {
 			Error:   "",
 		},
 		Data: lists,
+	})
+}
+
+func RetrieveListMemberUsernames(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	reqParams := c.Request.URL.Query()
+	listId := reqParams.Get(LIST_ID_PARAM_KEY)
+	if listId == "" {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("invalid listId provided").Error(),
+		})
+		return
+	}
+	userId := c.GetHeader("id")
+
+	list, retrieveListErr := listService.RetrieveListById(listId)
+	if retrieveListErr != nil {
+		log.Println(retrieveListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListErr.Error(),
+		})
+		return
+	}
+
+	if !validator.HasListReadWritePermission(list, userId) {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
+	memberUsernames, retrieveMemberUsernamesErr := listService.RetrieveMemberUsernamesFromMemberIds(append(list.Members, list.Owner))
+	if retrieveMemberUsernamesErr != nil {
+		log.Println(retrieveMemberUsernamesErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveMemberUsernamesErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.RetrieveListMemberUsernamesResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: memberUsernames,
 	})
 }
 

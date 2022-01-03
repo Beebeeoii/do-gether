@@ -39,3 +39,8 @@ type RetrieveListsResponse struct {
 	BaseResponse
 	Data []BasicListData `json:"data"`
 }
+
+type RetrieveListMemberUsernamesResponse struct {
+	BaseResponse
+	Data []string `json:"data"`
+}

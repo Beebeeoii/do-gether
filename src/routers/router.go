@@ -29,6 +29,7 @@ func Init(address string) {
 	router.DELETE("/list", list.DeleteList)
 	router.POST("/list/edit", list.EditList)
 	router.GET("/list", list.RetrieveListsByUserId)
+	router.GET("/list/members", list.RetrieveListMemberUsernames)
 	router.GET("/list/:id", list.RetrieveListById)
 
 	router.POST("/task", task.CreateTask)

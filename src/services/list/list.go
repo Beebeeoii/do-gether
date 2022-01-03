@@ -93,6 +93,25 @@ func RetrieveListsByUserId(ownerId string, userId string) ([]interfaces.BasicLis
 	return listsBasicData, nil
 }
 
+func RetrieveMemberUsernamesFromMemberIds(memberIds []string) ([]string, error) {
+	var memberUsernames []string
+
+	memberUsernamesQueryCommand := "SELECT username FROM users WHERE id = $1"
+
+	for _, memberId := range memberIds {
+		var memberUsername string
+
+		memberUsernamesQueryErr := db.Database.QueryRow(memberUsernamesQueryCommand, memberId).Scan(&memberUsername)
+		if memberUsernamesQueryErr != nil {
+			return memberUsernames, memberUsernamesQueryErr
+		}
+
+		memberUsernames = append(memberUsernames, memberUsername)
+	}
+
+	return memberUsernames, nil
+}
+
 func RetrieveOwnerIdByListId(listId string) (string, error) {
 	var ownerId string
 
