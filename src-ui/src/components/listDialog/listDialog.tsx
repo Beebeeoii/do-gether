@@ -1,7 +1,6 @@
-import { Button, Checkbox, Dialog, DialogTitle, FormControlLabel, TextField } from "@mui/material";
+import { Button, Checkbox, Dialog, DialogActions, DialogTitle, FormControlLabel, Stack, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { List } from "../../interfaces/list/List";
-import CreateIcon from '@mui/icons-material/Create';
 import { AuthData } from "../../interfaces/auth/Auth";
 import { CreateListRequest, EditListRequest } from "../../interfaces/list/ListRequest";
 import { addList, editList } from "../../services/list/listSplice";
@@ -56,7 +55,7 @@ export function ListDialog(props: ListDialogProps) {
                 onClose(value.payload.data.id)
             })
         }
-        
+
         resetState()
     }
 
@@ -73,27 +72,32 @@ export function ListDialog(props: ListDialogProps) {
     return (
         <Dialog onClose={handleDialogClose} open={open}>
             <DialogTitle>
-                {data ? "Edit list": "Create a List"}
+                {data ? "Edit list" : "Create a list"}
             </DialogTitle>
 
-            <TextField
-                id="taskTitle"
-                label="List Name"
-                value={listName}
-                onChange={handleListNameChange}
-                variant="outlined"
-            />
+            <Stack direction={'column'} gap={2} sx={{ width: '300px', padding: 2 }}>
+                <TextField
+                    id="taskTitle"
+                    label="List Name"
+                    value={listName}
+                    onChange={handleListNameChange}
+                    variant="outlined"
+                />
 
-            <FormControlLabel control={<Checkbox checked={isPrivate} onChange={handleCheckboxChange} />} label="Private" />
+                <Tooltip title="Private lists do not appear on your profile page when another user searches for you" placement="right" arrow>
+                    <FormControlLabel control={<Checkbox checked={isPrivate} onChange={handleCheckboxChange} />} label="Private" />
+                </Tooltip>
+            </Stack>
 
-            <Button
-                variant="contained"
-                endIcon={<CreateIcon />}
-                onClick={handleCreateNewList}
-            >
-                {data ? "Edit list" : "Create List"}
-            </Button>
+            <DialogActions>
+                <Button onClick={handleDialogClose}>
+                    Cancel
+                </Button>
 
+                <Button variant="contained" onClick={handleCreateNewList} autoFocus>
+                    {data ? "Edit list" : "Create List"}
+                </Button>
+            </DialogActions>
         </Dialog >
     )
 }
