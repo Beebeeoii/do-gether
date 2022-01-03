@@ -82,6 +82,7 @@ export function ListDialog(props: ListDialogProps) {
                     value={listName}
                     onChange={handleListNameChange}
                     variant="outlined"
+                    autoFocus
                 />
 
                 <Tooltip title="Private lists do not appear on your profile page when another user searches for you" placement="right" arrow>
@@ -94,7 +95,7 @@ export function ListDialog(props: ListDialogProps) {
                     Cancel
                 </Button>
 
-                <Button variant="contained" onClick={handleCreateNewList} autoFocus>
+                <Button variant="contained" onClick={handleCreateNewList}>
                     {data ? "Edit list" : "Create List"}
                 </Button>
             </DialogActions>

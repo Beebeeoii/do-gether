@@ -218,6 +218,7 @@ export function TaskDialog(props: TaskDialogProps) {
                             value={taskTitle}
                             onChange={handleTitleChange}
                             variant="standard"
+                            autoFocus
                         />
 
                         <Stack direction={'row'} justifyContent={'space-between'} gap={4}>
@@ -355,7 +356,7 @@ export function TaskDialog(props: TaskDialogProps) {
                     Cancel
                 </Button>
 
-                <Button variant="contained" onClick={handleCreateTask} autoFocus>
+                <Button variant="contained" onClick={handleCreateTask}>
                     {data ? "Edit Task" : "Create Task"}
                 </Button>
             </DialogActions>
