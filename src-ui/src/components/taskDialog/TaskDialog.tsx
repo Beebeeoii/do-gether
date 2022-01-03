@@ -26,10 +26,10 @@ function TabPanel(props: TabPanelProps) {
 
     return (
         <div
-            role="tabpanel"
+            role="tabPanel"
             hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
+            id={`tabPanel-${index}`}
+            aria-labelledby={`tab-${index}`}
             {...other}
         >
             {value === index && (
@@ -43,8 +43,8 @@ function TabPanel(props: TabPanelProps) {
 
 function tabProps(index: number) {
     return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
+        id: `tab-${index}`,
+        'aria-controls': `tabPanel-${index}`,
     }
 }
 
