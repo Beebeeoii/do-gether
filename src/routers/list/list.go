@@ -8,6 +8,7 @@ import (
 	"github.com/beebeeoii/do-gether/interfaces"
 	validator "github.com/beebeeoii/do-gether/routers/validator"
 	listService "github.com/beebeeoii/do-gether/services/list"
+	taskService "github.com/beebeeoii/do-gether/services/task"
 	"github.com/gin-gonic/gin"
 )
 
@@ -223,6 +224,16 @@ func DeleteList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   deleteListErr.Error(),
+		})
+		return
+	}
+
+	deleteTasksErr := taskService.DeleteTasksFromList(reqParams.Id)
+	if deleteTasksErr != nil {
+		log.Println(deleteTasksErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   deleteTasksErr.Error(),
 		})
 		return
 	}

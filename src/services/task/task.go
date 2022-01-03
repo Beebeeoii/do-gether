@@ -104,6 +104,17 @@ func DeleteTask(taskId string) (interfaces.Task, error) {
 	return deletedTask, queryErr
 }
 
+func DeleteTasksFromList(listId string) error {
+	sqlCommand := "DELETE FROM tasks WHERE \"listId\" = $1 RETURNING *;"
+
+	_, queryErr := db.Database.Exec(sqlCommand, listId)
+	if queryErr != nil {
+		return queryErr
+	}
+
+	return nil
+}
+
 func RetrieveTasksByListId(listId string) ([]interfaces.Task, error) {
 	var tasks []interfaces.Task
 	sqlCommand := "SELECT * FROM tasks WHERE \"listId\" = $1"
