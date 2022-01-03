@@ -31,6 +31,7 @@ func Init(address string) {
 	router.GET("/list/:id", list.RetrieveListById)
 
 	router.POST("/task", task.CreateTask)
+	router.DELETE("/task", task.DeleteTask)
 	router.POST("/task/edit", task.EditTask)
 	router.POST("/task/reorder", task.ReorderTasks)
 	router.GET("/task", task.RetrieveTasksByListId)

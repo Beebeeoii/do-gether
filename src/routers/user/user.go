@@ -25,10 +25,6 @@ type acceptFriendReqBody struct {
 	Id string `json:"id"`
 }
 
-type removeFriendBody struct {
-	Id string `json:"id"`
-}
-
 const (
 	USER_ID_PARAM_KEY  = "id"
 	USERNAME_PARAM_KEY = "username"

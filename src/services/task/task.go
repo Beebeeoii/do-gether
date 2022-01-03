@@ -80,6 +80,30 @@ func EditTask(task interfaces.TaskEditionData) (interfaces.Task, error) {
 	return updatedTask, queryErr
 }
 
+func DeleteTask(taskId string) (interfaces.Task, error) {
+	var deletedTask interfaces.Task
+	sqlCommand := "DELETE FROM tasks WHERE id = $1 RETURNING *;"
+
+	queryErr := db.Database.QueryRow(
+		sqlCommand,
+		taskId,
+	).Scan(
+		&deletedTask.Id,
+		&deletedTask.Owner,
+		&deletedTask.Title,
+		pq.Array(&deletedTask.Tags),
+		&deletedTask.ListId,
+		&deletedTask.ListOrder,
+		&deletedTask.Priority,
+		&deletedTask.Due,
+		&deletedTask.PlannedStart,
+		&deletedTask.PlannedEnd,
+		&deletedTask.Completed,
+	)
+
+	return deletedTask, queryErr
+}
+
 func RetrieveTasksByListId(listId string) ([]interfaces.Task, error) {
 	var tasks []interfaces.Task
 	sqlCommand := "SELECT * FROM tasks WHERE \"listId\" = $1"
@@ -144,6 +168,18 @@ func RetrieveTagsByListId(listId string) ([]string, error) {
 	}
 
 	return removeDuplicateStr(tags), nil
+}
+
+func RetrieveListIdByTaskId(taskId string) (string, error) {
+	var listId string
+	sqlCommand := "SELECT \"listId\" FROM tasks WHERE id = $1"
+
+	queryErr := db.Database.QueryRow(sqlCommand, taskId).Scan(&listId)
+	if queryErr != nil {
+		return listId, queryErr
+	}
+
+	return listId, nil
 }
 
 func ReorderTasksInList(tasks []interfaces.BasicTaskReorderData) ([]interfaces.Task, error) {

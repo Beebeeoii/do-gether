@@ -24,6 +24,11 @@ type EditTaskResponse struct {
 	Data Task `json:"data"`
 }
 
+type DeleteTaskResponse struct {
+	BaseResponse
+	Data Task `json:"data"`
+}
+
 type TaskCreationData struct {
 	Owner        string   `json:"owner"`
 	Title        string   `json:"title"`

@@ -34,12 +34,17 @@ type editTaskBody struct {
 	PlannedEnd   int      `json:"plannedEnd" validate:"required"`
 }
 
+type deleteTaskParams struct {
+	Id string `form:"taskId" validate:"required,min=1,max=20"`
+}
+
 type reorderTasksBody struct {
 	ListId string                            `json:"listId" validate:"min=1,max=20,required"`
 	Tasks  []interfaces.BasicTaskReorderData `json:"tasks" validate:"required"`
 }
 
 const (
+	TASK_ID_PARAM_KEY = "taskId"
 	LIST_ID_PARAM_KEY = "listId"
 )
 
@@ -241,6 +246,88 @@ func EditTask(c *gin.Context) {
 			Error:   "",
 		},
 		Data: updatedTask,
+	})
+}
+
+func DeleteTask(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	var reqParams deleteTaskParams
+
+	reqParamsErr := c.BindQuery(&reqParams)
+	if reqParamsErr != nil {
+		log.Println(reqParamsErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqParamsErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		log.Println(validationErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader("id")
+
+	listId, retrieveListIdErr := taskService.RetrieveListIdByTaskId(reqParams.Id)
+	if retrieveListIdErr != nil {
+		log.Println(retrieveListIdErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListIdErr.Error(),
+		})
+		return
+	}
+
+	list, retrieveListErr := listService.RetrieveListById(listId)
+	if retrieveListErr != nil {
+		log.Println(retrieveListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListErr.Error(),
+		})
+		return
+	}
+
+	if !validator.HasListReadWritePermission(list, userId) {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
+	deletedTask, deleteTaskErr := taskService.DeleteTask(reqParams.Id)
+	if deleteTaskErr != nil {
+		log.Println(deleteTaskErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   deleteTaskErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.DeleteTaskResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: deletedTask,
 	})
 }
 
