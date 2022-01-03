@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { List } from '../../interfaces/list/List';
-import { createList, editExistingList, fetchListsByUserId } from '../../adapters/list/list';
+import { createList, deleteExistingList, editExistingList, fetchListsByUserId } from '../../adapters/list/list';
 import { AxiosError } from 'axios';
-import { CreateListRequest, EditListRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
+import { CreateListRequest, DeleteListRequest, EditListRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
 
 export interface ListState {
     lists: Array<List>
@@ -33,6 +33,19 @@ export const addList = createAsyncThunk("list/create", async (listRequest: Creat
 export const editList = createAsyncThunk("list/edit", async (listRequest: EditListRequest, { rejectWithValue }) => {
     try {
         const response = await editExistingList(listRequest)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const deleteList = createAsyncThunk("list/delete", async (listRequest: DeleteListRequest, { rejectWithValue }) => {
+    try {
+        const response = await deleteExistingList(listRequest.authData, listRequest.id)
         return response.data
     } catch (err) {
         let error = err as AxiosError
@@ -115,6 +128,22 @@ export const listSlice = createSlice({
                         }
 
                         updatedLists.push(updatedList)
+                    }
+                }
+
+                updatedLists.sort((a: List, b: List) => sortAlpha(a.name, b.name))
+                state.lists = updatedLists
+            }
+            state.status = "succeeded"
+        })
+
+        builder.addCase(deleteList.fulfilled, (state, action) => {
+            if (action.payload.success) {
+                let updatedLists: Array<List> = []
+
+                for (let list of state.lists) {
+                    if (list.id !== action.payload.data.id) {
+                        updatedLists.push(list)
                     }
                 }
 

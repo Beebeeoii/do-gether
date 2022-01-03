@@ -2,8 +2,8 @@ import { Button, Checkbox, Dialog, DialogActions, DialogTitle, FormControlLabel,
 import { useState } from "react";
 import { List } from "../../interfaces/list/List";
 import { AuthData } from "../../interfaces/auth/Auth";
-import { CreateListRequest, EditListRequest } from "../../interfaces/list/ListRequest";
-import { addList, editList } from "../../services/list/listSplice";
+import { CreateListRequest, DeleteListRequest, EditListRequest } from "../../interfaces/list/ListRequest";
+import { addList, deleteList, editList } from "../../services/list/listSplice";
 import { useAppDispatch } from "../../app/hooks";
 
 export interface ListDialogProps {
@@ -59,6 +59,22 @@ export function ListDialog(props: ListDialogProps) {
         resetState()
     }
 
+    const handleDeleteList = () => {
+        if (data) {
+            let deleteListRequest: DeleteListRequest = {
+                authData: authData,
+                id: data.id
+            }
+            dispatch(deleteList(deleteListRequest)).then(_ => {
+                onClose(null)
+            })
+        } else {
+            onClose(null)
+        }
+        
+        resetState()
+    }
+
     const handleDialogClose = () => {
         onClose(null)
         resetState()
@@ -91,6 +107,12 @@ export function ListDialog(props: ListDialogProps) {
             </Stack>
 
             <DialogActions>
+                {data && <Button color="error" onClick={handleDeleteList}>
+                    Delete
+                </Button>}
+
+                <div style={{ flex: '1 0 0' }} />
+
                 <Button onClick={handleDialogClose}>
                     Cancel
                 </Button>

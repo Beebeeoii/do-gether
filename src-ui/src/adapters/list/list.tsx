@@ -1,6 +1,6 @@
 import { AuthData } from "../../interfaces/auth/Auth";
 import { EditListRequest } from "../../interfaces/list/ListRequest";
-import { sendGet, sendPost } from "../adapter";
+import { sendDelete, sendGet, sendPost } from "../adapter";
 
 export function createList(authData: AuthData, name: string, ownerId: string, isPrivate: boolean) {
     let headers = {
@@ -30,6 +30,19 @@ export function editExistingList(data: EditListRequest) {
     }
 
     return sendPost("/list/edit", body, headers)
+}
+
+export function deleteExistingList(authData: AuthData, id: string) {
+    let headers = {
+        "Authorization": `Bearer ${authData.token}`,
+        "id": authData.id
+    }
+
+    let params = {
+        "listId": id
+    }
+
+    return sendDelete("/list", params, headers)
 }
 
 export function fetchListsByUserId(authData: AuthData, userId: string) {

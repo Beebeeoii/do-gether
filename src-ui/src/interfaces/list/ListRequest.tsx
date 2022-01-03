@@ -14,6 +14,10 @@ export interface EditListRequest {
     private: boolean
 }
 
+export interface DeleteListRequest {
+    authData: AuthData
+    id: string
+}
 
 export interface RetrieveListsByUserIdRequest {
     authData: AuthData
