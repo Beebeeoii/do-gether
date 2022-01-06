@@ -130,7 +130,7 @@ export function ListSelect(props: ListSelectProps) {
                         </Box>
                     )}
                 >
-                    {userLists.length == 0 && <MenuItem disabled value={NO_LIST_VALUE}>
+                    {userLists.length == 0 && userJoinedLists.length == 0 && <MenuItem disabled value={NO_LIST_VALUE}>
                         {NO_LIST_TEXT}
                     </MenuItem>}
 
@@ -164,7 +164,6 @@ export function ListSelect(props: ListSelectProps) {
                     ))}
 
                     {userJoinedLists.length != 0 && <div>
-                        <Divider component="li" />
                         <li>
                             <Typography
                                 sx={{ mt: 0.5, ml: 2 }}
