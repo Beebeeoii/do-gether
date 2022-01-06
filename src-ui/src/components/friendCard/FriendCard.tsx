@@ -21,8 +21,9 @@ export function FriendCard(props: FriendCardProps) {
 
     const [updatedType, setUpdatedType] = useState<'null' | 'outgoing' | 'incoming' | 'friend'>(type)
 
-    const defaultSnackBarState = {
+    const defaultSnackBarState: SnackBarState = {
         open: false,
+        severity: "info",
         message: ""
     }
     const [snackBarState, setSnackBarState] = useState<SnackBarState>(defaultSnackBarState)
@@ -49,7 +50,14 @@ export function FriendCard(props: FriendCardProps) {
                 setUpdatedType('friend')
                 openSnackBar({
                     open: true,
+                    severity: "success",
                     message: "Friend request accepted"
+                })()
+            } else {
+                openSnackBar({
+                    open: true,
+                    severity: "error",
+                    message: "An error has occurred"
                 })()
             }
         })
@@ -67,7 +75,14 @@ export function FriendCard(props: FriendCardProps) {
                 setUpdatedType('null')
                 openSnackBar({
                     open: true,
+                    severity: "success",
                     message: "Friend request cancelled"
+                })()
+            } else {
+                openSnackBar({
+                    open: true,
+                    severity: "error",
+                    message: "An error has occurred"
                 })()
             }
         })
@@ -84,7 +99,14 @@ export function FriendCard(props: FriendCardProps) {
                 setUpdatedType('null')
                 openSnackBar({
                     open: true,
+                    severity: "success",
                     message: "Friend removed"
+                })()
+            } else {
+                openSnackBar({
+                    open: true,
+                    severity: "error",
+                    message: "An error has occurred"
                 })()
             }
         })
@@ -129,7 +151,7 @@ export function FriendCard(props: FriendCardProps) {
             </Stack>
 
             <Snackbar open={snackBarState.open} autoHideDuration={6000} onClose={closeSnackBar} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
-                <Alert onClose={closeSnackBar} severity="success" sx={{ width: '100%' }}>
+                <Alert onClose={closeSnackBar} severity={snackBarState.severity} sx={{ width: '100%' }}>
                     {snackBarState.message}
                 </Alert>
             </Snackbar>

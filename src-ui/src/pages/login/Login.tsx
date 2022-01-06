@@ -9,8 +9,9 @@ import { login } from "../../services/auth/authSplice";
 import "./Login.css"
 
 export function Login() {
-    const defaultSnackBarState = {
+    const defaultSnackBarState: SnackBarState = {
         open: false,
+        severity: "info",
         message: ""
     }
     const [snackBarState, setSnackBarState] = useState<SnackBarState>(defaultSnackBarState)
@@ -53,6 +54,7 @@ export function Login() {
                     } else {
                         openSnackBar({
                             open: true,
+                            severity: "warning",
                             message: `Error: ${authPayload.error}`
                         })()
                     }
@@ -61,7 +63,7 @@ export function Login() {
                 </Button>
 
                 <Snackbar open={snackBarState.open} autoHideDuration={6000} onClose={closeSnackBar} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
-                    <Alert onClose={closeSnackBar} severity="warning" sx={{ width: '100%' }}>
+                    <Alert onClose={closeSnackBar} severity={snackBarState.severity} sx={{ width: '100%' }}>
                         {snackBarState.message}
                     </Alert>
                 </Snackbar>
