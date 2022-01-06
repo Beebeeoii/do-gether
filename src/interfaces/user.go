@@ -13,6 +13,12 @@ type BasicUser struct {
 	Username string `json:"username"`
 }
 
+type UserFriend struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+	Type     string `json:"type"`
+}
+
 type CreateUserResponse struct {
 	BaseResponse
 	Data User `json:"data"`
@@ -21,6 +27,11 @@ type CreateUserResponse struct {
 type RetrieveUserResponse struct {
 	BaseResponse
 	Data User `json:"data"`
+}
+
+type RetrieveUserFriendsResponse struct {
+	BaseResponse
+	Data []UserFriend `json:"data"`
 }
 
 // type FindUserResponse struct {

@@ -20,6 +20,7 @@ func Init(address string) {
 	router.POST("/user", user.Register)
 	router.GET("/user/:id", user.RetrieveUserById)
 	router.GET("/user/friend", user.FindUserByUsername)
+	router.GET("/user/friend/all", user.RetrieveAllUserFriends)
 	router.DELETE("/user/friend", user.RemoveFriend)
 	router.POST("/user/friend/sendReq", user.SendFriendReq)
 	router.POST("/user/friend/acceptReq", user.AcceptFriendReq)

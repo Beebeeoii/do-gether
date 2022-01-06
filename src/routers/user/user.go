@@ -119,6 +119,94 @@ func RetrieveUserById(c *gin.Context) {
 	})
 }
 
+func RetrieveAllUserFriends(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader("id")
+
+	user, retrieveErr := userService.RetrieveUserById(userId)
+	if retrieveErr != nil {
+		log.Println(retrieveErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveErr.Error(),
+		})
+		return
+	}
+
+	var allFriends []interfaces.UserFriend
+
+	for _, outgoingId := range user.Outgoing_req {
+		friend, retrieveErr := userService.RetrieveUserById(outgoingId)
+		if retrieveErr != nil {
+			log.Println(retrieveErr)
+			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+				Success: false,
+				Error:   retrieveErr.Error(),
+			})
+			return
+		}
+
+		allFriends = append(allFriends, interfaces.UserFriend{
+			Id:       friend.Id,
+			Username: friend.Username,
+			Type:     "outgoing",
+		})
+	}
+
+	for _, incomingId := range user.Incoming_req {
+		friend, retrieveErr := userService.RetrieveUserById(incomingId)
+		if retrieveErr != nil {
+			log.Println(retrieveErr)
+			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+				Success: false,
+				Error:   retrieveErr.Error(),
+			})
+			return
+		}
+
+		allFriends = append(allFriends, interfaces.UserFriend{
+			Id:       friend.Id,
+			Username: friend.Username,
+			Type:     "incoming",
+		})
+	}
+
+	for _, friendId := range user.Friends {
+		friend, retrieveErr := userService.RetrieveUserById(friendId)
+		if retrieveErr != nil {
+			log.Println(retrieveErr)
+			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+				Success: false,
+				Error:   retrieveErr.Error(),
+			})
+			return
+		}
+
+		allFriends = append(allFriends, interfaces.UserFriend{
+			Id:       friend.Id,
+			Username: friend.Username,
+			Type:     "friend",
+		})
+	}
+
+	c.JSON(http.StatusOK, interfaces.RetrieveUserFriendsResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: allFriends,
+	})
+}
+
 func FindUserByUsername(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
