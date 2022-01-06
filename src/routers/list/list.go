@@ -418,7 +418,7 @@ func RetrieveListMembers(c *gin.Context) {
 		return
 	}
 
-	memberUsernames, retrieveMemberUsernamesErr := listService.RetrieveMemberUsernamesFromMemberIds(append(list.Members, list.Owner))
+	memberUsernames, retrieveMemberUsernamesErr := listService.RetrieveMemberUsernamesFromMemberIds(list.Members)
 	if retrieveMemberUsernamesErr != nil {
 		log.Println(retrieveMemberUsernamesErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
@@ -436,11 +436,6 @@ func RetrieveListMembers(c *gin.Context) {
 			Type:     "friend",
 		})
 	}
-	listMembers = append(listMembers, interfaces.UserFriend{
-		Id:       userId,
-		Username: memberUsernames[len(listMembers)],
-		Type:     "friend",
-	})
 
 	c.JSON(http.StatusOK, interfaces.RetrieveListMembersResponse{
 		BaseResponse: interfaces.BaseResponse{
