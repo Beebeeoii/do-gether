@@ -2,8 +2,9 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { User } from '../../interfaces/user/User';
 import { FriendReqRequest, RetrieveByUsernameRequest, UserRequest } from '../../interfaces/user/UserRequest';
-import { acceptIncomingFriendRequest, deleteFriend, deleteFriendRequest, fetchUserByUsername, fetchUserInfo, sendOutgoingFriendRequest } from '../../adapters/user/user';
+import { acceptIncomingFriendRequest, deleteFriend, deleteFriendRequest, fetchUserByUsername, fetchUserFriends, fetchUserInfo, sendOutgoingFriendRequest } from '../../adapters/user/user';
 import { AxiosError } from 'axios';
+import { AuthData } from '../../interfaces/auth/Auth';
 
 export interface UserState {
     user: User | null
@@ -33,6 +34,19 @@ export const retrieveUserInfo = createAsyncThunk("user/retrieve", async (userReq
 export const retrieveUserByUsername = createAsyncThunk("user/retrieveByUsername", async (userRequest: RetrieveByUsernameRequest, { rejectWithValue }) => {
     try {
         const response = await fetchUserByUsername(userRequest.authData, userRequest.username)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const retrieveUserFriends = createAsyncThunk("user/retrieveUserFriends", async (authData: AuthData, { rejectWithValue }) => {
+    try {
+        const response = await fetchUserFriends(authData)
         return response.data
     } catch (err) {
         let error = err as AxiosError

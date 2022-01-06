@@ -23,6 +23,15 @@ export function fetchUserByUsername(authData: AuthData, username: string) {
     return sendGet(`/user/friend`, params, headers)
 }
 
+export function fetchUserFriends(authData: AuthData) {
+    let headers = {
+        "Authorization": `Bearer ${authData.token}`,
+        "id": authData.id
+    }
+
+    return sendGet(`/user/friend/all`, undefined, headers)
+}
+
 export function sendOutgoingFriendRequest(authData: AuthData, userId: string) {
     let headers = {
         "Authorization": `Bearer ${authData.token}`,

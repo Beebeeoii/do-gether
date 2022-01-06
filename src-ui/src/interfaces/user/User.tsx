@@ -5,3 +5,9 @@ export interface User {
     outgoing_requests: Array<string>
     incoming_requests: Array<string>
 }
+
+export interface UserFriend {
+    id: string
+    username: string
+    type: "outgoing" | "incoming" | "friend"
+}
