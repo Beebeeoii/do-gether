@@ -9,6 +9,7 @@ import (
 	validator "github.com/beebeeoii/do-gether/routers/validator"
 	listService "github.com/beebeeoii/do-gether/services/list"
 	taskService "github.com/beebeeoii/do-gether/services/task"
+	userService "github.com/beebeeoii/do-gether/services/user"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,6 +23,11 @@ type editListBody struct {
 	Id      string `json:"id" validate:"min=1,max=20,required"`
 	Name    string `json:"name" validate:"min=1,max=20,required"`
 	Private bool   `json:"private"`
+}
+
+type editListMembersBody struct {
+	Id      string   `json:"id" validate:"min=1,max=20,required"`
+	Members []string `json:"members" validate:"required"`
 }
 
 type deleteListParams struct {
@@ -153,6 +159,89 @@ func EditList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   editListErr.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, interfaces.EditListResponse{
+		BaseResponse: interfaces.BaseResponse{
+			Success: true,
+			Error:   "",
+		},
+		Data: updatedList,
+	})
+}
+
+func EditListMembers(c *gin.Context) {
+	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
+	if authDataValidationErr != nil {
+		log.Println(authDataValidationErr)
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   authDataValidationErr.Error(),
+		})
+		return
+	}
+
+	var requestBody editListMembersBody
+
+	reqBodyErr := c.BindJSON(&requestBody)
+	if reqBodyErr != nil {
+		log.Println(reqBodyErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqBodyErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(requestBody)
+	if validationErr != nil {
+		log.Println(validationErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader("id")
+
+	list, retrieveListErr := listService.RetrieveListById(requestBody.Id)
+	if retrieveListErr != nil {
+		log.Println(retrieveListErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   retrieveListErr.Error(),
+		})
+		return
+	}
+
+	if !validator.HasListEditPermission(list, userId) {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
+	for _, memberId := range requestBody.Members {
+		_, retrieveUserErr := userService.RetrieveUserById(memberId)
+		if retrieveUserErr != nil || memberId == userId {
+			c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+				Success: false,
+				Error:   fmt.Errorf("invalid user").Error(),
+			})
+			return
+		}
+	}
+
+	updatedList, editListMembersErr := listService.EditListMembers(requestBody.Id, requestBody.Members)
+	if editListMembersErr != nil {
+		log.Println(editListMembersErr)
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   editListMembersErr.Error(),
 		})
 		return
 	}

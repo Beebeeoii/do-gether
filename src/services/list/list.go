@@ -42,6 +42,25 @@ func EditList(id string, name string, private bool) (interfaces.List, error) {
 	return updatedList, queryErr
 }
 
+func EditListMembers(id string, members []string) (interfaces.List, error) {
+	var updatedList interfaces.List
+	sqlCommand := "UPDATE lists set members = $1 WHERE id = $2 RETURNING *;"
+
+	queryErr := db.Database.QueryRow(
+		sqlCommand,
+		pq.Array(members),
+		id,
+	).Scan(
+		&updatedList.Id,
+		&updatedList.Name,
+		&updatedList.Owner,
+		&updatedList.Private,
+		pq.Array(&updatedList.Members),
+	)
+
+	return updatedList, queryErr
+}
+
 func DeleteList(listId string) (interfaces.List, error) {
 	var deletedList interfaces.List
 	sqlCommand := "DELETE FROM lists WHERE id = $1 RETURNING *;"
