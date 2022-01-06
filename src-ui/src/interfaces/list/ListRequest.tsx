@@ -14,6 +14,12 @@ export interface EditListRequest {
     private: boolean
 }
 
+export interface EditListMembersRequest {
+    authData: AuthData
+    id: string
+    members: Array<string>
+}
+
 export interface DeleteListRequest {
     authData: AuthData
     id: string
@@ -24,7 +30,7 @@ export interface RetrieveListsByUserIdRequest {
     userId: string
 }
 
-export interface RetrieveListMemberUsernamesRequest {
+export interface RetrieveListMembersRequest {
     authData: AuthData
     listId: string
 }

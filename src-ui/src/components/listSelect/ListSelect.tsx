@@ -1,4 +1,4 @@
-import { Box, Divider, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
+import { Box, Divider, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
 import { MouseEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
@@ -6,8 +6,10 @@ import { retrieveAllLists, selectLists, selectListStatus } from "../../services/
 import { AuthData } from "../../interfaces/auth/Auth";
 import { RetrieveListsByUserIdRequest } from "../../interfaces/list/ListRequest";
 import AddIcon from '@mui/icons-material/Add';
-import { ListDialog } from "../listDialog/listDialog";
+import { ListSettingsDialog } from "../listDialog/ListSettingsDialog";
 import SettingsIcon from "@mui/icons-material/Settings";
+import GroupIcon from "@mui/icons-material/Group";
+import { ListMembersDialog } from "../listDialog/ListMembersDialog";
 
 export interface ListSelectProps {
     authData: AuthData,
@@ -32,7 +34,8 @@ export function ListSelect(props: ListSelectProps) {
 
     const [userLists, setUserLists] = useState<Array<List>>([])
     const [userJoinedLists, setUserJoinedLists] = useState<Array<List>>([])
-    const [listDialogOpen, setListDialogOpen] = useState<boolean>(false)
+    const [listMembersDialogOpen, setListMembersDialogOpen] = useState<boolean>(false)
+    const [listSettingsDialogOpen, setListSettingsDialogOpen] = useState<boolean>(false)
     const [listBeingEdited, setListBeingEdited] = useState<List | null>(null)
     const [newListId, setNewListId] = useState<string | null>(null)
 
@@ -54,14 +57,14 @@ export function ListSelect(props: ListSelectProps) {
 
             setUserLists(listsOwnedByUser)
             setUserJoinedLists(listsNotOwnedByUser)
-            
+
             let listToSelect = listsOwnedByUser.length == 0 ? listsNotOwnedByUser[0] : listsOwnedByUser[0]
-            
+
             if (newListId) {
                 listToSelect = listsOwnedByUser.filter((list, _, __) => list.id === newListId)[0]
                 setNewListId("")
             }
-            
+
             setSelectedList(listToSelect)
             onSelect(listToSelect)
         }
@@ -80,20 +83,31 @@ export function ListSelect(props: ListSelectProps) {
         onSelect(selected[0])
     }
 
+    const handleListMembersDialogOpen = (event: MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation()
+        setListBeingEdited(userLists[Number(event.currentTarget.value)])
+        setListMembersDialogOpen(true)
+    }
+
+    const handleListMembersDialogClose = () => {
+        setListBeingEdited(null)
+        setListMembersDialogOpen(false)
+    }
+
     const handleListSettingsDialogOpen = (event: MouseEvent<HTMLButtonElement>) => {
         event.stopPropagation()
         setListBeingEdited(userLists[Number(event.currentTarget.value)])
-        setListDialogOpen(true)
-    }    
+        setListSettingsDialogOpen(true)
+    }
 
     const handleListDialogOpen = () => {
         setListBeingEdited(null)
-        setListDialogOpen(true)
+        setListSettingsDialogOpen(true)
     }
 
     const handleListDialogClose = (newListId: string | null) => {
         setListBeingEdited(null)
-        setListDialogOpen(false)
+        setListSettingsDialogOpen(false)
         setNewListId(newListId)
     }
 
@@ -138,9 +152,14 @@ export function ListSelect(props: ListSelectProps) {
                             sx={{ justifyContent: "space-between" }}
                         >
                             {list.name}
-                            <IconButton value={index} aria-label="list_settings" onClick={handleListSettingsDialogOpen}>
-                                <SettingsIcon />
-                            </IconButton>
+                            <Stack direction={"row"}>
+                                <IconButton value={index} aria-label="list_settings" onClick={handleListMembersDialogOpen}>
+                                    <GroupIcon />
+                                </IconButton>
+                                <IconButton value={index} aria-label="list_settings" onClick={handleListSettingsDialogOpen}>
+                                    <SettingsIcon />
+                                </IconButton>
+                            </Stack>
                         </MenuItem>
                     ))}
 
@@ -176,8 +195,10 @@ export function ListSelect(props: ListSelectProps) {
                 </Select>
             </FormControl>
 
-            {!listBeingEdited && <ListDialog open={listDialogOpen} data={null} authData={authData} onClose={handleListDialogClose} />}
-            {listBeingEdited && <ListDialog open={listDialogOpen} data={listBeingEdited} authData={authData} onClose={handleListDialogClose} />}
+            {listMembersDialogOpen && listBeingEdited && <ListMembersDialog listId={listBeingEdited?.id} open={listMembersDialogOpen} authData={authData} onClose={handleListMembersDialogClose} />}
+
+            {!listBeingEdited && <ListSettingsDialog open={listSettingsDialogOpen} data={null} authData={authData} onClose={handleListDialogClose} />}
+            {listBeingEdited && <ListSettingsDialog open={listSettingsDialogOpen} data={listBeingEdited} authData={authData} onClose={handleListDialogClose} />}
         </div>
     )
 }

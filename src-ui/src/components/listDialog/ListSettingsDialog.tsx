@@ -6,7 +6,7 @@ import { CreateListRequest, DeleteListRequest, EditListRequest } from "../../int
 import { addList, deleteList, editList } from "../../services/list/listSplice";
 import { useAppDispatch } from "../../app/hooks";
 
-export interface ListDialogProps {
+export interface ListSettingsDialogProps {
     open: boolean
     authData: AuthData
     data: List | null
@@ -16,7 +16,7 @@ export interface ListDialogProps {
 const DEFAULT_LIST_NAME_VALUE = ""
 const DEFAULT_IS_PRIVATE_VALUE = true
 
-export function ListDialog(props: ListDialogProps) {
+export function ListSettingsDialog(props: ListSettingsDialogProps) {
     const dispatch = useAppDispatch()
     const { open, authData, data, onClose } = props
 

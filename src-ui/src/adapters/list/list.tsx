@@ -1,5 +1,5 @@
 import { AuthData } from "../../interfaces/auth/Auth";
-import { EditListRequest } from "../../interfaces/list/ListRequest";
+import { EditListMembersRequest, EditListRequest } from "../../interfaces/list/ListRequest";
 import { sendDelete, sendGet, sendPost } from "../adapter";
 
 export function createList(authData: AuthData, name: string, ownerId: string, isPrivate: boolean) {
@@ -32,6 +32,20 @@ export function editExistingList(data: EditListRequest) {
     return sendPost("/list/edit", body, headers)
 }
 
+export function editExistingListMembers(data: EditListMembersRequest) {
+    let headers = {
+        "Authorization": `Bearer ${data.authData.token}`,
+        "id": data.authData.id
+    }
+
+    let body = {
+        "id": data.id,
+        "members": data.members
+    }
+
+    return sendPost("/list/editMembers", body, headers)
+}
+
 export function deleteExistingList(authData: AuthData, id: string) {
     let headers = {
         "Authorization": `Bearer ${authData.token}`,
@@ -58,7 +72,7 @@ export function fetchListsByUserId(authData: AuthData, userId: string) {
     return sendGet("/list", params, headers)
 }
 
-export function fetchListMemberUsernames(authData: AuthData, listId: string) {
+export function fetchListMembers(authData: AuthData, listId: string) {
     let headers = {
         "Authorization": `Bearer ${authData.token}`,
         "id": authData.id

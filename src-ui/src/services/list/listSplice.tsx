@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { List } from '../../interfaces/list/List';
-import { createList, deleteExistingList, editExistingList, fetchListMemberUsernames, fetchListsByUserId } from '../../adapters/list/list';
+import { createList, deleteExistingList, editExistingList, editExistingListMembers, fetchListMembers, fetchListsByUserId } from '../../adapters/list/list';
 import { AxiosError } from 'axios';
-import { CreateListRequest, DeleteListRequest, EditListRequest, RetrieveListMemberUsernamesRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
+import { CreateListRequest, DeleteListRequest, EditListMembersRequest, EditListRequest, RetrieveListMembersRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
 
 export interface ListState {
     lists: Array<List>
@@ -43,6 +43,19 @@ export const editList = createAsyncThunk("list/edit", async (listRequest: EditLi
     }
 })
 
+export const editListMembers = createAsyncThunk("list/editMemberrs", async (listRequest: EditListMembersRequest, { rejectWithValue }) => {
+    try {
+        const response = await editExistingListMembers(listRequest)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
 export const deleteList = createAsyncThunk("list/delete", async (listRequest: DeleteListRequest, { rejectWithValue }) => {
     try {
         const response = await deleteExistingList(listRequest.authData, listRequest.id)
@@ -69,9 +82,9 @@ export const retrieveAllLists = createAsyncThunk("list/fetchAll", async (listReq
     }
 })
 
-export const retrieveListMemberUsernames = createAsyncThunk("list/fetchMemberUsernames", async (listRequest: RetrieveListMemberUsernamesRequest, { rejectWithValue }) => {
+export const retrieveListMembers = createAsyncThunk("list/fetchMembers", async (listRequest: RetrieveListMembersRequest, { rejectWithValue }) => {
     try {
-        const response = await fetchListMemberUsernames(listRequest.authData, listRequest.listId)
+        const response = await fetchListMembers(listRequest.authData, listRequest.listId)
         return response.data
     } catch (err) {
         let error = err as AxiosError
