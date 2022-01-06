@@ -49,7 +49,9 @@ export function ListMembersDialog(props: ListMembersDialogProps) {
             } 
 
             dispatch(retrieveListMembers(retrieveListMemberUsernamesRequest)).then(value => {
-                setMembersSelected(value.payload.data as Array<UserFriend>)
+                if (value.payload.data) {
+                    setMembersSelected(value.payload.data as Array<UserFriend>)
+                }
             })
         }
     }, [dispatch])
