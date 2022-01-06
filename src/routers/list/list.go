@@ -378,7 +378,7 @@ func RetrieveListsByUserId(c *gin.Context) {
 	})
 }
 
-func RetrieveListMemberUsernames(c *gin.Context) {
+func RetrieveListMembers(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
 		log.Println(authDataValidationErr)
@@ -428,12 +428,26 @@ func RetrieveListMemberUsernames(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, interfaces.RetrieveListMemberUsernamesResponse{
+	var listMembers []interfaces.UserFriend
+	for index, member := range list.Members {
+		listMembers = append(listMembers, interfaces.UserFriend{
+			Id:       member,
+			Username: memberUsernames[index],
+			Type:     "friend",
+		})
+	}
+	listMembers = append(listMembers, interfaces.UserFriend{
+		Id:       userId,
+		Username: memberUsernames[len(listMembers)],
+		Type:     "friend",
+	})
+
+	c.JSON(http.StatusOK, interfaces.RetrieveListMembersResponse{
 		BaseResponse: interfaces.BaseResponse{
 			Success: true,
 			Error:   "",
 		},
-		Data: memberUsernames,
+		Data: listMembers,
 	})
 }
 
