@@ -51,6 +51,8 @@ export function ListMembersDialog(props: ListMembersDialogProps) {
             dispatch(retrieveListMembers(retrieveListMemberUsernamesRequest)).then(value => {
                 if (value.payload.data) {
                     setMembersSelected(value.payload.data as Array<UserFriend>)
+                } else {
+                    setMembersSelected(DEFAULT_MEMBERS_SELECTED_VALUE)
                 }
             })
         }

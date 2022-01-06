@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
 import "./Dashboard.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
-import { Avatar, AvatarGroup, Fab, Stack, Tooltip } from "@mui/material";
+import { Fab, Stack } from "@mui/material";
 import { AddTask } from "@mui/icons-material";
 import { List } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
@@ -13,6 +13,7 @@ import { ListSelect } from "../../components/listSelect/ListSelect";
 import { TaskBoard } from "../../components/taskBoard/TaskBoard";
 import { TaskDialog } from "../../components/taskDialog/TaskDialog";
 import { ListMemberAvatar } from "../../components/listMemberAvatars/ListMemberAvatars";
+import { ListOwnerAvatar } from "../../components/listOwnerAvatar/ListOwnerAvatar";
 
 export function Dashboard() {
     const dispatch = useAppDispatch()
@@ -55,9 +56,13 @@ export function Dashboard() {
         <div className="dashboard">
             <NavBar />
 
-            <Stack direction="row" justifyContent="space-between">
+            <Stack direction="row" gap={3} alignItems={'center'}>
                 <ListSelect authData={authData} userId={authData.id} onSelect={handleListChange} />
+
+                {selectedList && <ListOwnerAvatar authData={authData} listId={selectedList.id}/>}
                 {selectedList && <ListMemberAvatar authData={authData} listId={selectedList.id}/>}
+
+                <div style={{ flex: '1 0 0' }} />
 
                 <Fab color="primary" aria-label="addTask" onClick={handleTaskDialogOpen} variant="extended">
                     <AddTask sx={{ mr: 1 }} />

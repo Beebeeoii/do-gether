@@ -34,3 +34,8 @@ export interface RetrieveListMembersRequest {
     authData: AuthData
     listId: string
 }
+
+export interface RetrieveListOwnerRequest {
+    authData: AuthData
+    listId: string
+}

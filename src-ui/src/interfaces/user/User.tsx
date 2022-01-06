@@ -6,6 +6,11 @@ export interface User {
     incoming_requests: Array<string>
 }
 
+export interface BasicUser {
+    id: string
+    username: string
+}
+
 export interface UserFriend {
     id: string
     username: string

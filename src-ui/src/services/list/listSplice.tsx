@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { List } from '../../interfaces/list/List';
-import { createList, deleteExistingList, editExistingList, editExistingListMembers, fetchListMembers, fetchListsByUserId } from '../../adapters/list/list';
+import { createList, deleteExistingList, editExistingList, editExistingListMembers, fetchListMembers, fetchListOwner, fetchListsByUserId } from '../../adapters/list/list';
 import { AxiosError } from 'axios';
-import { CreateListRequest, DeleteListRequest, EditListMembersRequest, EditListRequest, RetrieveListMembersRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
+import { CreateListRequest, DeleteListRequest, EditListMembersRequest, EditListRequest, RetrieveListMembersRequest, RetrieveListOwnerRequest, RetrieveListsByUserIdRequest } from '../../interfaces/list/ListRequest';
 
 export interface ListState {
     lists: Array<List>
@@ -85,6 +85,19 @@ export const retrieveAllLists = createAsyncThunk("list/fetchAll", async (listReq
 export const retrieveListMembers = createAsyncThunk("list/fetchMembers", async (listRequest: RetrieveListMembersRequest, { rejectWithValue }) => {
     try {
         const response = await fetchListMembers(listRequest.authData, listRequest.listId)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const retrieveListOwner = createAsyncThunk("list/fetchOwner", async (listRequest: RetrieveListOwnerRequest, { rejectWithValue }) => {
+    try {
+        const response = await fetchListOwner(listRequest.authData, listRequest.listId)
         return response.data
     } catch (err) {
         let error = err as AxiosError
