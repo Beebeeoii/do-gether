@@ -61,7 +61,6 @@ export function FriendCard(props: FriendCardProps) {
                 })()
             }
         })
-
     }
 
     const handleCancelFriendRequest = () => {

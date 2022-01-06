@@ -8,7 +8,7 @@ import { AuthData } from "../../interfaces/auth/Auth";
 import { Box, Divider, IconButton, Stack, TextField, Typography } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import { SearchUserDialog } from "../../components/searchUserDialog/SearchUserDialog";
-import { UserFriend } from "../../interfaces/user/User";
+import { User, UserFriend } from "../../interfaces/user/User";
 import { FriendCard } from "../../components/friendCard/FriendCard";
 
 export function Friends() {
@@ -22,7 +22,7 @@ export function Friends() {
     }
 
     const userStatus = useAppSelector(selectUserStatus)
-    const [friends,  setFriends] = useState<Array<UserFriend>>([])
+    const [friends, setFriends] = useState<Array<UserFriend>>([])
 
     useEffect(() => {
         if (userStatus === "idle") {
@@ -61,7 +61,17 @@ export function Friends() {
         setSearchUserDialogOpen(true)
     }
 
-    const handleSearchUserDialogClose = () => {
+    const handleSearchUserDialogClose = (user: User | null) => {
+        if (user) {
+            let friendsTemp: Array<UserFriend> = friends
+            friendsTemp.push({
+                id: user.id,
+                username: user.username,
+                type: 'outgoing'
+            } as UserFriend)
+            setFriends(friendsTemp)
+        }
+
         setSearchUserDialogOpen(false)
     }
 
@@ -84,17 +94,31 @@ export function Friends() {
 
             <Stack direction={"column"}>
                 <Typography>
+                    Pending Requests
+                </Typography>
+
+                <Divider />
+
+                {friends.map((friendObject: UserFriend, index: number) => {
+                    if (friendObject.type !== "friend") {
+                        return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
+                    }
+                })}
+                
+                <Typography>
                     Your Friends
                 </Typography>
 
                 <Divider />
 
-                {friends.map((friendObject: UserFriend, index: number) => (
-                    <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username}/>
-                ))}
+                {friends.map((friendObject: UserFriend, index: number) => {
+                    if (friendObject.type === "friend") {
+                        return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
+                    }
+                })}
             </Stack>
 
-            <SearchUserDialog authData={authData} open={searchUserDialogOpen} username={usernameInput} onClose={handleSearchUserDialogClose}/>
+            <SearchUserDialog authData={authData} open={searchUserDialogOpen} username={usernameInput} onClose={handleSearchUserDialogClose} />
         </Box>
     )
 }
