@@ -42,5 +42,9 @@ type RetrieveListsResponse struct {
 
 type RetrieveListMembersResponse struct {
 	BaseResponse
-	Data []UserFriend `json:"data"`
+	Data []BasicUser `json:"data"`
+}
+type RetrieveListOwnerResponse struct {
+	BaseResponse
+	Data BasicUser `json:"data"`
 }
