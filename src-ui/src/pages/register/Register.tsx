@@ -9,8 +9,9 @@ import { register } from "../../services/auth/authSplice"
 import "./Register.css"
 
 export function Register() {
-    const defaultSnackBarState = {
+    const defaultSnackBarState: SnackBarState = {
         open: false,
+        severity: "info",
         message: ""
     }
     const [snackBarState, setSnackBarState] = useState<SnackBarState>(defaultSnackBarState)
@@ -53,6 +54,7 @@ export function Register() {
                     } else {
                         openSnackBar({
                             open: true,
+                            severity: "error",
                             message: `Error: ${authPayload.error}`
                         })()
                     }
@@ -61,7 +63,7 @@ export function Register() {
                 </Button>
 
                 <Snackbar open={snackBarState.open} autoHideDuration={6000} onClose={closeSnackBar} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
-                    <Alert onClose={closeSnackBar} severity="warning" sx={{ width: '100%' }}>
+                    <Alert onClose={closeSnackBar} severity={snackBarState.severity} sx={{ width: '100%' }}>
                         {snackBarState.message}
                     </Alert>
                 </Snackbar>

@@ -54,7 +54,7 @@ export function Login() {
                     } else {
                         openSnackBar({
                             open: true,
-                            severity: "warning",
+                            severity: "error",
                             message: `Error: ${authPayload.error}`
                         })()
                     }
