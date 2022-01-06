@@ -86,6 +86,14 @@ func RetrieveUserById(c *gin.Context) {
 
 	userId := c.Param("id")
 
+	if userId != c.GetHeader("id") {
+		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("access denied").Error(),
+		})
+		return
+	}
+
 	user, retrieveErr := userService.RetrieveUserById(userId)
 	if retrieveErr != nil {
 		log.Println(retrieveErr)
@@ -183,7 +191,6 @@ func SendFriendReq(c *gin.Context) {
 	senderId := c.GetHeader("id")
 
 	if recipientId == senderId {
-		log.Println(recipientId, senderId)
 		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
 			Success: false,
 			Error:   fmt.Errorf("you cannt send yourself a friend request").Error(),
