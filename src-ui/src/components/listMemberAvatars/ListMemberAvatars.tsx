@@ -26,7 +26,9 @@ export function ListMemberAvatar(props: ListMemberAvatarProps) {
             } 
 
             dispatch(retrieveListMembers(retrieveListMemberUsernamesRequest)).then(value => {
-                setMembers(value.payload.data as Array<UserFriend>)
+                if (value.payload.data) {
+                    setMembers(value.payload.data as Array<UserFriend>)
+                }
             })
         }
     }, [listId])
