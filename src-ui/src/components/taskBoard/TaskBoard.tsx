@@ -11,7 +11,8 @@ import { TaskDialog } from "../taskDialog/TaskDialog";
 
 export interface TaskBoardProps {
     authData: AuthData,
-    listId: string
+    listId: string,
+    filterTags: Array<string>
 }
 
 const grid = 8
@@ -56,23 +57,6 @@ const reorder = (list: Array<Task>, startIndex: number, endIndex: number) => {
     return result
 }
 
-const stringToColour = (str: string) => {
-    let hash = 0
-
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash)
-    }
-
-    let hex = '#'
-
-    for (let i = 0; i < 3; i++) {
-        let value = (hash >> (i * 8)) & 0xFF
-        hex += ('00' + value.toString(16)).substring(-2)
-    }
-
-    return hex
-}
-
 const priorityLevelColours: { [index: number]: string | null } = {
     [-1]: "lightgrey",
     1: 'green',
@@ -82,7 +66,7 @@ const priorityLevelColours: { [index: number]: string | null } = {
 
 export function TaskBoard(props: TaskBoardProps) {
     const dispatch = useAppDispatch()
-    const { authData, listId } = props
+    const { authData, listId, filterTags } = props
 
     const tasks = useAppSelector(selectTasks)
 
@@ -138,43 +122,45 @@ export function TaskBoard(props: TaskBoardProps) {
                             style={getBoardStyle(snapshot.isDraggingOver)}
                             className="tasksContainer"
                         >
-                            {tasks.map((item, index) => (
-                                <Draggable key={item.id} draggableId={item.id} index={index}>
-                                    {(provided, snapshot) => (
-                                        <Card
-                                            sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center', position: 'relative' }}
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            style={getTaskItemStyle(
-                                                snapshot.isDragging,
-                                                provided.draggableProps.style
-                                            )}
-                                        >
-                                            {item.priority != -1 && <Box sx={{position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: priorityLevelColours[item.priority], width: '4px'}}/>}
-                                            <Stack direction={"column"} gap={2}>
-                                                <Typography variant="subtitle1" component="div">
-                                                    {item.title}
-                                                </Typography>
+                            {tasks.map((item, index) => {
+                                if (filterTags.length == 0 || filterTags.every((tag, _, __) => item.tags.includes(tag))) {
+                                    return <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={filterTags.length != 0}>
+                                        {(provided, snapshot) => (
+                                            <Card
+                                                sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center', position: 'relative' }}
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                style={getTaskItemStyle(
+                                                    snapshot.isDragging,
+                                                    provided.draggableProps.style
+                                                )}
+                                            >
+                                                {item.priority != -1 && <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: priorityLevelColours[item.priority], width: '4px' }} />}
+                                                <Stack direction={"column"} gap={2}>
+                                                    <Typography variant="subtitle1" component="div">
+                                                        {item.title}
+                                                    </Typography>
 
-                                                <Stack direction={"row"} gap={1}>
-                                                    {item.tags.map((tag, index) => (
-                                                        <Chip key={index} label={tag} color="primary" variant="outlined" />
-                                                    ))}
+                                                    <Stack direction={"row"} gap={1}>
+                                                        {item.tags.map((tag, index) => (
+                                                            <Chip key={index} label={tag} color="primary" variant="outlined" />
+                                                        ))}
+                                                    </Stack>
                                                 </Stack>
-                                            </Stack>
 
-                                            <div className="menu">
-                                                <Tooltip title="Edit">
-                                                    <IconButton aria-label="edit" onClick={handleEditTask(item)}>
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </div>
-                                        </Card>
-                                    )}
-                                </Draggable>
-                            ))}
+                                                <div className="menu">
+                                                    <Tooltip title="Edit">
+                                                        <IconButton aria-label="edit" onClick={handleEditTask(item)}>
+                                                            <EditIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </div>
+                                            </Card>
+                                        )}
+                                    </Draggable>
+                                }
+                            })}
                             {provided.placeholder}
                         </div>
                     )}

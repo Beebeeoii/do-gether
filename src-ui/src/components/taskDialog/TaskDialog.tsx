@@ -1,19 +1,20 @@
-import { Autocomplete, Button, Chip, Dialog, DialogActions, DialogTitle, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogTitle, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, Tab, Tabs, TextField, Typography } from "@mui/material";
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MomentAdapter from '@mui/lab/AdapterMoment';
-import { ChangeEvent, ReactNode, SyntheticEvent, useEffect, useState } from "react";
+import { ChangeEvent, ReactNode, SyntheticEvent, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
 import { Task } from "../../interfaces/task/Task";
 import { selectLists } from "../../services/list/listSplice";
-import { resetTags, retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
+import { resetTags } from "../../services/task/tagSplice";
 import { DateTimePicker } from "@mui/lab";
 import { Star } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import { CreateTaskRequest, DeleteTaskRequest, EditTaskRequest, RetrieveTagsByListIdRequest } from "../../interfaces/task/TaskRequest";
+import { CreateTaskRequest, DeleteTaskRequest, EditTaskRequest } from "../../interfaces/task/TaskRequest";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { addTask, deleteTask, editTask } from "../../services/task/taskSplice";
+import { TaskTagsAutocomplete } from "../taskTagsAutocomplete/TaskTagsAutocomplete";
 
 interface TabPanelProps {
     children?: ReactNode
@@ -59,7 +60,6 @@ export interface TaskDialogProps {
 const DEFAULT_TASK_TITLE_VALUE = ""
 const DEFAULT_LIST_VALUE = "defaultList"
 const DEFAULT_TAGS_SELECTED_VALUE: Array<string> = []
-const DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE = false
 const DEFAULT_PRIORITY_LEVEL_VALUE = -1
 
 export function TaskDialog(props: TaskDialogProps) {
@@ -71,25 +71,7 @@ export function TaskDialog(props: TaskDialogProps) {
     const lists = useAppSelector(selectLists)
     let [listId, setListId] = useState<string>(currentListId)
 
-    const tagStatus = useAppSelector(selectTagStatus)
-    const tagSuggestions = useAppSelector(selectTags)
     const [tagsSelected, setTagsSelected] = useState<Array<string>>(data ? data.tags : DEFAULT_TAGS_SELECTED_VALUE)
-    const [tagsSuggestionsOpen, setTagsSuggestionsOpen] = useState<boolean>(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
-    const tagsLoading = tagsSuggestionsOpen && tagStatus === "idle"
-
-    useEffect(() => {
-        if (!tagsLoading) {
-            return undefined
-        }
-
-        if (tagStatus === "idle") {
-            let tagRequest: RetrieveTagsByListIdRequest = {
-                authData: authData,
-                listId: currentListId
-            }
-            dispatch(retrieveTagsByListId(tagRequest))
-        }
-    }, [tagsLoading])
 
     const [dueDateActive, setDueDateActive] = useState<boolean>(data ? data.due != -1 : false)
     const [dueDate, setDueDate] = useState<Date | null>(data ? dueDateActive ? moment.unix(data.due).toDate() : null : dueDateActive ? new Date() : null)
@@ -184,7 +166,6 @@ export function TaskDialog(props: TaskDialogProps) {
         setTaskTitle(DEFAULT_TASK_TITLE_VALUE)
         setListId(DEFAULT_LIST_VALUE)
         setTagsSelected(DEFAULT_TAGS_SELECTED_VALUE)
-        setTagsSuggestionsOpen(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
         setDueDate(new Date())
         setPriorityLevel(DEFAULT_PRIORITY_LEVEL_VALUE)
         dispatch(resetTags())
@@ -259,33 +240,7 @@ export function TaskDialog(props: TaskDialogProps) {
                             </Box>
                         </Stack>
 
-                        <Autocomplete
-                            multiple
-                            limitTags={3}
-                            id="tags"
-                            open={tagsSuggestionsOpen}
-                            onOpen={() => {
-                                setTagsSuggestionsOpen(true)
-                            }}
-                            onClose={() => {
-                                setTagsSuggestionsOpen(false)
-                            }}
-                            freeSolo
-                            options={tagSuggestions}
-                            value={tagsSelected}
-                            onChange={(_, tagsSelected: Array<string>) => {
-                                setTagsSelected(tagsSelected)
-                            }}
-                            getOptionLabel={(option) => option}
-                            renderTags={(value: readonly string[], getTagProps) =>
-                                value.map((option: string, index: number) => (
-                                    <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-                                ))
-                            }
-                            renderInput={(params) => (
-                                <TextField {...params} label="Tags" placeholder="Add a tag" />
-                            )}
-                        />
+                        <TaskTagsAutocomplete authData={authData} listId={currentListId} tags={tagsSelected} onTagsSelect={setTagsSelected}/>
                     </Stack>
                 </TabPanel>
 
