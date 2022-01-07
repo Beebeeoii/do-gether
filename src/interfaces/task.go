@@ -50,6 +50,11 @@ type TaskEditionData struct {
 	PlannedEnd   int      `json:"plannedEnd"`   // -1 if nil
 }
 
+type TaskEditCompletedData struct {
+	Id        string `json:"id"`
+	Completed bool   `json:"completed"`
+}
+
 type BasicTaskReorderData struct {
 	Id        string `json:"id"`
 	ListOrder int    `json:"listOrder"`
