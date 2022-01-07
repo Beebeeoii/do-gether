@@ -1,6 +1,6 @@
 import { Button, Checkbox, Dialog, DialogActions, DialogTitle, FormControlLabel, Stack, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
-import { List } from "../../interfaces/list/List";
+import { List, ListSettingsDialogOpResponse } from "../../interfaces/list/List";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { CreateListRequest, DeleteListRequest, EditListRequest } from "../../interfaces/list/ListRequest";
 import { addList, deleteList, editList } from "../../services/list/listSplice";
@@ -10,7 +10,7 @@ export interface ListSettingsDialogProps {
     open: boolean
     authData: AuthData
     data: List | null
-    onClose: (newListId: string | null) => void
+    onClose: (res: ListSettingsDialogOpResponse) => void
 }
 
 const DEFAULT_LIST_NAME_VALUE = ""
@@ -41,7 +41,10 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
             }
 
             dispatch(addList(createListRequest)).then(value => {
-                onClose(value.payload.data.id)
+                onClose({
+                    id: value.payload.data.id,
+                    operation: "new"
+                })
             })
         } else {
             let editListRequest: EditListRequest = {
@@ -52,7 +55,10 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
             }
 
             dispatch(editList(editListRequest)).then(value => {
-                onClose(value.payload.data.id)
+                onClose({
+                    id: value.payload.data.id,
+                    operation: "edit"
+                })
             })
         }
 
@@ -66,17 +72,26 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
                 id: data.id
             }
             dispatch(deleteList(deleteListRequest)).then(_ => {
-                onClose(null)
+                onClose({
+                    id: data.id,
+                    operation: "delete"
+                })
             })
         } else {
-            onClose(null)
+            onClose({
+                id: "",
+                operation: "close"
+            })
         }
-        
+
         resetState()
     }
 
     const handleDialogClose = () => {
-        onClose(null)
+        onClose({
+            id: "",
+            operation: "close"
+        })
         resetState()
     }
 

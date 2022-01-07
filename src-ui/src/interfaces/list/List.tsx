@@ -10,3 +10,8 @@ export interface ListData {
     name: string
     private: boolean
 }
+
+export interface ListSettingsDialogOpResponse {
+    id: string
+    operation: 'new' | 'edit' | 'delete' | 'close'
+}

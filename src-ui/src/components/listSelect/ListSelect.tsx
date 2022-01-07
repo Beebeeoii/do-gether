@@ -1,7 +1,7 @@
 import { Box, Divider, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Stack, Tooltip, Typography } from "@mui/material";
 import { MouseEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { List } from "../../interfaces/list/List";
+import { List, ListSettingsDialogOpResponse } from "../../interfaces/list/List";
 import { retrieveAllLists, selectLists, selectListStatus } from "../../services/list/listSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { RetrieveListsByUserIdRequest } from "../../interfaces/list/ListRequest";
@@ -37,7 +37,8 @@ export function ListSelect(props: ListSelectProps) {
     const [listMembersDialogOpen, setListMembersDialogOpen] = useState<boolean>(false)
     const [listSettingsDialogOpen, setListSettingsDialogOpen] = useState<boolean>(false)
     const [listBeingEdited, setListBeingEdited] = useState<List | null>(null)
-    const [deletedListId, setDeletedListId] = useState<string | null>(null)
+
+    const [settingsDialogOperation, setSettingsDialogOperation] = useState<'new' | 'edit' | 'delete' | 'close' | 'idle'>()
     const [newListId, setNewListId] = useState<string | null>(null)
 
     useEffect(() => {
@@ -48,16 +49,20 @@ export function ListSelect(props: ListSelectProps) {
             }
 
             dispatch(retrieveAllLists(listRequest))
-        } else if ((newListId != "" || deletedListId != "") && listStatus === "succeeded") {
-            let listsOwnedByUser = getListsOwnedByUser(lists, userId)
-            let listsNotOwnedByUser = getListsNotOwnedByUser(lists, userId)
-
+        } else if (settingsDialogOperation != "idle" && listStatus === "succeeded") {
             if (lists.length == 0) {
                 return
             }
 
+            let listsOwnedByUser = getListsOwnedByUser(lists, userId)
+            let listsNotOwnedByUser = getListsNotOwnedByUser(lists, userId)
+
             setUserLists(listsOwnedByUser)
             setUserJoinedLists(listsNotOwnedByUser)
+
+            if (settingsDialogOperation == "edit" || settingsDialogOperation == "close") {
+                return
+            }
 
             let listToSelect = listsOwnedByUser.length == 0 ? listsNotOwnedByUser[0] : listsOwnedByUser[0]
 
@@ -66,11 +71,12 @@ export function ListSelect(props: ListSelectProps) {
             }
 
             setNewListId("")
-            setDeletedListId("")
+            setSettingsDialogOperation("idle")
+
             setSelectedList(listToSelect)
             onSelect(listToSelect)
         }
-    }, [deletedListId, newListId, listStatus, dispatch])
+    }, [settingsDialogOperation, listStatus, dispatch])
 
     const handleListChange = (event: SelectChangeEvent) => {
         if (event.target.value === CREATE_LIST_VALUE || !event.target.value) {
@@ -107,19 +113,19 @@ export function ListSelect(props: ListSelectProps) {
         setListSettingsDialogOpen(true)
     }
 
-    const handleListDialogClose = (listId: string | null) => {
+    const handleListDialogClose = (res: ListSettingsDialogOpResponse) => {
         setListBeingEdited(null)
         setListSettingsDialogOpen(false)
 
-        if (listId) {
-            if (userLists.map((list, _, __) => list.id).includes(listId)) {
-                setDeletedListId(listId)
-            } else {
-                setNewListId(listId)
+        switch (res.operation) {
+            // @ts-expect-error
+            case "new": {
+                setNewListId(res.id) // falls through to default
             }
-        } else {
-            setDeletedListId(null)
-            setNewListId(null)
+            default: {
+                setSettingsDialogOperation(res.operation)
+                break
+            }
         }
     }
 
