@@ -112,7 +112,7 @@ export function FriendCard(props: FriendCardProps) {
     }
 
     return (
-        <Card elevation={1} sx={{ padding: "16px", width: "300px" }}>
+        <Card elevation={1} sx={{ padding: "16px", width: "300px", minWidth: "200px", margin: "6px" }}>
             <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                 <Stack direction={"column"} alignItems={"center"}>
                     <Avatar {...stringAvatar(username)} />

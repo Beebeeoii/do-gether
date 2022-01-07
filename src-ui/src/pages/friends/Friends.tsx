@@ -99,23 +99,27 @@ export function Friends() {
 
                 <Divider />
 
-                {friends.map((friendObject: UserFriend, index: number) => {
-                    if (friendObject.type !== "friend") {
-                        return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
-                    }
-                })}
-                
+                <Stack direction={"row"} gap={5} flexWrap={"wrap"}>
+                    {friends.map((friendObject: UserFriend, index: number) => {
+                        if (friendObject.type !== "friend") {
+                            return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
+                        }
+                    })}
+                </Stack>
+
                 <Typography>
                     Your Friends
                 </Typography>
 
                 <Divider />
 
-                {friends.map((friendObject: UserFriend, index: number) => {
-                    if (friendObject.type === "friend") {
-                        return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
-                    }
-                })}
+                <Stack direction={"row"} gap={5} flexWrap={"wrap"}>
+                    {friends.map((friendObject: UserFriend, index: number) => {
+                        if (friendObject.type === "friend") {
+                            return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
+                        }
+                    })}
+                </Stack>
             </Stack>
 
             <SearchUserDialog authData={authData} open={searchUserDialogOpen} username={usernameInput} onClose={handleSearchUserDialogClose} />
