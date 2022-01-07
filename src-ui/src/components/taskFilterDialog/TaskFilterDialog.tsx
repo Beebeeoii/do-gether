@@ -19,7 +19,7 @@ export function TaskFilterDialog(props: TaskFilterDialogProps) {
     const [tagsSelected, setTagsSelected] = useState<Array<string>>(tags ? tags : DEFAULT_TAGS_SELECTED_VALUE)
 
     const handleDialogClose = () => {
-        onClose(null)
+        onClose(tags)
     }
 
     const handleFilter = () => {
