@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogTitle } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogTitle, Stack } from "@mui/material";
 import { useState } from "react";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { TaskTagsAutocomplete } from "../taskTagsAutocomplete/TaskTagsAutocomplete";
@@ -29,10 +29,12 @@ export function TaskFilterDialog(props: TaskFilterDialogProps) {
     return (
         <Dialog onClose={handleDialogClose} open={open}>
             <DialogTitle>
-                Filter task
+                Filter tasks
             </DialogTitle>
 
-            <TaskTagsAutocomplete authData={authData} listId={listId} tags={tagsSelected} onTagsSelect={setTagsSelected} />
+            <Stack direction={'column'} gap={2} sx={{ width: '300px', padding: 2 }}>
+                <TaskTagsAutocomplete authData={authData} listId={listId} tags={tagsSelected} onTagsSelect={setTagsSelected} />
+            </Stack>
 
             <DialogActions>
                 <Button onClick={handleDialogClose}>
@@ -40,7 +42,7 @@ export function TaskFilterDialog(props: TaskFilterDialogProps) {
                 </Button>
 
                 <Button variant="contained" onClick={handleFilter}>
-                    Filter
+                    {tagsSelected.length == 0 ? "Clear Filter" : "Set Filter"}
                 </Button>
             </DialogActions>
         </Dialog >

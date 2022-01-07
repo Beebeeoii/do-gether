@@ -43,7 +43,7 @@ export function ListMemberAvatar(props: ListMemberAvatarProps) {
 
             <AvatarGroup max={4}>
                 {members.map((member: BasicUser, index: number) => (
-                    <Tooltip title={member.username} key={index}>
+                    <Tooltip title={member.username} key={index} arrow>
                         <Avatar {...stringAvatar(member.username)} />
                     </Tooltip>
                 ))}

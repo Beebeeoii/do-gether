@@ -38,7 +38,7 @@ export function ListOwnerAvatar(props: ListOwnerAvatarProps) {
             <Typography>
                 Owner:
             </Typography>
-            {owner && <Tooltip title={owner.username}>
+            {owner && <Tooltip title={owner.username} arrow>
                 <Avatar {...stringAvatar(owner.username)} />
             </Tooltip>}
         </Stack>
