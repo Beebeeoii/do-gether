@@ -1,4 +1,4 @@
-import { Box, Divider, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
+import { Box, Divider, FormControl, IconButton, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent, Stack, Tooltip, Typography } from "@mui/material";
 import { MouseEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
@@ -153,12 +153,18 @@ export function ListSelect(props: ListSelectProps) {
                         >
                             {list.name}
                             <Stack direction={"row"}>
-                                <IconButton value={index} aria-label="list_settings" onClick={handleListMembersDialogOpen}>
-                                    <GroupIcon />
-                                </IconButton>
-                                <IconButton value={index} aria-label="list_settings" onClick={handleListSettingsDialogOpen}>
-                                    <SettingsIcon />
-                                </IconButton>
+                                <Tooltip title="Members" arrow>
+                                    <IconButton value={index} aria-label="list_settings" onClick={handleListMembersDialogOpen}>
+                                        <GroupIcon />
+                                    </IconButton>
+                                </Tooltip>
+
+                                <Tooltip title="Settings" arrow>
+                                    <IconButton value={index} aria-label="list_settings" onClick={handleListSettingsDialogOpen}>
+                                        <SettingsIcon />
+                                    </IconButton>
+                                </Tooltip>
+
                             </Stack>
                         </MenuItem>
                     ))}

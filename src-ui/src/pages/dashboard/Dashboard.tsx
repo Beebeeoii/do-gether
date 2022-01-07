@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
 import "./Dashboard.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
-import { Button, ButtonGroup, Stack, Tooltip } from "@mui/material";
+import { Badge, Button, ButtonGroup, Stack, Tooltip } from "@mui/material";
 import { AddTask, FilterAltOutlined } from "@mui/icons-material";
 import { List } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
@@ -90,8 +90,10 @@ export function Dashboard() {
                     </Button>
 
                     <Tooltip title="Filter" arrow>
-                        <Button onClick={handleFilterClick}>
-                            <FilterAltOutlined />
+                        <Button onClick={handleFilterClick} sx={{paddingTop: "8px", paddingBottom: "8px"}}>
+                            <Badge color="secondary" variant={filterTagsSelected.length == 0 ? undefined : "dot"}>
+                                <FilterAltOutlined />
+                            </Badge>
                         </Button>
                     </Tooltip>
                 </ButtonGroup>
