@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080"
+const BASE_URL = "http://192.168.1.128:8080"
 
 export function sendGet(route: string, params?: object, headers?: object) {
     return axios.get(`${BASE_URL}${route}`, {
