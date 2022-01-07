@@ -240,7 +240,7 @@ export function TaskDialog(props: TaskDialogProps) {
                             </Box>
                         </Stack>
 
-                        <TaskTagsAutocomplete authData={authData} listId={currentListId} tags={tagsSelected} onTagsSelect={setTagsSelected}/>
+                        <TaskTagsAutocomplete authData={authData} listId={currentListId} tags={tagsSelected} freeSolo={true} onTagsSelect={setTagsSelected}/>
                     </Stack>
                 </TabPanel>
 

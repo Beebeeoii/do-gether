@@ -33,7 +33,7 @@ export function TaskFilterDialog(props: TaskFilterDialogProps) {
             </DialogTitle>
 
             <Stack direction={'column'} gap={2} sx={{ width: '300px', padding: 2 }}>
-                <TaskTagsAutocomplete authData={authData} listId={listId} tags={tagsSelected} onTagsSelect={setTagsSelected} />
+                <TaskTagsAutocomplete authData={authData} listId={listId} tags={tagsSelected} freeSolo={false} onTagsSelect={setTagsSelected} />
             </Stack>
 
             <DialogActions>

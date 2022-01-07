@@ -9,6 +9,7 @@ export interface TaskTagsAutocompleteProps {
     authData: AuthData
     listId: string
     tags: Array<string>
+    freeSolo: boolean
     onTagsSelect: (tagsSelected: Array<string>) => void
 }
 
@@ -16,7 +17,7 @@ const DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE = false
 
 export function TaskTagsAutocomplete(props: TaskTagsAutocompleteProps) {
     const dispatch = useAppDispatch()
-    const { authData, listId, tags, onTagsSelect} = props
+    const { authData, listId, tags, freeSolo, onTagsSelect} = props
 
     const tagStatus = useAppSelector(selectTagStatus)
     const tagSuggestions = useAppSelector(selectTags)
@@ -49,7 +50,7 @@ export function TaskTagsAutocomplete(props: TaskTagsAutocompleteProps) {
             onClose={() => {
                 setTagsSuggestionsOpen(false)
             }}
-            freeSolo
+            freeSolo={freeSolo}
             options={tagSuggestions}
             value={tags}
             onChange={(_, tagsSelected: Array<string>) => {
