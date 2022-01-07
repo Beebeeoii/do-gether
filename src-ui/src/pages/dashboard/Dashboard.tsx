@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
 import "./Dashboard.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
-import { Badge, Button, ButtonGroup, Stack, Tooltip } from "@mui/material";
+import { Alert, Badge, Button, ButtonGroup, Snackbar, Stack, Tooltip } from "@mui/material";
 import { AddTask, FilterAltOutlined } from "@mui/icons-material";
 import { List } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
@@ -15,11 +15,30 @@ import { TaskDialog } from "../../components/taskDialog/TaskDialog";
 import { ListMemberAvatar } from "../../components/listMemberAvatars/ListMemberAvatars";
 import { ListOwnerAvatar } from "../../components/listOwnerAvatar/ListOwnerAvatar";
 import { TaskFilterDialog } from "../../components/taskFilterDialog/TaskFilterDialog";
+import { SnackBarState } from "../../interfaces/utils/Snackbar";
 
 const DEFAULT_FILTER_TAGS_SELECTED_VALUE: Array<string> = []
 
 export function Dashboard() {
     const dispatch = useAppDispatch()
+
+    const defaultSnackBarState: SnackBarState = {
+        open: false,
+        severity: "info",
+        message: ""
+    }
+    const [snackBarState, setSnackBarState] = useState<SnackBarState>(defaultSnackBarState)
+
+    const openSnackBar = (newState: SnackBarState) => () => {
+        setSnackBarState(newState)
+    }
+
+    const closeSnackBar = () => {
+        setSnackBarState({
+            ...snackBarState,
+            open: false
+        })
+    }
 
     const authId = useAppSelector(selectId)
     const authToken = useAppSelector(selectToken)
@@ -64,7 +83,15 @@ export function Dashboard() {
 
     const [taskDialogOpen, setTaskDialogOpen] = useState<boolean>(false)
     const handleTaskDialogOpen = () => {
-        setTaskDialogOpen(true)
+        if (selectedList) {
+            setTaskDialogOpen(true)
+        } else {
+            openSnackBar({
+                open: true,
+                message: "No list selected. Please select or create a new list",
+                severity: "warning"
+            })()
+        }
     }
 
     const handleTaskDialogClose = () => {
@@ -89,13 +116,13 @@ export function Dashboard() {
                         Add Task
                     </Button>
 
-                    <Tooltip title="Filter" arrow>
-                        <Button onClick={handleFilterClick} sx={{paddingTop: "8px", paddingBottom: "8px"}}>
+                    {selectedList && <Tooltip title="Filter" arrow>
+                        <Button onClick={handleFilterClick} sx={{ paddingTop: "8px", paddingBottom: "8px" }} >
                             <Badge color="secondary" variant={filterTagsSelected.length == 0 ? undefined : "dot"}>
                                 <FilterAltOutlined />
                             </Badge>
                         </Button>
-                    </Tooltip>
+                    </Tooltip>}
                 </ButtonGroup>
             </Stack>
 
@@ -103,6 +130,12 @@ export function Dashboard() {
             {taskDialogOpen && selectedList && <TaskDialog open={taskDialogOpen} data={null} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
 
             {filterDialogOpen && selectedList && <TaskFilterDialog open={filterDialogOpen} tags={filterTagsSelected} authData={authData} listId={selectedList.id} onClose={handleFilterDialogClose} />}
+
+            <Snackbar open={snackBarState.open} autoHideDuration={6000} onClose={closeSnackBar} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+                <Alert onClose={closeSnackBar} severity={snackBarState.severity} sx={{ width: '100%' }}>
+                    {snackBarState.message}
+                </Alert>
+            </Snackbar>
         </div>
     )
 }
