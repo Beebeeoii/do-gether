@@ -37,6 +37,7 @@ export function ListSelect(props: ListSelectProps) {
     const [listMembersDialogOpen, setListMembersDialogOpen] = useState<boolean>(false)
     const [listSettingsDialogOpen, setListSettingsDialogOpen] = useState<boolean>(false)
     const [listBeingEdited, setListBeingEdited] = useState<List | null>(null)
+    const [deletedListId, setDeletedListId] = useState<string | null>(null)
     const [newListId, setNewListId] = useState<string | null>(null)
 
     useEffect(() => {
@@ -47,7 +48,7 @@ export function ListSelect(props: ListSelectProps) {
             }
 
             dispatch(retrieveAllLists(listRequest))
-        } else if (listStatus === "succeeded" && newListId !== "") {
+        } else if ((newListId != "" || deletedListId != "") && listStatus === "succeeded") {
             let listsOwnedByUser = getListsOwnedByUser(lists, userId)
             let listsNotOwnedByUser = getListsNotOwnedByUser(lists, userId)
 
@@ -62,13 +63,14 @@ export function ListSelect(props: ListSelectProps) {
 
             if (newListId) {
                 listToSelect = listsOwnedByUser.filter((list, _, __) => list.id === newListId)[0]
-                setNewListId("")
             }
 
+            setNewListId("")
+            setDeletedListId("")
             setSelectedList(listToSelect)
             onSelect(listToSelect)
         }
-    }, [newListId, listStatus, dispatch])
+    }, [deletedListId, newListId, listStatus, dispatch])
 
     const handleListChange = (event: SelectChangeEvent) => {
         if (event.target.value === CREATE_LIST_VALUE || !event.target.value) {
@@ -105,10 +107,20 @@ export function ListSelect(props: ListSelectProps) {
         setListSettingsDialogOpen(true)
     }
 
-    const handleListDialogClose = (newListId: string | null) => {
+    const handleListDialogClose = (listId: string | null) => {
         setListBeingEdited(null)
         setListSettingsDialogOpen(false)
-        setNewListId(newListId)
+
+        if (listId) {
+            if (userLists.map((list, _, __) => list.id).includes(listId)) {
+                setDeletedListId(listId)
+            } else {
+                setNewListId(listId)
+            }
+        } else {
+            setDeletedListId(null)
+            setNewListId(null)
+        }
     }
 
     return (
