@@ -1,6 +1,6 @@
 import { AuthData } from "../../interfaces/auth/Auth";
 import { TaskReorderData } from "../../interfaces/task/Task";
-import { CreateTaskRequest, DeleteTaskRequest, EditTaskRequest } from "../../interfaces/task/TaskRequest";
+import { CreateTaskRequest, DeleteTaskRequest, EditTaskCompletedRequest, EditTaskRequest } from "../../interfaces/task/TaskRequest";
 import { sendDelete, sendGet, sendPost } from "../adapter";
 
 export function createTask(data: CreateTaskRequest) {
@@ -41,6 +41,21 @@ export function editExistingTask(data: EditTaskRequest) {
     }
 
     return sendPost("/task/edit", body, headers)
+}
+
+export function editExistingTaskCompleted(data: EditTaskCompletedRequest) {
+    let headers = {
+        "Authorization": `Bearer ${data.authData.token}`,
+        "id": data.authData.id
+    }
+
+    let body = {
+        "id": data.id,
+        "listId": data.listId,
+        "completed": data.completed
+    }
+
+    return sendPost("/task/editCompleted", body, headers)
 }
 
 export function deleteExistingTask(authData: AuthData, id: string) {

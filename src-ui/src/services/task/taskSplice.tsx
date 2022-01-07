@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { Task, TaskReorderData } from '../../interfaces/task/Task';
-import { createTask, editExistingTask, deleteExistingTask, fetchTasks, reorderList } from '../../adapters/task/task';
+import { createTask, editExistingTask, deleteExistingTask, fetchTasks, reorderList, editExistingTaskCompleted } from '../../adapters/task/task';
 import { AxiosError } from 'axios';
-import { CreateTaskRequest, DeleteTaskRequest, EditTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
+import { CreateTaskRequest, DeleteTaskRequest, EditTaskCompletedRequest, EditTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
 
 export interface TaskState {
     tasks: Array<Task>
@@ -35,6 +35,19 @@ export const addTask = createAsyncThunk("task/create", async (taskRequest: Creat
 export const editTask = createAsyncThunk("task/edit", async (taskRequest: EditTaskRequest, { rejectWithValue }) => {
     try {
         const response = await editExistingTask(taskRequest)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const editTaskCompleted = createAsyncThunk("task/editCompleted", async (taskRequest: EditTaskCompletedRequest, { rejectWithValue }) => {
+    try {
+        const response = await editExistingTaskCompleted(taskRequest)
         return response.data
     } catch (err) {
         let error = err as AxiosError

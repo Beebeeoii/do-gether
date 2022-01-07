@@ -1,18 +1,19 @@
-import { Box, Card, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Card, Checkbox, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { AuthData } from "../../interfaces/auth/Auth";
 import EditIcon from '@mui/icons-material/Edit';
 import { DragDropContext, Draggable, DraggingStyle, Droppable, DropResult, NotDraggingStyle } from "react-beautiful-dnd";
 import { Task } from "../../interfaces/task/Task";
-import { reorderTasks, retrieveTasks, selectTasks } from "../../services/task/taskSplice";
-import { ReorderTasksRequest, RetrieveTasksByListIdRequest } from "../../interfaces/task/TaskRequest";
+import { editTaskCompleted, reorderTasks, retrieveTasks, selectTasks } from "../../services/task/taskSplice";
+import { EditTaskCompletedRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from "../../interfaces/task/TaskRequest";
 import { TaskDialog } from "../taskDialog/TaskDialog";
 
 export interface TaskBoardProps {
     authData: AuthData,
     listId: string,
     filterTags: Array<string>
+    isCompleted: boolean
 }
 
 const grid = 8
@@ -66,7 +67,7 @@ const priorityLevelColours: { [index: number]: string | null } = {
 
 export function TaskBoard(props: TaskBoardProps) {
     const dispatch = useAppDispatch()
-    const { authData, listId, filterTags } = props
+    const { authData, listId, filterTags, isCompleted } = props
 
     const tasks = useAppSelector(selectTasks)
 
@@ -91,7 +92,7 @@ export function TaskBoard(props: TaskBoardProps) {
             return
         }
 
-        let taskReqeust: ReorderTasksRequest = {
+        let taskRequest: ReorderTasksRequest = {
             authData: authData,
             listId: listId,
             newTaskOrder: reorder(
@@ -101,7 +102,7 @@ export function TaskBoard(props: TaskBoardProps) {
             )
         }
 
-        dispatch(reorderTasks(taskReqeust))
+        dispatch(reorderTasks(taskRequest))
     }
 
     const [editTaskDialogOpen, setEditTaskDialogOpen] = useState<boolean>(false)
@@ -110,6 +111,42 @@ export function TaskBoard(props: TaskBoardProps) {
         setSelectedTask(null)
         setEditTaskDialogOpen(false)
     }
+
+    const handleCompletedChange = (taskId: string, initialOrder: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        let taskRequest: EditTaskCompletedRequest = {
+            authData: authData,
+            id: taskId,
+            listId: listId,
+            completed: event.target.checked
+        }
+
+        dispatch(editTaskCompleted(taskRequest)).then(value => {
+            let taskRequest: ReorderTasksRequest
+            if (!value.payload.data.completed) {                
+                taskRequest = {
+                    authData: authData,
+                    listId: listId,
+                    newTaskOrder: reorder(
+                        tasks,
+                        initialOrder,
+                        tasks.filter((task, _, __) => !task.completed).length
+                    )
+                }
+            } else {
+                taskRequest = {
+                    authData: authData,
+                    listId: listId,
+                    newTaskOrder: reorder(
+                        tasks,
+                        initialOrder,
+                        tasks.length - 1
+                    )
+                }
+            }
+
+            dispatch(reorderTasks(taskRequest))
+        })
+    };
 
     return (
         <div>
@@ -123,8 +160,8 @@ export function TaskBoard(props: TaskBoardProps) {
                             className="tasksContainer"
                         >
                             {tasks.map((item, index) => {
-                                if (filterTags.length == 0 || filterTags.every((tag, _, __) => item.tags.includes(tag))) {
-                                    return <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={filterTags.length != 0}>
+                                if (item.completed == isCompleted && (filterTags.length == 0 || filterTags.every((tag, _, __) => item.tags.includes(tag)))) {
+                                    return <Draggable key={item.id} draggableId={item.id} index={index} isDragDisabled={filterTags.length != 0 || isCompleted}>
                                         {(provided, snapshot) => (
                                             <Card
                                                 sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center', position: 'relative' }}
@@ -155,6 +192,8 @@ export function TaskBoard(props: TaskBoardProps) {
                                                             <EditIcon />
                                                         </IconButton>
                                                     </Tooltip>
+
+                                                    <Checkbox checked={item.completed} onChange={handleCompletedChange(item.id, item.listOrder)} />
                                                 </div>
                                             </Card>
                                         )}

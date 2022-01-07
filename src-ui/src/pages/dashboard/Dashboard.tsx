@@ -4,7 +4,7 @@ import { NavBar } from "../../components/nav/NavBar"
 import "./Dashboard.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
 import { Alert, Badge, Button, ButtonGroup, Snackbar, Stack, Tooltip } from "@mui/material";
-import { AddTask, FilterAltOutlined } from "@mui/icons-material";
+import { AddTask, AssignmentTurnedInOutlined, CheckBoxOutlineBlankOutlined, CheckBoxOutlined, FilterAltOutlined } from "@mui/icons-material";
 import { List } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
 import { selectId, selectToken } from "../../services/auth/authSplice";
@@ -75,6 +75,11 @@ export function Dashboard() {
         setFilterDialogOpen(false)
     }
 
+    const [isCompleted, setIsCompleted] = useState<boolean>(false)
+    const handleCompletedClick = () => {
+        setIsCompleted(!isCompleted)
+    }
+
     const [selectedList, setSelectedList] = useState<List | null>(null)
 
     const handleListChange = (list: List) => {
@@ -123,10 +128,16 @@ export function Dashboard() {
                             </Badge>
                         </Button>
                     </Tooltip>}
+
+                    {selectedList && <Tooltip title={isCompleted ? "View current tasks" : "View completed tasks"} arrow>
+                        <Button onClick={handleCompletedClick} sx={{ paddingTop: "8px", paddingBottom: "8px" }} >
+                            {isCompleted ? <CheckBoxOutlineBlankOutlined /> : <CheckBoxOutlined />}
+                        </Button>
+                    </Tooltip>}
                 </ButtonGroup>
             </Stack>
 
-            {selectedList && <TaskBoard authData={authData} listId={selectedList.id} filterTags={filterTagsSelected} />}
+            {selectedList && <TaskBoard authData={authData} listId={selectedList.id} filterTags={filterTagsSelected} isCompleted={isCompleted} />}
             {taskDialogOpen && selectedList && <TaskDialog open={taskDialogOpen} data={null} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
 
             {filterDialogOpen && selectedList && <TaskFilterDialog open={filterDialogOpen} tags={filterTagsSelected} authData={authData} listId={selectedList.id} onClose={handleFilterDialogClose} />}
