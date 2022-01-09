@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
-import { Task, TaskReorderData } from '../../interfaces/task/Task';
+import { Task } from '../../interfaces/task/Task';
 import { createTask, editExistingTask, deleteExistingTask, fetchTasks, reorderList, editExistingTaskCompleted } from '../../adapters/task/task';
 import { AxiosError } from 'axios';
 import { CreateTaskRequest, DeleteTaskRequest, EditTaskCompletedRequest, EditTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
@@ -86,13 +86,7 @@ export const retrieveTasks = createAsyncThunk("task/fetch", async (taskRequest: 
 
 export const reorderTasks = createAsyncThunk("task/reorder", async (taskRequest: ReorderTasksRequest, { rejectWithValue }) => {
     try {
-        let newTaskOrder: Array<TaskReorderData> = taskRequest.newTaskOrder.map(task => (
-            {
-                id: task.id,
-                listOrder: task.listOrder
-            }
-        ) as TaskReorderData)
-        const response = await reorderList(taskRequest.authData, taskRequest.listId, newTaskOrder)
+        const response = await reorderList(taskRequest.authData, taskRequest.id, taskRequest.listId, taskRequest.newTaskOrder)
         return response.data
     } catch (err) {
         let error = err as AxiosError
@@ -196,7 +190,7 @@ export const taskSlice = createSlice({
         })
 
         builder.addCase(reorderTasks.pending, (state, action) => {
-            state.tasks = action.meta.arg.newTaskOrder.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
+            state.tasks = action.meta.arg.updatedListOrder.sort((a: Task, b: Task) => a.listOrder - b.listOrder)
             state.status = "loading"
         })
 

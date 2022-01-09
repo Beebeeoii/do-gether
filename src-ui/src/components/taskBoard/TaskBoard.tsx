@@ -94,8 +94,10 @@ export function TaskBoard(props: TaskBoardProps) {
 
         let taskRequest: ReorderTasksRequest = {
             authData: authData,
+            id: tasks[result.source.index].id,
             listId: listId,
-            newTaskOrder: reorder(
+            newTaskOrder: result.destination.index,
+            updatedListOrder: reorder(
                 tasks,
                 result.source.index,
                 result.destination.index
@@ -107,7 +109,7 @@ export function TaskBoard(props: TaskBoardProps) {
 
     const [editTaskDialogOpen, setEditTaskDialogOpen] = useState<boolean>(false)
 
-    const handleEditTaskDialogClose = () => {
+    const handleEditTaskDialogClose = (requireReorder: boolean) => {
         setSelectedTask(null)
         setEditTaskDialogOpen(false)
     }
@@ -125,8 +127,10 @@ export function TaskBoard(props: TaskBoardProps) {
             if (!value.payload.data.completed) {                
                 taskRequest = {
                     authData: authData,
+                    id: tasks[initialOrder].id,
                     listId: listId,
-                    newTaskOrder: reorder(
+                    newTaskOrder: tasks.filter((task, _, __) => !task.completed).length,
+                    updatedListOrder: reorder(
                         tasks,
                         initialOrder,
                         tasks.filter((task, _, __) => !task.completed).length
@@ -135,8 +139,10 @@ export function TaskBoard(props: TaskBoardProps) {
             } else {
                 taskRequest = {
                     authData: authData,
+                    id: tasks[initialOrder].id,
                     listId: listId,
-                    newTaskOrder: reorder(
+                    newTaskOrder: tasks.length - 1,
+                    updatedListOrder: reorder(
                         tasks,
                         initialOrder,
                         tasks.length - 1

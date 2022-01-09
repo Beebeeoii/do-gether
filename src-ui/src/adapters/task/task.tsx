@@ -1,6 +1,5 @@
 import { AuthData } from "../../interfaces/auth/Auth";
-import { TaskReorderData } from "../../interfaces/task/Task";
-import { CreateTaskRequest, DeleteTaskRequest, EditTaskCompletedRequest, EditTaskRequest } from "../../interfaces/task/TaskRequest";
+import { CreateTaskRequest, EditTaskCompletedRequest, EditTaskRequest } from "../../interfaces/task/TaskRequest";
 import { sendDelete, sendGet, sendPost } from "../adapter";
 
 export function createTask(data: CreateTaskRequest) {
@@ -97,15 +96,16 @@ export function fetchTagsByListId(authData: AuthData, listId: string) {
     return sendGet("/task/tagSuggestion", params, headers)
 }
 
-export function reorderList(authData: AuthData, listId: string, newTaskOrder: Array<TaskReorderData>) {
+export function reorderList(authData: AuthData, id: string, listId: string, newListOrder: number) {
     let headers = {
         "Authorization": `Bearer ${authData.token}`,
         "id": authData.id
     }
 
     let body = {
+        "id": id,
         "listId": listId,
-        "tasks": newTaskOrder
+        "newListOrder": newListOrder
     }
 
     return sendPost("/task/reorder", body, headers)

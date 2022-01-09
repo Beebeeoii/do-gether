@@ -49,6 +49,8 @@ export interface RetrieveTagsByListIdRequest {
 
 export interface ReorderTasksRequest {
     authData: AuthData
+    id: string
     listId: string
-    newTaskOrder: Array<Task>
+    newTaskOrder: number
+    updatedListOrder: Array<Task>
 }
