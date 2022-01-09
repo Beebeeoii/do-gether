@@ -32,6 +32,14 @@ export interface EditTaskCompletedRequest {
     completed: boolean
 }
 
+export interface MoveTaskRequest {
+    authData: AuthData
+    id: string,
+    originalListId: string,
+    newListId: string,
+    originalListOrder: number
+}
+
 export interface DeleteTaskRequest {
     authData: AuthData
     id: string

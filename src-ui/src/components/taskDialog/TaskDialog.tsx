@@ -1,19 +1,19 @@
-import { Button, Dialog, DialogActions, DialogTitle, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, Tab, Tabs, TextField, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogTitle, FormControl, FormControlLabel, FormGroup, IconButton, InputLabel, Menu, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material";
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MomentAdapter from '@mui/lab/AdapterMoment';
-import { ChangeEvent, ReactNode, SyntheticEvent, useState } from "react";
+import { ChangeEvent, MouseEvent, ReactNode, SyntheticEvent, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { List } from "../../interfaces/list/List";
 import { Task } from "../../interfaces/task/Task";
 import { selectLists } from "../../services/list/listSplice";
 import { resetTags } from "../../services/task/tagSplice";
 import { DateTimePicker } from "@mui/lab";
-import { Star } from "@mui/icons-material";
+import { DriveFileMove, Star } from "@mui/icons-material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import { CreateTaskRequest, DeleteTaskRequest, EditTaskRequest } from "../../interfaces/task/TaskRequest";
+import { CreateTaskRequest, DeleteTaskRequest, EditTaskRequest, MoveTaskRequest } from "../../interfaces/task/TaskRequest";
 import { AuthData } from "../../interfaces/auth/Auth";
-import { addTask, deleteTask, editTask } from "../../services/task/taskSplice";
+import { addTask, deleteTask, editTask, moveTask } from "../../services/task/taskSplice";
 import { TaskTagsAutocomplete } from "../taskTagsAutocomplete/TaskTagsAutocomplete";
 
 interface TabPanelProps {
@@ -58,6 +58,7 @@ export interface TaskDialogProps {
 }
 
 const DEFAULT_TASK_TITLE_VALUE = ""
+const DEFAULT_MOVE_MENU_OPEN_VALUE = false
 const DEFAULT_LIST_VALUE = "defaultList"
 const DEFAULT_TAGS_SELECTED_VALUE: Array<string> = []
 const DEFAULT_PRIORITY_LEVEL_VALUE = -1
@@ -70,6 +71,31 @@ export function TaskDialog(props: TaskDialogProps) {
 
     const lists = useAppSelector(selectLists)
     let [listId, setListId] = useState<string>(currentListId)
+
+    const [moveMenuAnchorEl, setMoveMenuAnchorEl] = useState<HTMLElement | null>(null);
+    let [moveTaskMenuOpen, setMoveTaskMenuOpen] = useState<boolean>(DEFAULT_MOVE_MENU_OPEN_VALUE)
+
+    const handleMoveTaskMenuClick = (event: MouseEvent<HTMLButtonElement>) => {
+        setMoveMenuAnchorEl(event.currentTarget)
+        setMoveTaskMenuOpen(true)
+    }
+
+    const handleMoveTaskMenuClose = () => {
+        setMoveTaskMenuOpen(false)
+    }
+
+    const handleMoveTask = (newListId: string) => (event: MouseEvent<HTMLLIElement>) => {
+        let moveTaskRequest: MoveTaskRequest = {
+            authData: authData,
+            id: data!.id,
+            newListId: newListId,
+            originalListId: data!.listId,
+            originalListOrder: data!.listOrder
+        }
+        dispatch(moveTask(moveTaskRequest))
+        setMoveTaskMenuOpen(false)
+        onClose()
+    }
 
     const [tagsSelected, setTagsSelected] = useState<Array<string>>(data ? data.tags : DEFAULT_TAGS_SELECTED_VALUE)
 
@@ -202,7 +228,7 @@ export function TaskDialog(props: TaskDialogProps) {
                             autoFocus
                         />
 
-                        <Stack direction={'row'} justifyContent={'space-between'} gap={4}>
+                        <Stack direction={'row'} justifyContent={'space-between'} gap={2}>
                             <FormControl sx={{ flexGrow: 1 }}>
                                 <InputLabel id="listSelectorLabel">List</InputLabel>
                                 <Select
@@ -212,6 +238,7 @@ export function TaskDialog(props: TaskDialogProps) {
                                     onChange={handleListChange}
                                     autoWidth
                                     label="List"
+                                    disabled={data != null}
                                 >
                                     <MenuItem key={DEFAULT_LIST_VALUE} value={DEFAULT_LIST_VALUE} disabled>Choose your list</MenuItem>
                                     {lists.map((list: List, _: number) => (
@@ -219,6 +246,28 @@ export function TaskDialog(props: TaskDialogProps) {
                                     ))}
                                 </Select>
                             </FormControl>
+
+                            {data && <Tooltip title="Move task to another list">
+                                <IconButton id="move-task-button" aria-controls="move-task-menu" aria-haspopup="true" aria-expanded={moveTaskMenuOpen ? 'true' : undefined} onClick={handleMoveTaskMenuClick}>
+                                    <DriveFileMove />
+                                </IconButton>
+                            </Tooltip>}
+
+                            <Menu
+                                id="move-task-menu"
+                                anchorEl={moveMenuAnchorEl}
+                                open={moveTaskMenuOpen}
+                                onClose={handleMoveTaskMenuClose}
+                                MenuListProps={{
+                                    'aria-labelledby': 'move-task-button',
+                                }}
+                            >
+                                {lists.map((list: List, _: number) => (
+                                    <MenuItem key={list.id} value={list.id} onClick={handleMoveTask(list.id)}>
+                                        {list.name}
+                                    </MenuItem>
+                                ))}
+                            </Menu>
 
                             <Box
                                 sx={{
@@ -240,7 +289,7 @@ export function TaskDialog(props: TaskDialogProps) {
                             </Box>
                         </Stack>
 
-                        <TaskTagsAutocomplete authData={authData} listId={currentListId} tags={tagsSelected} freeSolo={true} onTagsSelect={setTagsSelected}/>
+                        <TaskTagsAutocomplete authData={authData} listId={currentListId} tags={tagsSelected} freeSolo={true} onTagsSelect={setTagsSelected} />
                     </Stack>
                 </TabPanel>
 

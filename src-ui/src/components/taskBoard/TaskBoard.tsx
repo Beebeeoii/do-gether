@@ -109,7 +109,7 @@ export function TaskBoard(props: TaskBoardProps) {
 
     const [editTaskDialogOpen, setEditTaskDialogOpen] = useState<boolean>(false)
 
-    const handleEditTaskDialogClose = (requireReorder: boolean) => {
+    const handleEditTaskDialogClose = () => {
         setSelectedTask(null)
         setEditTaskDialogOpen(false)
     }

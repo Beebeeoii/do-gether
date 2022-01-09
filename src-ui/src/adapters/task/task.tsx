@@ -110,3 +110,18 @@ export function reorderList(authData: AuthData, id: string, listId: string, newL
 
     return sendPost("/task/reorder", body, headers)
 }
+
+export function moveTaskToAnotherList(authData: AuthData, id: string, originalListId: string, newListId: string) {
+    let headers = {
+        "Authorization": `Bearer ${authData.token}`,
+        "id": authData.id
+    }
+
+    let body = {
+        "id": id,
+        "originalListId": originalListId,
+        "newListId": newListId
+    }
+
+    return sendPost("/task/edit/move", body, headers)
+}

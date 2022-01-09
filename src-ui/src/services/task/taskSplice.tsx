@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
 import { Task } from '../../interfaces/task/Task';
-import { createTask, editExistingTask, deleteExistingTask, fetchTasks, reorderList, editExistingTaskCompleted } from '../../adapters/task/task';
+import { createTask, editExistingTask, deleteExistingTask, fetchTasks, reorderList, editExistingTaskCompleted, moveTaskToAnotherList } from '../../adapters/task/task';
 import { AxiosError } from 'axios';
-import { CreateTaskRequest, DeleteTaskRequest, EditTaskCompletedRequest, EditTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
+import { CreateTaskRequest, DeleteTaskRequest, EditTaskCompletedRequest, EditTaskRequest, MoveTaskRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from '../../interfaces/task/TaskRequest';
 
 export interface TaskState {
     tasks: Array<Task>
@@ -48,6 +48,19 @@ export const editTask = createAsyncThunk("task/edit", async (taskRequest: EditTa
 export const editTaskCompleted = createAsyncThunk("task/editCompleted", async (taskRequest: EditTaskCompletedRequest, { rejectWithValue }) => {
     try {
         const response = await editExistingTaskCompleted(taskRequest)
+        return response.data
+    } catch (err) {
+        let error = err as AxiosError
+        if (!error.response) {
+            throw err
+        }
+        return rejectWithValue(error.response.data)
+    }
+})
+
+export const moveTask = createAsyncThunk("task/moveTask", async (taskRequest: MoveTaskRequest, { rejectWithValue }) => {
+    try {
+        const response = await moveTaskToAnotherList(taskRequest.authData, taskRequest.id, taskRequest.originalListId, taskRequest.newListId)
         return response.data
     } catch (err) {
         let error = err as AxiosError
@@ -155,6 +168,27 @@ export const taskSlice = createSlice({
                         }
 
                         updatedTasks.push(updatedTask)
+                    }
+                }
+
+                state.tasks = updatedTasks
+            }
+            state.status = "succeeded"
+        })
+
+        builder.addCase(moveTask.fulfilled, (state, action) => {
+            if (action.payload.success) {
+                let updatedTasks: Array<Task> = []
+                for (let task of state.tasks) {
+                    if (task.id !== action.payload.data.id) {
+                        if (task.listOrder > action.meta.arg.originalListOrder) {
+                            updatedTasks.push({
+                                ...task,
+                                listOrder: task.listOrder - 1
+                            })
+                        } else {
+                            updatedTasks.push(task)
+                        }
                     }
                 }
 
