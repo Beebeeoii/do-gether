@@ -681,6 +681,14 @@ func MoveTask(c *gin.Context) {
 		return
 	}
 
+	if requestBody.OriginalListId == requestBody.NewListId {
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   fmt.Errorf("you cannot move a list to the same list").Error(),
+		})
+		return
+	}
+
 	userId := c.GetHeader("id")
 
 	originalList, retrieveOriginalListErr := listService.RetrieveListById(requestBody.OriginalListId)
