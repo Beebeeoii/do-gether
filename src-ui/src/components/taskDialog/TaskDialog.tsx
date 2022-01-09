@@ -253,7 +253,7 @@ export function TaskDialog(props: TaskDialogProps) {
                                 </IconButton>
                             </Tooltip>}
 
-                            <Menu
+                            {data && <Menu
                                 id="move-task-menu"
                                 anchorEl={moveMenuAnchorEl}
                                 open={moveTaskMenuOpen}
@@ -262,12 +262,14 @@ export function TaskDialog(props: TaskDialogProps) {
                                     'aria-labelledby': 'move-task-button',
                                 }}
                             >
-                                {lists.map((list: List, _: number) => (
-                                    <MenuItem key={list.id} value={list.id} onClick={handleMoveTask(list.id)}>
-                                        {list.name}
-                                    </MenuItem>
-                                ))}
-                            </Menu>
+                                {lists.map((list: List, _: number) => {
+                                    if (list.id != data.listId) {
+                                        return <MenuItem key={list.id} value={list.id} onClick={handleMoveTask(list.id)}>
+                                            {list.name}
+                                        </MenuItem>
+                                    }
+                                })}
+                            </Menu>}
 
                             <Box
                                 sx={{
