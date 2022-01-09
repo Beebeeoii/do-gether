@@ -38,6 +38,7 @@ func Init(address string) {
 	router.POST("/task", task.CreateTask)
 	router.DELETE("/task", task.DeleteTask)
 	router.POST("/task/edit", task.EditTask)
+	router.POST("/task/edit/move", task.MoveTask)
 	router.POST("/task/editCompleted", task.EditTaskCompleted)
 	router.POST("/task/reorder", task.ReorderTasks)
 	router.GET("/task", task.RetrieveTasksByListId)

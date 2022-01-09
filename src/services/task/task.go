@@ -105,6 +105,32 @@ func EditTaskCompleted(task interfaces.TaskEditCompletedData) (interfaces.Task, 
 	return updatedTask, queryErr
 }
 
+func MoveTask(task interfaces.MoveTaskData) (interfaces.Task, error) {
+	var updatedTask interfaces.Task
+	sqlCommand := "UPDATE tasks SET \"listId\" = $1, \"listOrder\" = $2 WHERE id = $3 RETURNING *;"
+
+	queryErr := db.Database.QueryRow(
+		sqlCommand,
+		task.NewListId,
+		task.NewListOrder,
+		task.Id,
+	).Scan(
+		&updatedTask.Id,
+		&updatedTask.Owner,
+		&updatedTask.Title,
+		pq.Array(&updatedTask.Tags),
+		&updatedTask.ListId,
+		&updatedTask.ListOrder,
+		&updatedTask.Priority,
+		&updatedTask.Due,
+		&updatedTask.PlannedStart,
+		&updatedTask.PlannedEnd,
+		&updatedTask.Completed,
+	)
+
+	return updatedTask, queryErr
+}
+
 func DeleteTask(taskId string) (interfaces.Task, error) {
 	var deletedTask interfaces.Task
 	sqlCommand := "DELETE FROM tasks WHERE id = $1 RETURNING *;"
@@ -142,7 +168,7 @@ func DeleteTasksFromList(listId string) error {
 
 func RetrieveTasksByListId(listId string) ([]interfaces.Task, error) {
 	var tasks []interfaces.Task
-	sqlCommand := "SELECT * FROM tasks WHERE \"listId\" = $1"
+	sqlCommand := "SELECT * FROM tasks WHERE \"listId\" = $1 ORDER BY \"listOrder\" ASC"
 
 	rows, queryErr := db.Database.Query(sqlCommand, listId)
 	if queryErr != nil {
@@ -246,6 +272,35 @@ func ReorderTasksInList(tasks []interfaces.BasicTaskReorderData) ([]interfaces.T
 
 	return updatedTasks, nil
 }
+
+// func ReorderTask(tasks []interfaces.TaskReorderData) ([]interfaces.Task, error) {
+// 	var updatedTasks []interfaces.Task
+// 	sqlCommand := "UPDATE tasks SET \"listOrder\" = $1 WHERE id = $2 RETURNING *"
+
+// 	for _, task := range tasks {
+// 		updatedTask := interfaces.Task{}
+// 		queryErr := db.Database.QueryRow(sqlCommand, task.ListOrder, task.Id).Scan(
+// 			&updatedTask.Id,
+// 			&updatedTask.Owner,
+// 			&updatedTask.Title,
+// 			pq.Array(&updatedTask.Tags),
+// 			&updatedTask.ListId,
+// 			&updatedTask.ListOrder,
+// 			&updatedTask.Priority,
+// 			&updatedTask.Due,
+// 			&updatedTask.PlannedStart,
+// 			&updatedTask.PlannedEnd,
+// 			&updatedTask.Completed,
+// 		)
+
+// 		if queryErr != nil {
+// 			return updatedTasks, queryErr
+// 		}
+// 		updatedTasks = append(updatedTasks, updatedTask)
+// 	}
+
+// 	return updatedTasks, nil
+// }
 
 func removeDuplicateStr(tagSlice []string) []string {
 	tags := make(map[string]bool)

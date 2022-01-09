@@ -164,3 +164,17 @@ func RetrieveListById(listId string) (interfaces.List, error) {
 
 	return list, nil
 }
+
+func RetrieveNumberTasksInList(listId string) (int, error) {
+	var count int
+
+	sqlCommand := "SELECT COUNT(*) FROM tasks WHERE \"listId\" = $1;"
+
+	queryErr := db.Database.QueryRow(sqlCommand, listId).Scan(&count)
+
+	if queryErr != nil {
+		return count, queryErr
+	}
+
+	return count, nil
+}

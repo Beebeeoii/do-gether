@@ -24,6 +24,11 @@ type EditTaskResponse struct {
 	Data Task `json:"data"`
 }
 
+type MoveTaskResponse struct {
+	BaseResponse
+	Data Task `json:"data"`
+}
+
 type DeleteTaskResponse struct {
 	BaseResponse
 	Data Task `json:"data"`
@@ -53,6 +58,19 @@ type TaskEditionData struct {
 type TaskEditCompletedData struct {
 	Id        string `json:"id"`
 	Completed bool   `json:"completed"`
+}
+
+type MoveTaskData struct {
+	Id           string `json:"id"`
+	NewListId    string `json:"newListId"`
+	NewListOrder int    `json:"newListOrder"`
+}
+
+type TaskReorderData struct {
+	Id           string `json:"id"`
+	ListId       string `json:"listId"`
+	InitialOrder int    `json:"initialOrder"`
+	NewOrder     int    `json:"newOrder"`
 }
 
 type BasicTaskReorderData struct {
