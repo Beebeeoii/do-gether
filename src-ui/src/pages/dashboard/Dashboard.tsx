@@ -16,6 +16,7 @@ import { ListMemberAvatar } from "../../components/listMemberAvatars/ListMemberA
 import { ListOwnerAvatar } from "../../components/listOwnerAvatar/ListOwnerAvatar";
 import { TaskFilterDialog } from "../../components/taskFilterDialog/TaskFilterDialog";
 import { SnackBarState } from "../../interfaces/utils/Snackbar";
+import { resetTags } from "../../services/task/tagSplice";
 
 const DEFAULT_FILTER_TAGS_SELECTED_VALUE: Array<string> = []
 
@@ -83,6 +84,8 @@ export function Dashboard() {
     const [selectedList, setSelectedList] = useState<List | null>(null)
 
     const handleListChange = (list: List) => {
+        setFilterTagsSelected(DEFAULT_FILTER_TAGS_SELECTED_VALUE)
+        dispatch(resetTags())
         setSelectedList(list)
     }
 

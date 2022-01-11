@@ -2,7 +2,7 @@ import { Autocomplete, Chip, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { retrieveTagsByListId, selectTags, selectTagStatus } from "../../services/task/tagSplice";
+import { retrieveTagsByListId, selectTags } from "../../services/task/tagSplice";
 import { RetrieveTagsByListIdRequest } from "../../interfaces/task/TaskRequest";
 
 export interface TaskTagsAutocompleteProps {
@@ -19,24 +19,22 @@ export function TaskTagsAutocomplete(props: TaskTagsAutocompleteProps) {
     const dispatch = useAppDispatch()
     const { authData, listId, tags, freeSolo, onTagsSelect} = props
 
-    const tagStatus = useAppSelector(selectTagStatus)
     const tagSuggestions = useAppSelector(selectTags)
     const [tagsSuggestionsOpen, setTagsSuggestionsOpen] = useState<boolean>(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
-    const tagsLoading = tagsSuggestionsOpen && tagStatus === "idle"
 
     useEffect(() => {
-        if (!tagsLoading) {
+        if (!tagsSuggestionsOpen) {
             return undefined
         }
 
-        if (tagStatus === "idle") {
-            let tagRequest: RetrieveTagsByListIdRequest = {
-                authData: authData,
-                listId: listId
-            }
-            dispatch(retrieveTagsByListId(tagRequest))
+        let tagRequest: RetrieveTagsByListIdRequest = {
+            authData: authData,
+            listId: listId
         }
-    }, [tagsLoading])
+
+        dispatch(retrieveTagsByListId(tagRequest))
+        console.log(listId)
+    }, [tagsSuggestionsOpen])
 
     return (
         <Autocomplete
