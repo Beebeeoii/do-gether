@@ -1,4 +1,4 @@
-import { Logout, Settings, People } from '@mui/icons-material'
+import { Logout, People } from '@mui/icons-material'
 import { Avatar, Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material'
 import Button from '@mui/material/Button'
 import { useState } from 'react'
@@ -89,13 +89,6 @@ export function NavBar() {
                         <People fontSize="small" />
                     </ListItemIcon>
                     Friends
-                </MenuItem>
-
-                <MenuItem>
-                    <ListItemIcon>
-                        <Settings fontSize="small" />
-                    </ListItemIcon>
-                    Settings
                 </MenuItem>
 
                 <Divider />

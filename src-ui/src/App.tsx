@@ -1,4 +1,3 @@
-import { Home } from './pages/home/Home'
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { Login } from './pages/login/Login';
@@ -22,7 +21,7 @@ function App() {
         <div className="App">
             <Router>
                 <Routes>
-                    <Route path="/" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Home />}></Route>
+                    <Route path="/" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Navigate replace to="/login" />}></Route>
                     <Route path="/login" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Login />}></Route>
                     <Route path="/register" element={isLoggedIn ? <Navigate replace to="/dashboard" /> : <Register />}></Route>
                     <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />}></Route>
