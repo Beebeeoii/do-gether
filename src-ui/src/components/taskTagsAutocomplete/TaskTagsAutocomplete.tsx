@@ -33,7 +33,6 @@ export function TaskTagsAutocomplete(props: TaskTagsAutocompleteProps) {
         }
 
         dispatch(retrieveTagsByListId(tagRequest))
-        console.log(listId)
     }, [tagsSuggestionsOpen])
 
     return (
