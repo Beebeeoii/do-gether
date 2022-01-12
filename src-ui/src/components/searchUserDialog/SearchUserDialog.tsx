@@ -91,7 +91,7 @@ export function SearchUserDialog(props: SearchUserDialogProps) {
                 </Typography>
             </Stack>}
 
-            {!doesUserExist && <Typography>
+            {!doesUserExist && <Typography sx={{ width: '300px', padding: 2}}>
                 No such user found
             </Typography>}
 

@@ -57,6 +57,9 @@ export interface TaskDialogProps {
     onClose: () => void
 }
 
+const NO_LIST_VALUE = "no_list"
+const NO_LIST_TEXT = "No lists to move to"
+
 const DEFAULT_TASK_TITLE_VALUE = ""
 const DEFAULT_MOVE_MENU_OPEN_VALUE = false
 const DEFAULT_LIST_VALUE = "defaultList"
@@ -261,7 +264,19 @@ export function TaskDialog(props: TaskDialogProps) {
                                 MenuListProps={{
                                     'aria-labelledby': 'move-task-button',
                                 }}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'right',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
                             >
+                                {lists.filter((list, _, __) => list.id != data.listId).length == 0 && <MenuItem disabled value={NO_LIST_VALUE}>
+                                    {NO_LIST_TEXT}
+                                </MenuItem>}
+
                                 {lists.map((list: List, _: number) => {
                                     if (list.id != data.listId) {
                                         return <MenuItem key={list.id} value={list.id} onClick={handleMoveTask(list.id)}>
