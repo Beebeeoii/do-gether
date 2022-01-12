@@ -29,11 +29,11 @@ type acceptFriendReqBody struct {
 	Id string `json:"id"`
 }
 
-type removeFriendRequestBody struct {
+type removeFriendRequestParams struct {
 	Id string `form:"id"`
 }
 
-type removeFriendBody struct {
+type removeFriendParams struct {
 	Id string `form:"id"`
 }
 
@@ -392,13 +392,13 @@ func RemoveFriendRequest(c *gin.Context) {
 		return
 	}
 
-	var reqParams removeFriendRequestBody
+	var reqParams removeFriendRequestParams
 
-	reqBodyErr := c.BindJSON(&reqParams)
-	if reqBodyErr != nil {
+	reqParamsErr := c.BindJSON(&reqParams)
+	if reqParamsErr != nil {
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
-			Error:   reqBodyErr.Error(),
+			Error:   reqParamsErr.Error(),
 		})
 		return
 	}
@@ -439,13 +439,13 @@ func RemoveFriend(c *gin.Context) {
 		return
 	}
 
-	var reqParams removeFriendBody
+	var reqParams removeFriendParams
 
-	reqBodyErr := c.BindJSON(&reqParams)
-	if reqBodyErr != nil {
+	reqParamsErr := c.BindJSON(&reqParams)
+	if reqParamsErr != nil {
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
-			Error:   reqBodyErr.Error(),
+			Error:   reqParamsErr.Error(),
 		})
 		return
 	}

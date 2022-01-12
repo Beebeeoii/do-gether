@@ -1,32 +1,49 @@
 package router
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
+	validator "github.com/beebeeoii/do-gether/routers/validator"
 	authService "github.com/beebeeoii/do-gether/services/auth"
 	userService "github.com/beebeeoii/do-gether/services/user"
 	"github.com/gin-gonic/gin"
 )
 
+type authenticateParams struct {
+	Username string `form:"username" validate:"required"`
+	Password string `form:"password" validate:"required"`
+}
+
 const (
-	USERNAME_PARAM_KEY        = "username"
-	PASSWORD_PARAM_KEY        = "password"
 	INVALID_USERNAME_ERROR    = "sql: no rows in result set"
 	INVALID_USERNAME_RESPONSE = "Incorrect username/password"
 	INVALID_PASSWORD_RESPONSE = "Incorrect username/password"
 )
 
 func AuthenticateUser(c *gin.Context) {
-	reqParams := c.Request.URL.Query()
-	username := reqParams.Get(USERNAME_PARAM_KEY)
-	password := reqParams.Get(PASSWORD_PARAM_KEY)
+	var reqParams authenticateParams
 
-	hashedPassword, retrieveErr := userService.RetrieveUserHashedPassword(username)
+	reqParamsErr := c.BindQuery(&reqParams)
+	if reqParamsErr != nil {
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqParamsErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	hashedPassword, retrieveErr := userService.RetrieveUserHashedPassword(reqParams.Username)
 	if retrieveErr != nil {
-		log.Println(retrieveErr)
-
 		if retrieveErr.Error() == INVALID_USERNAME_ERROR {
 			c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 				Success: false,
@@ -41,22 +58,18 @@ func AuthenticateUser(c *gin.Context) {
 		return
 	}
 
-	isMatch := authService.CheckPasswordHash(password, hashedPassword)
+	if authService.DoesPasswordMatchHash(reqParams.Password, hashedPassword) {
+		userId, userIdErr := userService.RetrieveUserIdByUsername(reqParams.Username)
+		if userIdErr != nil {
+			c.JSON(http.StatusNotFound, interfaces.BaseResponse{
+				Success: false,
+				Error:   userIdErr.Error(),
+			})
+			return
+		}
 
-	userId, userIdErr := userService.RetrieveUserIdByUsername(username)
-	if userIdErr != nil {
-		log.Println(userIdErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
-			Success: false,
-			Error:   userIdErr.Error(),
-		})
-		return
-	}
-
-	if isMatch {
 		jwtToken, jwtTokenErr := authService.GenerateJwt(userId)
 		if jwtTokenErr != nil {
-			log.Println(jwtTokenErr)
 			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 				Success: false,
 				Error:   jwtTokenErr.Error(),
