@@ -2,7 +2,6 @@ package router
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
@@ -34,15 +33,25 @@ type deleteListParams struct {
 	Id string `form:"listId" validate:"required,min=1,max=20"`
 }
 
+type retrieveListsByUserIdParams struct {
+	Id string `form:"userId" validate:"required,min=1,max=20"`
+}
+
+type retrieveListMembersParams struct {
+	ListId string `form:"listId" validate:"required,min=1,max=20"`
+}
+
+type retrieveListOwnerParams struct {
+	ListId string `form:"listId" validate:"required,min=1,max=20"`
+}
+
 const (
-	USER_ID_PARAM_KEY = "userId"
-	LIST_ID_PARAM_KEY = "listId"
+	USER_ID_HEADER_KEY = "id"
 )
 
 func CreateList(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -54,7 +63,6 @@ func CreateList(c *gin.Context) {
 
 	reqBodyErr := c.BindJSON(&requestBody)
 	if reqBodyErr != nil {
-		log.Println(reqBodyErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   reqBodyErr.Error(),
@@ -64,26 +72,23 @@ func CreateList(c *gin.Context) {
 
 	validationErr := validator.Validate.Struct(requestBody)
 	if validationErr != nil {
-		log.Println(validationErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
 			Success: false,
 			Error:   validationErr.Error(),
 		})
 		return
 	}
 
-	if requestBody.Owner != c.GetHeader("id") {
-		log.Println("Id mismatch")
+	if requestBody.Owner != c.GetHeader(USER_ID_HEADER_KEY) {
 		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
 			Success: false,
-			Error:   fmt.Errorf("id mismatch").Error(),
+			Error:   fmt.Errorf("list owner id mismatch with current account id").Error(),
 		})
 		return
 	}
 
 	newList, createListErr := listService.CreateList(requestBody.Name, requestBody.Owner, requestBody.Private)
 	if createListErr != nil {
-		log.Println(createListErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   createListErr.Error(),
@@ -103,7 +108,6 @@ func CreateList(c *gin.Context) {
 func EditList(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -115,7 +119,6 @@ func EditList(c *gin.Context) {
 
 	reqBodyErr := c.BindJSON(&requestBody)
 	if reqBodyErr != nil {
-		log.Println(reqBodyErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   reqBodyErr.Error(),
@@ -125,20 +128,18 @@ func EditList(c *gin.Context) {
 
 	validationErr := validator.Validate.Struct(requestBody)
 	if validationErr != nil {
-		log.Println(validationErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
 			Success: false,
 			Error:   validationErr.Error(),
 		})
 		return
 	}
 
-	userId := c.GetHeader("id")
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
 
 	list, retrieveListErr := listService.RetrieveListById(requestBody.Id)
 	if retrieveListErr != nil {
-		log.Println(retrieveListErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveListErr.Error(),
 		})
@@ -155,7 +156,6 @@ func EditList(c *gin.Context) {
 
 	updatedList, editListErr := listService.EditList(requestBody.Id, requestBody.Name, requestBody.Private)
 	if editListErr != nil {
-		log.Println(editListErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   editListErr.Error(),
@@ -175,7 +175,6 @@ func EditList(c *gin.Context) {
 func EditListMembers(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -187,7 +186,6 @@ func EditListMembers(c *gin.Context) {
 
 	reqBodyErr := c.BindJSON(&requestBody)
 	if reqBodyErr != nil {
-		log.Println(reqBodyErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   reqBodyErr.Error(),
@@ -197,20 +195,18 @@ func EditListMembers(c *gin.Context) {
 
 	validationErr := validator.Validate.Struct(requestBody)
 	if validationErr != nil {
-		log.Println(validationErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
 			Success: false,
 			Error:   validationErr.Error(),
 		})
 		return
 	}
 
-	userId := c.GetHeader("id")
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
 
 	list, retrieveListErr := listService.RetrieveListById(requestBody.Id)
 	if retrieveListErr != nil {
-		log.Println(retrieveListErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveListErr.Error(),
 		})
@@ -238,7 +234,6 @@ func EditListMembers(c *gin.Context) {
 
 	updatedList, editListMembersErr := listService.EditListMembers(requestBody.Id, requestBody.Members)
 	if editListMembersErr != nil {
-		log.Println(editListMembersErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   editListMembersErr.Error(),
@@ -258,7 +253,6 @@ func EditListMembers(c *gin.Context) {
 func DeleteList(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -270,7 +264,6 @@ func DeleteList(c *gin.Context) {
 
 	reqParamsErr := c.BindQuery(&reqParams)
 	if reqParamsErr != nil {
-		log.Println(reqParamsErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   reqParamsErr.Error(),
@@ -280,20 +273,18 @@ func DeleteList(c *gin.Context) {
 
 	validationErr := validator.Validate.Struct(reqParams)
 	if validationErr != nil {
-		log.Println(validationErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
 			Success: false,
 			Error:   validationErr.Error(),
 		})
 		return
 	}
 
-	userId := c.GetHeader("id")
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
 
 	ownerId, retrieveOwnerIdErr := listService.RetrieveOwnerIdByListId(reqParams.Id)
 	if retrieveOwnerIdErr != nil {
-		log.Println(retrieveOwnerIdErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveOwnerIdErr.Error(),
 		})
@@ -310,7 +301,6 @@ func DeleteList(c *gin.Context) {
 
 	deletedList, deleteListErr := listService.DeleteList(reqParams.Id)
 	if deleteListErr != nil {
-		log.Println(deleteListErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   deleteListErr.Error(),
@@ -320,7 +310,6 @@ func DeleteList(c *gin.Context) {
 
 	deleteTasksErr := taskService.DeleteTasksFromList(reqParams.Id)
 	if deleteTasksErr != nil {
-		log.Println(deleteTasksErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   deleteTasksErr.Error(),
@@ -340,7 +329,6 @@ func DeleteList(c *gin.Context) {
 func RetrieveListsByUserId(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -348,20 +336,30 @@ func RetrieveListsByUserId(c *gin.Context) {
 		return
 	}
 
-	reqParams := c.Request.URL.Query()
-	ownerId := reqParams.Get(USER_ID_PARAM_KEY)
-	if ownerId == "" {
-		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+	var reqParams retrieveListsByUserIdParams
+
+	reqParamsErr := c.BindQuery(&reqParams)
+	if reqParamsErr != nil {
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
-			Error:   fmt.Errorf("invalid userId provided").Error(),
+			Error:   reqParamsErr.Error(),
 		})
 		return
 	}
-	userId := c.GetHeader("id")
 
-	lists, retrieveListsErr := listService.RetrieveListsByUserId(ownerId, userId)
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
+
+	lists, retrieveListsErr := listService.RetrieveListsByUserId(reqParams.Id, userId)
 	if retrieveListsErr != nil {
-		log.Println(retrieveListsErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveListsErr.Error(),
@@ -381,7 +379,6 @@ func RetrieveListsByUserId(c *gin.Context) {
 func RetrieveListMembers(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -389,21 +386,31 @@ func RetrieveListMembers(c *gin.Context) {
 		return
 	}
 
-	reqParams := c.Request.URL.Query()
-	listId := reqParams.Get(LIST_ID_PARAM_KEY)
-	if listId == "" {
-		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+	var reqParams retrieveListMembersParams
+
+	reqParamsErr := c.BindQuery(&reqParams)
+	if reqParamsErr != nil {
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
-			Error:   fmt.Errorf("invalid listId provided").Error(),
+			Error:   reqParamsErr.Error(),
 		})
 		return
 	}
-	userId := c.GetHeader("id")
 
-	list, retrieveListErr := listService.RetrieveListById(listId)
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
+
+	list, retrieveListErr := listService.RetrieveListById(reqParams.ListId)
 	if retrieveListErr != nil {
-		log.Println(retrieveListErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveListErr.Error(),
 		})
@@ -420,8 +427,7 @@ func RetrieveListMembers(c *gin.Context) {
 
 	memberUsernames, retrieveMemberUsernamesErr := listService.RetrieveMemberUsernamesFromMemberIds(list.Members)
 	if retrieveMemberUsernamesErr != nil {
-		log.Println(retrieveMemberUsernamesErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveMemberUsernamesErr.Error(),
 		})
@@ -448,7 +454,6 @@ func RetrieveListMembers(c *gin.Context) {
 func RetrieveListOwner(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -456,21 +461,31 @@ func RetrieveListOwner(c *gin.Context) {
 		return
 	}
 
-	reqParams := c.Request.URL.Query()
-	listId := reqParams.Get(LIST_ID_PARAM_KEY)
-	if listId == "" {
-		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+	var reqParams retrieveListOwnerParams
+
+	reqParamsErr := c.BindQuery(&reqParams)
+	if reqParamsErr != nil {
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
-			Error:   fmt.Errorf("invalid listId provided").Error(),
+			Error:   reqParamsErr.Error(),
 		})
 		return
 	}
-	userId := c.GetHeader("id")
 
-	list, retrieveListErr := listService.RetrieveListById(listId)
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
+
+	list, retrieveListErr := listService.RetrieveListById(reqParams.ListId)
 	if retrieveListErr != nil {
-		log.Println(retrieveListErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveListErr.Error(),
 		})
@@ -487,8 +502,7 @@ func RetrieveListOwner(c *gin.Context) {
 
 	ownerUsername, retrievOwnerUsernameErr := listService.RetrieveMemberUsernamesFromMemberIds([]string{list.Owner})
 	if retrievOwnerUsernameErr != nil {
-		log.Println(retrievOwnerUsernameErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrievOwnerUsernameErr.Error(),
 		})
@@ -506,44 +520,5 @@ func RetrieveListOwner(c *gin.Context) {
 			Error:   "",
 		},
 		Data: listOwner,
-	})
-}
-
-func RetrieveListById(c *gin.Context) {
-	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
-	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
-		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
-			Success: false,
-			Error:   authDataValidationErr.Error(),
-		})
-		return
-	}
-
-	listId := c.Param("id")
-	if listId == "" {
-		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
-			Success: false,
-			Error:   fmt.Errorf("invalid id provided").Error(),
-		})
-		return
-	}
-
-	list, retrieveListErr := listService.RetrieveListById(listId)
-	if retrieveListErr != nil {
-		log.Println(retrieveListErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
-			Success: false,
-			Error:   retrieveListErr.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, interfaces.RetrieveListResponse{
-		BaseResponse: interfaces.BaseResponse{
-			Success: true,
-			Error:   "",
-		},
-		Data: list,
 	})
 }

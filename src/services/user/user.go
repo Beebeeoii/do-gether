@@ -87,8 +87,7 @@ func SendFriendRequest(senderId string, recipientId string) error {
 	if senderOutgoingErr != nil {
 		return senderOutgoingErr
 	}
-	doesRequestExist := utils.Contains(recipientIncomingReq, senderId) && utils.Contains(senderOutgoingReq, recipientId)
-	if doesRequestExist {
+	if utils.Contains(recipientIncomingReq, senderId) && utils.Contains(senderOutgoingReq, recipientId) {
 		return fmt.Errorf("request is pending for response")
 	}
 
@@ -100,9 +99,20 @@ func SendFriendRequest(senderId string, recipientId string) error {
 	if senderIncomingErr != nil {
 		return senderIncomingErr
 	}
-	doesRequestExist = utils.Contains(recipientOutgoingReq, senderId) && utils.Contains(senderIncomingReq, recipientId)
-	if doesRequestExist {
+	if utils.Contains(recipientOutgoingReq, senderId) && utils.Contains(senderIncomingReq, recipientId) {
 		return fmt.Errorf("request is pending for you to accept")
+	}
+
+	recipientFriends, recipientFriendsErr := RetrieveFriends(recipientId)
+	if recipientFriendsErr != nil {
+		return recipientFriendsErr
+	}
+	senderFriends, senderFriendsErr := RetrieveFriends(senderId)
+	if senderFriendsErr != nil {
+		return senderFriendsErr
+	}
+	if utils.Contains(recipientFriends, senderId) && utils.Contains(senderFriends, recipientId) {
+		return fmt.Errorf("you are already friends")
 	}
 
 	if !utils.Contains(recipientIncomingReq, senderId) {

@@ -33,7 +33,6 @@ func Init(address string) {
 	router.GET("/list", list.RetrieveListsByUserId)
 	router.GET("/list/members", list.RetrieveListMembers)
 	router.GET("/list/owner", list.RetrieveListOwner)
-	router.GET("/list/:id", list.RetrieveListById)
 
 	router.POST("/task", task.CreateTask)
 	router.DELETE("/task", task.DeleteTask)

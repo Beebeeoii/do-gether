@@ -2,7 +2,6 @@ package router
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/beebeeoii/do-gether/interfaces"
@@ -14,8 +13,12 @@ import (
 )
 
 type registerBody struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"min=1,max=20,required"`
+	Password string `json:"password" validate:"min=1,max=20,required"`
+}
+
+type findUserByUsernameParams struct {
+	Username string `form:"username" validate:"required"`
 }
 
 type sendFriendReqBody struct {
@@ -26,7 +29,16 @@ type acceptFriendReqBody struct {
 	Id string `json:"id"`
 }
 
+type removeFriendRequestBody struct {
+	Id string `form:"id"`
+}
+
+type removeFriendBody struct {
+	Id string `form:"id"`
+}
+
 const (
+	USER_ID_HEADER_KEY = "id"
 	USER_ID_PARAM_KEY  = "id"
 	USERNAME_PARAM_KEY = "username"
 )
@@ -36,7 +48,6 @@ func Register(c *gin.Context) {
 
 	reqBodyErr := c.BindJSON(&requestBody)
 	if reqBodyErr != nil {
-		log.Println(reqBodyErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   reqBodyErr.Error(),
@@ -44,9 +55,17 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	validationErr := validator.Validate.Struct(requestBody)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
 	hashedPassword, hashPwErr := authService.HashPassword(requestBody.Password)
 	if hashPwErr != nil {
-		log.Println(hashPwErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   hashPwErr.Error(),
@@ -56,7 +75,6 @@ func Register(c *gin.Context) {
 
 	newUser, createUserErr := userService.CreateUser(requestBody.Username, hashedPassword)
 	if createUserErr != nil {
-		log.Println(createUserErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   createUserErr.Error(),
@@ -76,7 +94,6 @@ func Register(c *gin.Context) {
 func RetrieveUserById(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -84,9 +101,9 @@ func RetrieveUserById(c *gin.Context) {
 		return
 	}
 
-	userId := c.Param("id")
+	userId := c.Param(USER_ID_PARAM_KEY)
 
-	if userId != c.GetHeader("id") {
+	if userId != c.GetHeader(USER_ID_HEADER_KEY) {
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   fmt.Errorf("access denied").Error(),
@@ -96,8 +113,7 @@ func RetrieveUserById(c *gin.Context) {
 
 	user, retrieveErr := userService.RetrieveUserById(userId)
 	if retrieveErr != nil {
-		log.Println(retrieveErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveErr.Error(),
 		})
@@ -122,7 +138,6 @@ func RetrieveUserById(c *gin.Context) {
 func RetrieveAllUserFriends(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -130,12 +145,11 @@ func RetrieveAllUserFriends(c *gin.Context) {
 		return
 	}
 
-	userId := c.GetHeader("id")
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
 
 	user, retrieveErr := userService.RetrieveUserById(userId)
 	if retrieveErr != nil {
-		log.Println(retrieveErr)
-		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveErr.Error(),
 		})
@@ -147,8 +161,7 @@ func RetrieveAllUserFriends(c *gin.Context) {
 	for _, outgoingId := range user.Outgoing_req {
 		friend, retrieveErr := userService.RetrieveUserById(outgoingId)
 		if retrieveErr != nil {
-			log.Println(retrieveErr)
-			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 				Success: false,
 				Error:   retrieveErr.Error(),
 			})
@@ -165,8 +178,7 @@ func RetrieveAllUserFriends(c *gin.Context) {
 	for _, incomingId := range user.Incoming_req {
 		friend, retrieveErr := userService.RetrieveUserById(incomingId)
 		if retrieveErr != nil {
-			log.Println(retrieveErr)
-			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 				Success: false,
 				Error:   retrieveErr.Error(),
 			})
@@ -183,8 +195,7 @@ func RetrieveAllUserFriends(c *gin.Context) {
 	for _, friendId := range user.Friends {
 		friend, retrieveErr := userService.RetrieveUserById(friendId)
 		if retrieveErr != nil {
-			log.Println(retrieveErr)
-			c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 				Success: false,
 				Error:   retrieveErr.Error(),
 			})
@@ -210,7 +221,6 @@ func RetrieveAllUserFriends(c *gin.Context) {
 func FindUserByUsername(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -218,20 +228,36 @@ func FindUserByUsername(c *gin.Context) {
 		return
 	}
 
-	reqParams := c.Request.URL.Query()
-	username := reqParams.Get(USERNAME_PARAM_KEY)
+	var reqParams findUserByUsernameParams
 
-	user, retrieveErr := userService.RetrieveUserByUsername(username)
-	if retrieveErr != nil {
-		log.Println(retrieveErr)
+	reqParamsErr := c.BindQuery(&reqParams)
+	if reqParamsErr != nil {
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqParamsErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	user, retrieveErr := userService.RetrieveUserByUsername(reqParams.Username)
+	if retrieveErr != nil {
+		c.JSON(http.StatusNotFound, interfaces.BaseResponse{
 			Success: false,
 			Error:   retrieveErr.Error(),
 		})
 		return
 	}
 
-	userId := c.GetHeader("id")
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
 
 	if !utils.Contains(user.Friends, userId) {
 		user = interfaces.User{
@@ -255,7 +281,6 @@ func FindUserByUsername(c *gin.Context) {
 func SendFriendReq(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -267,7 +292,6 @@ func SendFriendReq(c *gin.Context) {
 
 	reqBodyErr := c.BindJSON(&requestBody)
 	if reqBodyErr != nil {
-		log.Println(reqBodyErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   reqBodyErr.Error(),
@@ -275,8 +299,17 @@ func SendFriendReq(c *gin.Context) {
 		return
 	}
 
+	validationErr := validator.Validate.Struct(requestBody)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
 	recipientId := requestBody.Id
-	senderId := c.GetHeader("id")
+	senderId := c.GetHeader(USER_ID_HEADER_KEY)
 
 	if recipientId == senderId {
 		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
@@ -288,7 +321,6 @@ func SendFriendReq(c *gin.Context) {
 
 	sendReqErr := userService.SendFriendRequest(senderId, recipientId)
 	if sendReqErr != nil {
-		log.Println(sendReqErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   sendReqErr.Error(),
@@ -305,7 +337,6 @@ func SendFriendReq(c *gin.Context) {
 func AcceptFriendReq(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -317,7 +348,6 @@ func AcceptFriendReq(c *gin.Context) {
 
 	reqBodyErr := c.BindJSON(&requestBody)
 	if reqBodyErr != nil {
-		log.Println(reqBodyErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   reqBodyErr.Error(),
@@ -325,12 +355,20 @@ func AcceptFriendReq(c *gin.Context) {
 		return
 	}
 
+	validationErr := validator.Validate.Struct(requestBody)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
 	senderId := requestBody.Id
-	recipientId := c.GetHeader("id")
+	recipientId := c.GetHeader(USER_ID_HEADER_KEY)
 
 	acceptReqErr := userService.AcceptFriendRequest(senderId, recipientId)
 	if acceptReqErr != nil {
-		log.Println(acceptReqErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   acceptReqErr.Error(),
@@ -347,7 +385,6 @@ func AcceptFriendReq(c *gin.Context) {
 func RemoveFriendRequest(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -355,13 +392,30 @@ func RemoveFriendRequest(c *gin.Context) {
 		return
 	}
 
-	reqParams := c.Request.URL.Query()
-	pendingFriendId := reqParams.Get(USER_ID_PARAM_KEY)
-	userId := c.GetHeader("id")
+	var reqParams removeFriendRequestBody
 
-	removeFriendErr := userService.RemoveFriendRequest(userId, pendingFriendId)
+	reqBodyErr := c.BindJSON(&reqParams)
+	if reqBodyErr != nil {
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqBodyErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
+	userId := c.GetHeader(USER_ID_HEADER_KEY)
+
+	removeFriendErr := userService.RemoveFriendRequest(userId, reqParams.Id)
 	if removeFriendErr != nil {
-		log.Println(removeFriendErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   removeFriendErr.Error(),
@@ -378,7 +432,6 @@ func RemoveFriendRequest(c *gin.Context) {
 func RemoveFriend(c *gin.Context) {
 	authDataValidationErr := validator.ValidateAuthDataFromHeader(c.Request.Header)
 	if authDataValidationErr != nil {
-		log.Println(authDataValidationErr)
 		c.JSON(http.StatusUnauthorized, interfaces.BaseResponse{
 			Success: false,
 			Error:   authDataValidationErr.Error(),
@@ -386,13 +439,30 @@ func RemoveFriend(c *gin.Context) {
 		return
 	}
 
-	reqParams := c.Request.URL.Query()
-	friendId := reqParams.Get(USER_ID_PARAM_KEY)
+	var reqParams removeFriendBody
+
+	reqBodyErr := c.BindJSON(&reqParams)
+	if reqBodyErr != nil {
+		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
+			Success: false,
+			Error:   reqBodyErr.Error(),
+		})
+		return
+	}
+
+	validationErr := validator.Validate.Struct(reqParams)
+	if validationErr != nil {
+		c.JSON(http.StatusBadRequest, interfaces.BaseResponse{
+			Success: false,
+			Error:   validationErr.Error(),
+		})
+		return
+	}
+
 	userId := c.GetHeader("id")
 
-	removeFriendErr := userService.RemoveFriend(userId, friendId)
+	removeFriendErr := userService.RemoveFriend(userId, reqParams.Id)
 	if removeFriendErr != nil {
-		log.Println(removeFriendErr)
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
 			Error:   removeFriendErr.Error(),
