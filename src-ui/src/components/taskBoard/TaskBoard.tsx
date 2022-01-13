@@ -8,6 +8,7 @@ import { Task } from "../../interfaces/task/Task";
 import { editTaskCompleted, reorderTasks, retrieveTasks, selectTasks } from "../../services/task/taskSplice";
 import { EditTaskCompletedRequest, ReorderTasksRequest, RetrieveTasksByListIdRequest } from "../../interfaces/task/TaskRequest";
 import { TaskDialog } from "../taskDialog/TaskDialog";
+import MutitaskingIllustration from '../../assets/illustrations/illustration-multitasking.svg'
 
 export interface TaskBoardProps {
     authData: AuthData,
@@ -124,7 +125,7 @@ export function TaskBoard(props: TaskBoardProps) {
 
         dispatch(editTaskCompleted(taskRequest)).then(value => {
             let taskRequest: ReorderTasksRequest
-            if (!value.payload.data.completed) {                
+            if (!value.payload.data.completed) {
                 taskRequest = {
                     authData: authData,
                     id: tasks[initialOrder].id,
@@ -206,11 +207,16 @@ export function TaskBoard(props: TaskBoardProps) {
                                     </Draggable>
                                 }
                             })}
+
+                            {tasks.findIndex((item, _) => item.completed == isCompleted) == -1 && <Stack direction={"row"} justifyContent={"center"}>
+                                <img src={MutitaskingIllustration} width={"40%"} />
+                            </Stack>}
                             {provided.placeholder}
                         </div>
                     )}
                 </Droppable>
             </DragDropContext>
+
 
             {selectedTask && <TaskDialog open={editTaskDialogOpen} data={selectedTask} authData={authData} currentListId={listId} onClose={handleEditTaskDialogClose} />}
         </div>

@@ -10,6 +10,7 @@ import { Search } from "@mui/icons-material";
 import { SearchUserDialog } from "../../components/searchUserDialog/SearchUserDialog";
 import { User, UserFriend } from "../../interfaces/user/User";
 import { FriendCard } from "../../components/friendCard/FriendCard";
+import FindExploreIllustration from '../../assets/illustrations/illustration-find-explore.svg'
 
 export function Friends() {
     const dispatch = useAppDispatch()
@@ -130,6 +131,10 @@ export function Friends() {
                             }
                         })}
                     </Stack>
+                </Stack>}
+
+                {friends.length == 0 && <Stack direction={"row"} justifyContent={"center"}>
+                    <img src={FindExploreIllustration} width={"40%"} />
                 </Stack>}
             </Stack>
 

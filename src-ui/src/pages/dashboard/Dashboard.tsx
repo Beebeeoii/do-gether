@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
 import "./Dashboard.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
-import { Alert, Badge, Button, ButtonGroup, Snackbar, Stack, Tooltip } from "@mui/material";
+import { Alert, Badge, Button, ButtonGroup, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
 import { AddTask, CheckBoxOutlineBlankOutlined, CheckBoxOutlined, FilterAltOutlined, PlaylistAdd } from "@mui/icons-material";
 import { List, ListSettingsDialogOpResponse } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
@@ -18,6 +18,7 @@ import { TaskFilterDialog } from "../../components/taskFilterDialog/TaskFilterDi
 import { SnackBarState } from "../../interfaces/utils/Snackbar";
 import { resetTags } from "../../services/task/tagSplice";
 import { ListSettingsDialog } from "../../components/listDialog/ListSettingsDialog";
+import MutitaskingIllustration from '../../assets/illustrations/illustration-multitasking.svg'
 
 const DEFAULT_FILTER_TAGS_SELECTED_VALUE: Array<string> = []
 
@@ -157,8 +158,11 @@ export function Dashboard() {
             </Stack>
 
             {selectedList && <TaskBoard authData={authData} listId={selectedList.id} filterTags={filterTagsSelected} isCompleted={isCompleted} />}
-            {taskDialogOpen && selectedList && <TaskDialog open={taskDialogOpen} data={null} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
+            {!selectedList && <Stack direction={"row"} justifyContent={"center"}>
+                <img src={MutitaskingIllustration} width={"40%"} />
+            </Stack>}
 
+            {taskDialogOpen && selectedList && <TaskDialog open={taskDialogOpen} data={null} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
             {filterDialogOpen && selectedList && <TaskFilterDialog open={filterDialogOpen} tags={filterTagsSelected} authData={authData} listId={selectedList.id} onClose={handleFilterDialogClose} />}
 
             <Snackbar open={snackBarState.open} autoHideDuration={6000} onClose={closeSnackBar} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>

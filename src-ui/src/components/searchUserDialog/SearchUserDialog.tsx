@@ -86,7 +86,7 @@ export function SearchUserDialog(props: SearchUserDialogProps) {
             {doesUserExist && <Stack direction={'row'} gap={2} sx={{ width: '300px', padding: 2 }}>
                 <UserAvatar username={username} />
 
-                <Typography>
+                <Typography sx={{ marginTop: "auto", marginBottom: "auto" }}>
                     {username}
                 </Typography>
             </Stack>}
