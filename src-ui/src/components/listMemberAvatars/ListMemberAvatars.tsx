@@ -1,11 +1,11 @@
-import { Avatar, AvatarGroup, Stack, Tooltip, Typography } from "@mui/material";
+import { AvatarGroup, Box, Stack, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../app/hooks";
 import { retrieveListMembers } from "../../services/list/listSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { RetrieveListMembersRequest } from "../../interfaces/list/ListRequest";
-import { stringAvatar } from "../../utils/utils";
 import { BasicUser } from "../../interfaces/user/User";
+import { UserAvatar } from "../userAvatar/UserAvatar";
 
 export interface ListMemberAvatarProps {
     authData: AuthData
@@ -44,7 +44,9 @@ export function ListMemberAvatar(props: ListMemberAvatarProps) {
             <AvatarGroup max={4}>
                 {members.map((member: BasicUser, index: number) => (
                     <Tooltip title={member.username} key={index} arrow>
-                        <Avatar {...stringAvatar(member.username)} />
+                        <Box>
+                            <UserAvatar username={member.username} />
+                        </Box>
                     </Tooltip>
                 ))}
             </AvatarGroup>

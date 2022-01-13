@@ -1,5 +1,5 @@
 import { Logout, People } from '@mui/icons-material'
-import { Avatar, Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material'
+import { Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -8,7 +8,7 @@ import { selectAuthenticated, logout } from '../../services/auth/authSplice'
 import { resetLists } from '../../services/list/listSplice'
 import { resetTasks } from '../../services/task/taskSplice'
 import { resetUsers, selectUser } from '../../services/user/userSplice'
-import { stringAvatar } from '../../utils/utils'
+import { UserAvatar } from '../userAvatar/UserAvatar'
 import './NavBar.css'
 
 export function NavBar() {
@@ -45,7 +45,7 @@ export function NavBar() {
             </div>}
 
             {isLoggedIn && <IconButton onClick={handleMenuClick} size="small" sx={{ ml: 2 }}>
-                <Avatar {...stringAvatar(username)} />
+                <UserAvatar username={username} />
             </IconButton>}
 
             <Menu
@@ -76,7 +76,7 @@ export function NavBar() {
                             bgcolor: 'background.paper',
                             transform: 'translateY(-50%) rotate(45deg)',
                             zIndex: 0,
-                        },
+                        }
                     },
                 }}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
@@ -91,8 +91,6 @@ export function NavBar() {
                     Friends
                 </MenuItem>
 
-                <Divider />
-
                 <MenuItem onClick={() => {
                     dispatch(logout())
                     dispatch(resetLists())
@@ -105,6 +103,12 @@ export function NavBar() {
                     </ListItemIcon>
                     Logout
                 </MenuItem>
+
+                <Divider />
+
+                <Typography variant='body2' sx={{ fontWeight: "bold", padding: "0.3rem 0.3rem 0.5rem 0.3rem", textAlign: "center" }}>
+                    👋 {user?.username}
+                </Typography>
             </Menu>
         </nav>
     )

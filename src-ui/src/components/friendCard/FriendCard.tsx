@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useAppDispatch } from "../../app/hooks";
-import { Alert, Avatar, Card, IconButton, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
-import { stringAvatar } from "../../utils/utils";
+import { Alert, Card, IconButton, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
 import { Cancel, Delete, PersonAdd, PersonRemove } from "@mui/icons-material";
 import { FriendReqRequest } from "../../interfaces/user/UserRequest";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { acceptFriendRequest, removeFriend, removeFriendRequest } from "../../services/user/userSplice";
 import { SnackBarState } from "../../interfaces/utils/Snackbar";
+import { UserAvatar } from "../userAvatar/UserAvatar";
 
 export interface FriendCardProps {
     authData: AuthData,
@@ -115,9 +115,9 @@ export function FriendCard(props: FriendCardProps) {
         <Card elevation={1} sx={{ padding: "1rem", width: "30%", minWidth: "200px", marginTop: "1rem", marginRight: "0.5rem" }}>
             <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                 <Stack direction={"column"} alignItems={"center"} sx={{ width: "25%" }}>
-                    <Avatar {...stringAvatar(username)} />
+                    <UserAvatar username={username} />
 
-                    <Typography sx={{ textOverflow: "ellipsis", width: "100%", overflow: "hidden", whiteSpace: "nowrap", textAlign: "center"}}>
+                    <Typography sx={{ textOverflow: "ellipsis", width: "100%", overflow: "hidden", whiteSpace: "nowrap", textAlign: "center" }}>
                         {username}
                     </Typography>
                 </Stack>

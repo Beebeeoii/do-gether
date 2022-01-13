@@ -43,22 +43,36 @@ const avatars = [
     Logo20
 ]
 
-function stringToColor(string: string) {
+function calculateHash(string: string) {
     let hash = 0
-    let i
-
-    for (i = 0; i < string.length; i += 1) {
+    
+    for (let i = 0; i < string.length; i += 1) {
         hash = string.charCodeAt(i) + ((hash << 5) - hash)
     }
 
+    return hash
+}
+
+function stringToColor(string: string) {
+    let hash = calculateHash(string)
     let color = '#'
 
-    for (i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 3; i += 1) {
         const value = (hash >> (i * 8)) & 0xff
         color += `00${value.toString(16)}`.substr(-2)
     }
 
     return color + "30" // add transparency to background colour
+}
+
+function stringToAvatar(string: string) {
+    let hash = calculateHash(string)
+
+    if (hash < 0) {
+        hash *= -1
+    }
+
+    return avatars[hash % nAvatars]
 }
 
 export function stringAvatar(name: string) {
@@ -67,6 +81,6 @@ export function stringAvatar(name: string) {
             bgcolor: stringToColor(name)
         },
         children: name.split(' ')[0][0],
-        src: avatars[name.charCodeAt(0) % nAvatars + name.charCodeAt(1) % nAvatars]
+        src: stringToAvatar(name)
     }
 }

@@ -1,11 +1,11 @@
-import { Avatar, Button, Dialog, DialogActions, DialogTitle, Stack, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogTitle, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { useAppDispatch } from "../../app/hooks";
 import { User } from "../../interfaces/user/User";
 import { retrieveUserByUsername, sendFriendRequest } from "../../services/user/userSplice";
 import { FriendReqRequest, RetrieveByUsernameRequest } from "../../interfaces/user/UserRequest";
-import { stringAvatar } from "../../utils/utils";
+import { UserAvatar } from "../userAvatar/UserAvatar";
 
 export interface SearchUserDialogProps {
     open: boolean
@@ -84,14 +84,14 @@ export function SearchUserDialog(props: SearchUserDialogProps) {
             </DialogTitle>
 
             {doesUserExist && <Stack direction={'row'} gap={2} sx={{ width: '300px', padding: 2 }}>
-                <Avatar {...stringAvatar(username)} />
+                <UserAvatar username={username} />
 
                 <Typography>
                     {username}
                 </Typography>
             </Stack>}
 
-            {!doesUserExist && <Typography sx={{ width: '300px', padding: 2}}>
+            {!doesUserExist && <Typography sx={{ width: '300px', padding: 2 }}>
                 No such user found
             </Typography>}
 

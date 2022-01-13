@@ -1,11 +1,11 @@
-import { Avatar, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../app/hooks";
 import { retrieveListOwner } from "../../services/list/listSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { RetrieveListOwnerRequest } from "../../interfaces/list/ListRequest";
-import { stringAvatar } from "../../utils/utils";
 import { BasicUser } from "../../interfaces/user/User";
+import { UserAvatar } from "../userAvatar/UserAvatar";
 
 export interface ListOwnerAvatarProps {
     authData: AuthData
@@ -39,7 +39,9 @@ export function ListOwnerAvatar(props: ListOwnerAvatarProps) {
                 Owner:
             </Typography>
             {owner && <Tooltip title={owner.username} arrow>
-                <Avatar {...stringAvatar(owner.username)} />
+                <Box>
+                    <UserAvatar username={owner.username} />
+                </Box>
             </Tooltip>}
         </Stack>
     )
