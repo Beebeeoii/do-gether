@@ -208,7 +208,7 @@ export function TaskBoard(props: TaskBoardProps) {
                                 }
                             })}
 
-                            {tasks.findIndex((item, _) => item.completed == isCompleted) == -1 && <Stack direction={"row"} justifyContent={"center"}>
+                            {tasks.findIndex((item, _) => item.completed == isCompleted && (filterTags.length == 0 || filterTags.every((tag, _, __) => item.tags.includes(tag)))) == -1 && <Stack direction={"row"} justifyContent={"center"}>
                                 <img src={MutitaskingIllustration} width={"40%"} />
                             </Stack>}
                             {provided.placeholder}
