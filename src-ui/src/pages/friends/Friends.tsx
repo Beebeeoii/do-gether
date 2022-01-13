@@ -23,6 +23,7 @@ export function Friends() {
 
     const userStatus = useAppSelector(selectUserStatus)
     const [friends, setFriends] = useState<Array<UserFriend>>([])
+    const [hasPendingRequests, setHasPendingRequests] = useState<boolean>(false);
 
     useEffect(() => {
         if (userStatus === "idle") {
@@ -40,6 +41,10 @@ export function Friends() {
                 return
             }
             for (let friendObject of value.payload.data) {
+                if (friendObject.type !== "friend" && !hasPendingRequests) {
+                    setHasPendingRequests(true)
+                }
+
                 friendsTemp.push({
                     id: friendObject.id,
                     username: friendObject.username,
@@ -63,6 +68,8 @@ export function Friends() {
 
     const handleSearchUserDialogClose = (user: User | null) => {
         if (user) {
+            setHasPendingRequests(true)
+
             let friendsTemp: Array<UserFriend> = friends
             friendsTemp.push({
                 id: user.id,
@@ -86,40 +93,44 @@ export function Friends() {
                 value={usernameInput}
                 onChange={handleUsernameInputChange}
                 InputProps={{
-                    endAdornment: <IconButton type="submit" sx={{ p: '10px' }} aria-label="search" onClick={handleSearchUserDialogOpen}>
+                    endAdornment: <IconButton type="submit" sx={{ p: '1rem' }} aria-label="search" onClick={handleSearchUserDialogOpen}>
                         <Search />
                     </IconButton>
                 }}
             />
 
-            <Stack direction={"column"}>
-                <Typography>
-                    Pending Requests
-                </Typography>
+            <Stack direction={"column"} sx={{ marginTop: "1rem" }}>
+                {hasPendingRequests && <Stack direction={"column"}>
+                    <Typography sx={{ marginTop: "1rem", fontWeight: "bold" }}>
+                        Pending Requests
+                    </Typography>
 
-                <Divider />
+                    <Divider />
 
-                <Stack direction={"row"} gap={5} flexWrap={"wrap"}>
-                    {friends.map((friendObject: UserFriend, index: number) => {
-                        if (friendObject.type !== "friend") {
-                            return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
-                        }
-                    })}
-                </Stack>
+                    <Stack direction={"row"} rowGap={4} flexWrap={"wrap"}>
+                        {friends.map((friendObject: UserFriend, index: number) => {
+                            if (friendObject.type !== "friend") {
+                                return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
+                            }
+                        })}
+                    </Stack>
+                </Stack>}
 
-                <Typography>
-                    Your Friends
-                </Typography>
+                {friends.length > 0 && !hasPendingRequests && <Stack direction={"column"}>
+                    <Typography sx={{ marginTop: "1rem", fontWeight: "bold" }}>
+                        Your Friends
+                    </Typography>
 
-                <Divider />
+                    <Divider />
 
-                <Stack direction={"row"} gap={5} flexWrap={"wrap"}>
-                    {friends.map((friendObject: UserFriend, index: number) => {
-                        if (friendObject.type === "friend") {
-                            return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
-                        }
-                    })}
-                </Stack>
+                    <Stack direction={"row"} rowGap={4} flexWrap={"wrap"} >
+                        {friends.map((friendObject: UserFriend, index: number) => {
+                            if (friendObject.type === "friend") {
+                                return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
+                            }
+                        })}
+                    </Stack>
+                </Stack>}
             </Stack>
 
             <SearchUserDialog authData={authData} open={searchUserDialogOpen} username={usernameInput} onClose={handleSearchUserDialogClose} />
