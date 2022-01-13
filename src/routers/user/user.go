@@ -394,7 +394,7 @@ func RemoveFriendRequest(c *gin.Context) {
 
 	var reqParams removeFriendRequestParams
 
-	reqParamsErr := c.BindJSON(&reqParams)
+	reqParamsErr := c.BindQuery(&reqParams)
 	if reqParamsErr != nil {
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
@@ -441,7 +441,7 @@ func RemoveFriend(c *gin.Context) {
 
 	var reqParams removeFriendParams
 
-	reqParamsErr := c.BindJSON(&reqParams)
+	reqParamsErr := c.BindQuery(&reqParams)
 	if reqParamsErr != nil {
 		c.JSON(http.StatusInternalServerError, interfaces.BaseResponse{
 			Success: false,
