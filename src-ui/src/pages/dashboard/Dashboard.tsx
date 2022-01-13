@@ -4,8 +4,8 @@ import { NavBar } from "../../components/nav/NavBar"
 import "./Dashboard.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
 import { Alert, Badge, Button, ButtonGroup, Snackbar, Stack, Tooltip } from "@mui/material";
-import { AddTask, CheckBoxOutlineBlankOutlined, CheckBoxOutlined, FilterAltOutlined } from "@mui/icons-material";
-import { List } from "../../interfaces/list/List";
+import { AddTask, CheckBoxOutlineBlankOutlined, CheckBoxOutlined, FilterAltOutlined, PlaylistAdd } from "@mui/icons-material";
+import { List, ListSettingsDialogOpResponse } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
 import { selectId, selectToken } from "../../services/auth/authSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
@@ -17,6 +17,7 @@ import { ListOwnerAvatar } from "../../components/listOwnerAvatar/ListOwnerAvata
 import { TaskFilterDialog } from "../../components/taskFilterDialog/TaskFilterDialog";
 import { SnackBarState } from "../../interfaces/utils/Snackbar";
 import { resetTags } from "../../services/task/tagSplice";
+import { ListSettingsDialog } from "../../components/listDialog/ListSettingsDialog";
 
 const DEFAULT_FILTER_TAGS_SELECTED_VALUE: Array<string> = []
 
@@ -83,7 +84,7 @@ export function Dashboard() {
 
     const [selectedList, setSelectedList] = useState<List | null>(null)
 
-    const handleListChange = (list: List) => {
+    const handleListChange = (list: List | null) => {
         setFilterTagsSelected(DEFAULT_FILTER_TAGS_SELECTED_VALUE)
         dispatch(resetTags())
         setSelectedList(list)
@@ -106,6 +107,16 @@ export function Dashboard() {
         setTaskDialogOpen(false)
     }
 
+    const [listSettingsDialogOpen, setListSettingsDialogOpen] = useState<boolean>(false)
+
+    const handleListDialogOpen = () => {
+        setListSettingsDialogOpen(true)
+    }
+
+    const handleListDialogClose = (_: ListSettingsDialogOpResponse) => {
+        setListSettingsDialogOpen(false)
+    }
+
     return (
         <div className="dashboard">
             <NavBar />
@@ -119,10 +130,15 @@ export function Dashboard() {
                 <div style={{ flex: '1 0 0' }} />
 
                 <ButtonGroup variant="contained" aria-label="action-button">
-                    <Button onClick={handleTaskDialogOpen}>
+                    {!selectedList && <Button onClick={handleListDialogOpen}>
+                        <PlaylistAdd sx={{ mr: 1 }} />
+                        Create List
+                    </Button>}
+
+                    {selectedList && <Button onClick={handleTaskDialogOpen}>
                         <AddTask sx={{ mr: 1 }} />
                         Add Task
-                    </Button>
+                    </Button>}
 
                     {selectedList && <Tooltip title="Filter" arrow>
                         <Button onClick={handleFilterClick} sx={{ paddingTop: "8px", paddingBottom: "8px" }} >
@@ -150,6 +166,8 @@ export function Dashboard() {
                     {snackBarState.message}
                 </Alert>
             </Snackbar>
+
+            <ListSettingsDialog open={listSettingsDialogOpen} data={null} authData={authData} onClose={handleListDialogClose} />
         </div>
     )
 }

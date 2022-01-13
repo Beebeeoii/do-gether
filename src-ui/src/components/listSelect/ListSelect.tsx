@@ -14,7 +14,7 @@ import { ListMembersDialog } from "../listDialog/ListMembersDialog";
 export interface ListSelectProps {
     authData: AuthData,
     userId: string,
-    onSelect: (listSelected: List) => void
+    onSelect: (listSelected: List | null) => void
 }
 
 const CREATE_LIST_VALUE = "new_list"
@@ -50,17 +50,21 @@ export function ListSelect(props: ListSelectProps) {
 
             dispatch(retrieveAllLists(listRequest))
         } else if (settingsDialogOperation != "idle" && listStatus === "succeeded") {
-            if (lists.length == 0) {
-                return
-            }
-
             let listsOwnedByUser = getListsOwnedByUser(lists, userId)
             let listsNotOwnedByUser = getListsNotOwnedByUser(lists, userId)
 
             setUserLists(listsOwnedByUser)
             setUserJoinedLists(listsNotOwnedByUser)
 
-            if (settingsDialogOperation == "edit" || settingsDialogOperation == "close") {
+            if (settingsDialogOperation == "delete" && lists.length == 0) {
+                setNewListId(null)
+                setSettingsDialogOperation(undefined)
+                setSelectedList(null)
+                onSelect(null)
+                return
+            }
+
+            if (settingsDialogOperation == "edit" || settingsDialogOperation == "close" || lists.length == 0) {
                 return
             }
 
@@ -72,7 +76,6 @@ export function ListSelect(props: ListSelectProps) {
 
             setNewListId("")
             setSettingsDialogOperation("idle")
-
             setSelectedList(listToSelect)
             onSelect(listToSelect)
         }
