@@ -134,7 +134,7 @@ export function ListSelect(props: ListSelectProps) {
 
     return (
         <div>
-            <FormControl sx={{ m: 1, width: 300 }}>
+            <FormControl fullWidth>
                 <InputLabel id="list-select-label">
                     List
                 </InputLabel>
@@ -150,6 +150,7 @@ export function ListSelect(props: ListSelectProps) {
                             {selectedList?.name}
                         </Box>
                     )}
+                    // fullWidth
                 >
                     {userLists.length == 0 && userJoinedLists.length == 0 && <MenuItem disabled value={NO_LIST_VALUE}>
                         {NO_LIST_TEXT}

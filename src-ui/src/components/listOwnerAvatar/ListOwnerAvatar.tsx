@@ -1,4 +1,4 @@
-import { Box, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Stack, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../app/hooks";
 import { retrieveListOwner } from "../../services/list/listSplice";
@@ -35,11 +35,8 @@ export function ListOwnerAvatar(props: ListOwnerAvatarProps) {
 
     return (
         <Stack direction={'row'} alignItems={'center'} gap={1}>
-            <Typography>
-                Owner:
-            </Typography>
             {owner && <Tooltip title={owner.username} arrow>
-                <Box>
+                <Box sx={{border: "3px solid #aa52f7", borderRadius: "50%", padding: "2px"}}>
                     <UserAvatar username={owner.username} />
                 </Box>
             </Tooltip>}

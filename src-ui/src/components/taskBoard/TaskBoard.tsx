@@ -1,4 +1,4 @@
-import { Box, Card, Checkbox, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Card, Checkbox, Chip, Container, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { AuthData } from "../../interfaces/auth/Auth";
@@ -21,9 +21,9 @@ const grid = 8
 
 const getBoardStyle = (isDraggingOver: boolean) => ({
     background: "white",
-    padding: grid,
-    width: 250
-})
+    padding: 0,
+    marginTop: "1rem"
+} as React.CSSProperties)
 
 const getTaskItemStyle = (isDragging: boolean, draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
     userSelect: "none",
@@ -156,11 +156,11 @@ export function TaskBoard(props: TaskBoardProps) {
     };
 
     return (
-        <div>
+        <Box sx={{ padding: 0 }}>
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="droppable">
                     {(provided, snapshot) => (
-                        <div
+                        <Container
                             {...provided.droppableProps}
                             ref={provided.innerRef}
                             style={getBoardStyle(snapshot.isDraggingOver)}
@@ -208,17 +208,17 @@ export function TaskBoard(props: TaskBoardProps) {
                                 }
                             })}
 
-                            {tasks.findIndex((item, _) => item.completed == isCompleted && (filterTags.length == 0 || filterTags.every((tag, _, __) => item.tags.includes(tag)))) == -1 && <Stack direction={"row"} justifyContent={"center"}>
-                                <img src={MutitaskingIllustration} width={"40%"} />
-                            </Stack>}
+                            {tasks.findIndex((item, _) => item.completed == isCompleted && (filterTags.length == 0 || filterTags.every((tag, _, __) => item.tags.includes(tag)))) == -1 && <Box sx={{ display: "flex", justifyContent: "center" }}>
+                                <img src={MutitaskingIllustration} width={"100%"} style={{ maxWidth: "600px" }} />
+                            </Box>}
                             {provided.placeholder}
-                        </div>
+                        </Container>
                     )}
                 </Droppable>
             </DragDropContext>
 
 
             {selectedTask && <TaskDialog open={editTaskDialogOpen} data={selectedTask} authData={authData} currentListId={listId} onClose={handleEditTaskDialogClose} />}
-        </div>
+        </Box>
     )
 }

@@ -1,4 +1,4 @@
-import { AvatarGroup, Box, Stack, Tooltip, Typography } from "@mui/material";
+import { AvatarGroup, Box, Stack, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../app/hooks";
 import { retrieveListMembers } from "../../services/list/listSplice";
@@ -37,14 +37,10 @@ export function ListMemberAvatar(props: ListMemberAvatarProps) {
 
     return (
         <Stack direction={'row'} alignItems={'center'} gap={1}>
-            {members.length != 0 && <Typography>
-                Members:
-            </Typography>}
-
             <AvatarGroup max={4}>
                 {members.map((member: BasicUser, index: number) => (
                     <Tooltip title={member.username} key={index} arrow>
-                        <Box>
+                        <Box sx={{ border: "2px solid #52d1f7", borderRadius: "50%", padding: "1px", marginRight: "4px" }}>
                             <UserAvatar username={member.username} />
                         </Box>
                     </Tooltip>

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NavBar } from "../../components/nav/NavBar"
-import "./Dashboard.css"
 import { UserRequest } from "../../interfaces/user/UserRequest";
-import { Alert, Badge, Button, ButtonGroup, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
+import { Alert, Badge, Box, Button, ButtonGroup, Container, Grid, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
 import { AddTask, CheckBoxOutlineBlankOutlined, CheckBoxOutlined, FilterAltOutlined, PlaylistAdd } from "@mui/icons-material";
 import { List, ListSettingsDialogOpResponse } from "../../interfaces/list/List";
 import { retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
@@ -119,48 +118,58 @@ export function Dashboard() {
     }
 
     return (
-        <div className="dashboard">
+        <Container maxWidth="lg">
             <NavBar />
 
-            <Stack direction="row" gap={3} alignItems={'center'}>
-                <ListSelect authData={authData} userId={authData.id} onSelect={handleListChange} />
+            <Grid container rowGap={3} columnGap={1} alignItems={"center"}>
+                <Grid item xs={12} sm={4}>
+                    <ListSelect authData={authData} userId={authData.id} onSelect={handleListChange} />
 
-                {selectedList && <ListOwnerAvatar authData={authData} listId={selectedList.id} />}
-                {selectedList && <ListMemberAvatar authData={authData} listId={selectedList.id} />}
+                </Grid>
 
-                <div style={{ flex: '1 0 0' }} />
+                <Grid item xs={2} sm={1.2} md={1}>
+                    {selectedList && <ListOwnerAvatar authData={authData} listId={selectedList.id} />}
+                </Grid>
 
-                <ButtonGroup variant="contained" aria-label="action-button">
-                    {!selectedList && <Button onClick={handleListDialogOpen}>
-                        <PlaylistAdd sx={{ mr: 1 }} />
-                        Create List
-                    </Button>}
+                <Grid item container justifyContent={"flex-end"} xs sm>
+                    {selectedList && <ListMemberAvatar authData={authData} listId={selectedList.id} />}
+                </Grid>
 
-                    {selectedList && <Button onClick={handleTaskDialogOpen}>
-                        <AddTask sx={{ mr: 1 }} />
-                        Add Task
-                    </Button>}
+                <Grid item container justifyContent={"flex-end"} xs sm >
+                    <ButtonGroup variant="contained" aria-label="action-button">
+                        {!selectedList && <Button onClick={handleListDialogOpen}>
+                            <PlaylistAdd sx={{ mr: 1 }} />
+                            Create List
+                        </Button>}
 
-                    {selectedList && <Tooltip title="Filter" arrow>
-                        <Button onClick={handleFilterClick} sx={{ paddingTop: "8px", paddingBottom: "8px" }} >
-                            <Badge color="secondary" variant={filterTagsSelected.length == 0 ? undefined : "dot"}>
-                                <FilterAltOutlined />
-                            </Badge>
-                        </Button>
-                    </Tooltip>}
+                        {selectedList && <Button onClick={handleTaskDialogOpen}>
+                            <AddTask sx={{ mr: 1 }} />
+                            Add Task
+                        </Button>}
 
-                    {selectedList && <Tooltip title={isCompleted ? "View current tasks" : "View completed tasks"} arrow>
-                        <Button onClick={handleCompletedClick} sx={{ paddingTop: "8px", paddingBottom: "8px" }} >
-                            {isCompleted ? <CheckBoxOutlineBlankOutlined /> : <CheckBoxOutlined />}
-                        </Button>
-                    </Tooltip>}
-                </ButtonGroup>
-            </Stack>
+                        {selectedList && <Tooltip title="Filter" arrow>
+                            <Button onClick={handleFilterClick} sx={{ paddingTop: "8px", paddingBottom: "8px" }} >
+                                <Badge color="secondary" variant={filterTagsSelected.length == 0 ? undefined : "dot"}>
+                                    <FilterAltOutlined />
+                                </Badge>
+                            </Button>
+                        </Tooltip>}
+
+                        {selectedList && <Tooltip title={isCompleted ? "View current tasks" : "View completed tasks"} arrow>
+                            <Button onClick={handleCompletedClick} sx={{ paddingTop: "8px", paddingBottom: "8px" }} >
+                                {isCompleted ? <CheckBoxOutlineBlankOutlined /> : <CheckBoxOutlined />}
+                            </Button>
+                        </Tooltip>}
+                    </ButtonGroup>
+                </Grid>
+            </Grid>
 
             {selectedList && <TaskBoard authData={authData} listId={selectedList.id} filterTags={filterTagsSelected} isCompleted={isCompleted} />}
-            {!selectedList && <Stack direction={"row"} justifyContent={"center"}>
-                <img src={MutitaskingIllustration} width={"40%"} />
-            </Stack>}
+
+            {!selectedList && <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <img src={MutitaskingIllustration} width={"100%"} style={{ maxWidth: "600px" }} />
+            </Box>}
+
 
             {taskDialogOpen && selectedList && <TaskDialog open={taskDialogOpen} data={null} authData={authData} currentListId={selectedList.id} onClose={handleTaskDialogClose} />}
             {filterDialogOpen && selectedList && <TaskFilterDialog open={filterDialogOpen} tags={filterTagsSelected} authData={authData} listId={selectedList.id} onClose={handleFilterDialogClose} />}
@@ -172,6 +181,6 @@ export function Dashboard() {
             </Snackbar>
 
             <ListSettingsDialog open={listSettingsDialogOpen} data={null} authData={authData} onClose={handleListDialogClose} />
-        </div>
+        </Container>
     )
 }
