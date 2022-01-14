@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogTitle, FormControl, FormControlLabel, FormGroup, IconButton, InputLabel, Menu, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, IconButton, InputLabel, Menu, MenuItem, Rating, Select, SelectChangeEvent, Stack, Switch, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material";
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import MomentAdapter from '@mui/lab/AdapterMoment';
 import { ChangeEvent, MouseEvent, ReactNode, SyntheticEvent, useState } from "react";
@@ -34,9 +34,9 @@ function TabPanel(props: TabPanelProps) {
             {...other}
         >
             {value === index && (
-                <Box sx={{ paddingTop: 2, paddingBottom: 3, paddingLeft: 3, paddingRight: 3, width: '500px' }}>
+                <Stack direction={"column"} rowGap={3} paddingTop={"0.5rem"}>
                     {children}
-                </Box>
+                </Stack>
             )}
         </div>
     )
@@ -207,164 +207,156 @@ export function TaskDialog(props: TaskDialogProps) {
     };
 
     return (
-        <Dialog onClose={handleDialogClose} open={open}>
+        <Dialog onClose={handleDialogClose} open={open} fullWidth>
             <DialogTitle>
                 {data ? "Edit a Task" : "Create a task"}
             </DialogTitle>
 
-            <Box sx={{ padding: '4px' }}>
+            <DialogContent>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="basic tabs example">
+                    <Tabs value={tabValue} onChange={handleTabChange} aria-label="tabs">
                         <Tab label="Main" {...tabProps(0)} />
                         <Tab label="Extra" {...tabProps(1)} />
                     </Tabs>
                 </Box>
 
-                <TabPanel value={tabValue} index={0}>
-                    <Stack direction={"column"} gap={2}>
-                        <TextField
-                            id="taskTitle"
-                            label="Task"
-                            value={taskTitle}
-                            onChange={handleTitleChange}
-                            variant="standard"
-                            autoFocus
-                        />
+                <TabPanel value={tabValue} index={0} >
+                    <TextField
+                        id="taskTitle"
+                        label="Task"
+                        value={taskTitle}
+                        onChange={handleTitleChange}
+                        variant="standard"
+                        autoFocus
+                        fullWidth
+                    />
 
-                        <Stack direction={'row'} justifyContent={'space-between'} gap={2}>
-                            <FormControl sx={{ flexGrow: 1 }}>
-                                <InputLabel id="listSelectorLabel">List</InputLabel>
-                                <Select
-                                    labelId="listSelectorLabel"
-                                    id="listSelector"
-                                    value={listId}
-                                    onChange={handleListChange}
-                                    autoWidth
-                                    label="List"
-                                    disabled={data != null}
-                                >
-                                    <MenuItem key={DEFAULT_LIST_VALUE} value={DEFAULT_LIST_VALUE} disabled>Choose your list</MenuItem>
-                                    {lists.map((list: List, _: number) => (
-                                        <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-
-                            {data && <Tooltip title="Move task to another list">
-                                <IconButton id="move-task-button" aria-controls="move-task-menu" aria-haspopup="true" aria-expanded={moveTaskMenuOpen ? 'true' : undefined} onClick={handleMoveTaskMenuClick}>
-                                    <DriveFileMove />
-                                </IconButton>
-                            </Tooltip>}
-
-                            {data && <Menu
-                                id="move-task-menu"
-                                anchorEl={moveMenuAnchorEl}
-                                open={moveTaskMenuOpen}
-                                onClose={handleMoveTaskMenuClose}
-                                MenuListProps={{
-                                    'aria-labelledby': 'move-task-button',
-                                }}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'right',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
+                    <Stack direction={'row'} justifyContent={'space-between'} gap={2} marginTop={"0.5rem"}>
+                        <FormControl sx={{ flexGrow: 1 }}>
+                            <InputLabel id="listSelectorLabel">List</InputLabel>
+                            <Select
+                                labelId="listSelectorLabel"
+                                id="listSelector"
+                                value={listId}
+                                onChange={handleListChange}
+                                autoWidth
+                                label="List"
+                                disabled={data != null}
                             >
-                                {lists.filter((list, _, __) => list.id != data.listId).length == 0 && <MenuItem disabled value={NO_LIST_VALUE}>
-                                    {NO_LIST_TEXT}
-                                </MenuItem>}
+                                <MenuItem key={DEFAULT_LIST_VALUE} value={DEFAULT_LIST_VALUE} disabled>Choose your list</MenuItem>
+                                {lists.map((list: List, _: number) => (
+                                    <MenuItem key={list.id} value={list.id}>{list.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
 
-                                {lists.map((list: List, _: number) => {
-                                    if (list.id != data.listId) {
-                                        return <MenuItem key={list.id} value={list.id} onClick={handleMoveTask(list.id)}>
-                                            {list.name}
-                                        </MenuItem>
-                                    }
-                                })}
-                            </Menu>}
+                        {data && <Tooltip title="Move task to another list">
+                            <IconButton id="move-task-button" aria-controls="move-task-menu" aria-haspopup="true" aria-expanded={moveTaskMenuOpen ? 'true' : undefined} onClick={handleMoveTaskMenuClick}>
+                                <DriveFileMove />
+                            </IconButton>
+                        </Tooltip>}
 
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: "column"
-                                }}
-                            >
-                                <Typography>Priority</Typography>
+                        {data && <Menu
+                            id="move-task-menu"
+                            anchorEl={moveMenuAnchorEl}
+                            open={moveTaskMenuOpen}
+                            onClose={handleMoveTaskMenuClose}
+                            MenuListProps={{
+                                'aria-labelledby': 'move-task-button',
+                            }}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                        >
+                            {lists.filter((list, _, __) => list.id != data.listId).length == 0 && <MenuItem disabled value={NO_LIST_VALUE}>
+                                {NO_LIST_TEXT}
+                            </MenuItem>}
 
-                                <Rating
-                                    name="priority"
-                                    value={priorityLevel}
-                                    precision={1}
-                                    max={3}
-                                    onChange={handlePriorityLevelChange}
-                                    icon={<Star fontSize="inherit" />}
-                                    emptyIcon={<Star style={{ opacity: 0.50 }} fontSize="inherit" />}
-                                />
-                            </Box>
-                        </Stack>
+                            {lists.map((list: List, _: number) => {
+                                if (list.id != data.listId) {
+                                    return <MenuItem key={list.id} value={list.id} onClick={handleMoveTask(list.id)}>
+                                        {list.name}
+                                    </MenuItem>
+                                }
+                            })}
+                        </Menu>}
 
-                        <TaskTagsAutocomplete authData={authData} listId={currentListId} tags={tagsSelected} freeSolo={true} onTagsSelect={setTagsSelected} />
+                        <Box sx={{ display: 'flex', flexDirection: "column" }}>
+                            <Typography>Priority</Typography>
+
+                            <Rating
+                                name="priority"
+                                value={priorityLevel}
+                                precision={1}
+                                max={3}
+                                onChange={handlePriorityLevelChange}
+                                icon={<Star fontSize="inherit" />}
+                                emptyIcon={<Star style={{ opacity: 0.50 }} fontSize="inherit" />}
+                            />
+                        </Box>
                     </Stack>
+
+                    <TaskTagsAutocomplete authData={authData} listId={currentListId} tags={tagsSelected} freeSolo={true} onTagsSelect={setTagsSelected} />
                 </TabPanel>
 
                 <TabPanel value={tabValue} index={1}>
-                    <Stack direction={"column"} gap={2}>
-                        <Stack direction={"row"} justifyContent={"space-between"}>
-                            <FormGroup sx={{ justifyContent: "center" }}>
-                                <FormControlLabel control={<Switch checked={dueDateActive} value={dueDateActive} onChange={handleDueDateActiveChange} />} label="Include due date" />
-                            </FormGroup>
+                    <Stack direction={"row"} justifyContent={"space-between"}>
+                        <FormGroup sx={{ justifyContent: "center" }}>
+                            <FormControlLabel control={<Switch checked={dueDateActive} value={dueDateActive} onChange={handleDueDateActiveChange} />} label="Include due date" />
+                        </FormGroup>
 
-                            {dueDateActive && <LocalizationProvider dateAdapter={MomentAdapter}>
-                                <DateTimePicker
-                                    renderInput={(props) => <TextField {...props} />}
-                                    label="Due date"
-                                    value={dueDate}
-                                    onChange={(dateSelected) => {
-                                        setDueDate(dateSelected)
-                                    }}
-                                />
-                            </LocalizationProvider>}
-                        </Stack>
+                        {dueDateActive && <LocalizationProvider dateAdapter={MomentAdapter}>
+                            <DateTimePicker
+                                renderInput={(props) => <TextField {...props} />}
+                                label="Due date"
+                                value={dueDate}
+                                onChange={(dateSelected) => {
+                                    setDueDate(dateSelected)
+                                }}
+                            />
+                        </LocalizationProvider>}
+                    </Stack>
 
-                        <Stack direction={"row"} justifyContent={"space-between"}>
-                            <FormGroup sx={{ justifyContent: "center" }}>
-                                <FormControlLabel control={<Switch value={plannedStartActive} onChange={handlePlannedStartActiveChange} />} label="Include date to start" />
-                            </FormGroup>
+                    <Stack direction={"row"} justifyContent={"space-between"}>
+                        <FormGroup sx={{ justifyContent: "center" }}>
+                            <FormControlLabel control={<Switch value={plannedStartActive} onChange={handlePlannedStartActiveChange} />} label="Include date to start" />
+                        </FormGroup>
 
-                            {plannedStartActive && <LocalizationProvider dateAdapter={MomentAdapter}>
-                                <DateTimePicker
-                                    renderInput={(props) => <TextField {...props} />}
-                                    label="Planned start date"
-                                    value={plannedStart}
-                                    onChange={(dateSelected) => {
-                                        setPlannedStart(dateSelected)
-                                    }}
-                                />
-                            </LocalizationProvider>}
-                        </Stack>
+                        {plannedStartActive && <LocalizationProvider dateAdapter={MomentAdapter}>
+                            <DateTimePicker
+                                renderInput={(props) => <TextField {...props} />}
+                                label="Planned start date"
+                                value={plannedStart}
+                                onChange={(dateSelected) => {
+                                    setPlannedStart(dateSelected)
+                                }}
+                            />
+                        </LocalizationProvider>}
+                    </Stack>
 
-                        <Stack direction={"row"} justifyContent={"space-between"}>
-                            <FormGroup sx={{ justifyContent: "center" }}>
-                                <FormControlLabel control={<Switch value={plannedEndActive} onChange={handlePlannedEndActiveChange} />} label="Include end date" />
-                            </FormGroup>
+                    <Stack direction={"row"} justifyContent={"space-between"}>
+                        <FormGroup sx={{ justifyContent: "center" }}>
+                            <FormControlLabel control={<Switch value={plannedEndActive} onChange={handlePlannedEndActiveChange} />} label="Include end date" />
+                        </FormGroup>
 
-                            {plannedEndActive && <LocalizationProvider dateAdapter={MomentAdapter}>
-                                <DateTimePicker
-                                    renderInput={(props) => <TextField {...props} />}
-                                    label="Planned end date"
-                                    value={plannedEnd}
-                                    onChange={(dateSelected) => {
-                                        setPlannedEnd(dateSelected)
-                                    }}
-                                />
-                            </LocalizationProvider>}
-                        </Stack>
+                        {plannedEndActive && <LocalizationProvider dateAdapter={MomentAdapter}>
+                            <DateTimePicker
+                                renderInput={(props) => <TextField {...props} />}
+                                label="Planned end date"
+                                value={plannedEnd}
+                                onChange={(dateSelected) => {
+                                    setPlannedEnd(dateSelected)
+                                }}
+                            />
+                        </LocalizationProvider>}
                     </Stack>
                 </TabPanel>
-            </Box>
+            </DialogContent>
 
             <DialogActions>
                 {data && <Button color="error" onClick={handleDeleteTask}>
