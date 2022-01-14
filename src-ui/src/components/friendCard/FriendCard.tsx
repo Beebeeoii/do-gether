@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useAppDispatch } from "../../app/hooks";
-import { Alert, Card, IconButton, Snackbar, Stack, Tooltip, Typography } from "@mui/material";
+import { Card, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { Cancel, Delete, PersonAdd, PersonRemove } from "@mui/icons-material";
 import { FriendReqRequest } from "../../interfaces/user/UserRequest";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { acceptFriendRequest, removeFriend, removeFriendRequest } from "../../services/user/userSplice";
-import { SnackBarState } from "../../interfaces/utils/Snackbar";
 import { UserAvatar } from "../userAvatar/UserAvatar";
 
 export interface FriendCardProps {
@@ -13,7 +12,7 @@ export interface FriendCardProps {
     userId: string,
     username: string,
     type: 'outgoing' | 'incoming' | 'friend',
-    onCancelOrRemove: (userId: string) => void,
+    onCancelOrRemove: (userId: string, action: "Cancel" | "Remove") => void,
     onAccept: (userId: string) => void
 }
 
@@ -22,24 +21,6 @@ export function FriendCard(props: FriendCardProps) {
     const { authData, userId, username, type, onCancelOrRemove, onAccept } = props
 
     const [updatedType, setUpdatedType] = useState<'null' | 'outgoing' | 'incoming' | 'friend'>(type)
-
-    const defaultSnackBarState: SnackBarState = {
-        open: false,
-        severity: "info",
-        message: ""
-    }
-    const [snackBarState, setSnackBarState] = useState<SnackBarState>(defaultSnackBarState)
-
-    const openSnackBar = (newState: SnackBarState) => () => {
-        setSnackBarState(newState)
-    }
-
-    const closeSnackBar = () => {
-        setSnackBarState({
-            ...snackBarState,
-            open: false
-        })
-    }
 
     const handleAcceptFriendRequest = () => {
         let friendReqRequest: FriendReqRequest = {
@@ -50,21 +31,12 @@ export function FriendCard(props: FriendCardProps) {
         dispatch(acceptFriendRequest(friendReqRequest)).then((value) => {
             if (value.payload.success) {
                 setUpdatedType('friend')
-                openSnackBar({
-                    open: true,
-                    severity: "success",
-                    message: "Friend request accepted"
-                })()
+
+                onAccept(userId)
             } else {
-                openSnackBar({
-                    open: true,
-                    severity: "error",
-                    message: "An error has occurred"
-                })()
+                onAccept("")
             }
         })
-
-        onAccept(userId)
     }
 
     const handleCancelFriendRequest = () => {
@@ -76,21 +48,11 @@ export function FriendCard(props: FriendCardProps) {
         dispatch(removeFriendRequest(friendReqRequest)).then((value) => {
             if (value.payload.success) {
                 setUpdatedType('null')
-                openSnackBar({
-                    open: true,
-                    severity: "success",
-                    message: "Friend request cancelled"
-                })()
+                onCancelOrRemove(userId, "Cancel")
             } else {
-                openSnackBar({
-                    open: true,
-                    severity: "error",
-                    message: "An error has occurred"
-                })()
+                onCancelOrRemove("", "Cancel")
             }
         })
-
-        onCancelOrRemove(userId)
     }
 
     const handleRemoveFriend = () => {
@@ -102,21 +64,11 @@ export function FriendCard(props: FriendCardProps) {
         dispatch(removeFriend(friendReqRequest)).then((value) => {
             if (value.payload.success) {
                 setUpdatedType('null')
-                openSnackBar({
-                    open: true,
-                    severity: "success",
-                    message: "Friend removed"
-                })()
+                onCancelOrRemove(userId, "Remove")
             } else {
-                openSnackBar({
-                    open: true,
-                    severity: "error",
-                    message: "An error has occurred"
-                })()
+                onCancelOrRemove("", "Remove")
             }
         })
-
-        onCancelOrRemove(userId)
     }
 
     return (
@@ -156,12 +108,6 @@ export function FriendCard(props: FriendCardProps) {
                     </IconButton>
                 </Tooltip>}
             </Stack>
-
-            <Snackbar open={snackBarState.open} autoHideDuration={6000} onClose={closeSnackBar} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
-                <Alert onClose={closeSnackBar} severity={snackBarState.severity} sx={{ width: '100%' }}>
-                    {snackBarState.message}
-                </Alert>
-            </Snackbar>
         </Card>
     )
 }

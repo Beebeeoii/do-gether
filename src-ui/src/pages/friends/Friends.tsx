@@ -5,12 +5,13 @@ import { UserRequest } from "../../interfaces/user/UserRequest";
 import { retrieveUserFriends, retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
 import { selectId, selectToken } from "../../services/auth/authSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
-import { Box, Container, Divider, Grid, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Container, Divider, Grid, IconButton, Snackbar, Stack, TextField, Typography } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import { SearchUserDialog } from "../../components/searchUserDialog/SearchUserDialog";
 import { User, UserFriend } from "../../interfaces/user/User";
 import { FriendCard } from "../../components/friendCard/FriendCard";
 import FindExploreIllustration from '../../assets/illustrations/illustration-find-explore.svg'
+import { SnackBarState } from "../../interfaces/utils/Snackbar";
 
 export function Friends() {
     const dispatch = useAppDispatch()
@@ -82,13 +83,29 @@ export function Friends() {
                 username: user.username,
                 type: 'outgoing'
             } as UserFriend)
+
             setFriends(friendsTemp)
+
+            openSnackBar({
+                open: true,
+                severity: "success",
+                message: "Friend request sent"
+            })()
         }
 
         setSearchUserDialogOpen(false)
     }
 
-    const handleFriendCardOnCancelOrRemove = (userId: string) => {
+    const handleFriendCardOnCancelOrRemove = (userId: string, action: "Cancel" | "Remove") => {
+        if (userId === "") {
+            openSnackBar({
+                open: true,
+                severity: "error",
+                message: "An error has occurred"
+            })()
+            return
+        }
+
         let updatedFriends: Array<UserFriend> = []
         let hasOtherFriends = false
         let hasOtherPendingRequests = false
@@ -106,16 +123,31 @@ export function Friends() {
                 }
             }
         }
-        
+
         setFriends(updatedFriends)
         setHasFriends(hasOtherFriends)
         setHasPendingRequests(hasOtherPendingRequests)
+
+        openSnackBar({
+            open: true,
+            severity: "success",
+            message: action === "Cancel" ? "Friend request cancelled" : "Friend removed"
+        })()
     }
 
     const handleFriendCardOnAccept = (userId: string) => {
+        if (userId === "") {
+            openSnackBar({
+                open: true,
+                severity: "error",
+                message: "An error has occurred"
+            })()
+            return
+        }
+        
         let updatedFriends: Array<UserFriend> = []
         let hasOtherPendingRequests = false
-        
+
         for (let friend of friends) {
             if (userId !== friend.id) {
                 updatedFriends.push(friend)
@@ -132,12 +164,35 @@ export function Friends() {
         }
 
         setFriends(updatedFriends)
-        
+
         if (!hasFriends) {
             setHasFriends(true)
         }
 
         setHasPendingRequests(hasOtherPendingRequests)
+
+        openSnackBar({
+            open: true,
+            severity: "success",
+            message: "Friend request accepted"
+        })()
+    }
+
+    const defaultSnackBarState: SnackBarState = {
+        open: false,
+        severity: "info",
+        message: ""
+    }
+    const [snackBarState, setSnackBarState] = useState<SnackBarState>(defaultSnackBarState)
+    const openSnackBar = (newState: SnackBarState) => () => {
+        setSnackBarState(newState)
+    }
+
+    const closeSnackBar = () => {
+        setSnackBarState({
+            ...snackBarState,
+            open: false
+        })
     }
 
     return (
@@ -173,7 +228,7 @@ export function Friends() {
                                 {friends.map((friendObject: UserFriend, index: number) => {
                                     if (friendObject.type !== "friend") {
                                         return <Grid key={index} item xs={12} sm={5.5} md={3.5}>
-                                            <FriendCard authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} onCancelOrRemove={handleFriendCardOnCancelOrRemove} onAccept={handleFriendCardOnAccept}/>
+                                            <FriendCard authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} onCancelOrRemove={handleFriendCardOnCancelOrRemove} onAccept={handleFriendCardOnAccept} />
                                         </Grid>
                                     }
                                 })}
@@ -191,7 +246,7 @@ export function Friends() {
                                 {friends.map((friendObject: UserFriend, index: number) => {
                                     if (friendObject.type === "friend") {
                                         return <Grid key={index} item xs={12} sm={5.5} md={3.5}>
-                                            <FriendCard authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} onCancelOrRemove={handleFriendCardOnCancelOrRemove} onAccept={handleFriendCardOnAccept}/>
+                                            <FriendCard authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} onCancelOrRemove={handleFriendCardOnCancelOrRemove} onAccept={handleFriendCardOnAccept} />
                                         </Grid>
                                     }
                                 })}
@@ -205,8 +260,13 @@ export function Friends() {
                 </Grid>
             </Grid>
 
-
             <SearchUserDialog authData={authData} open={searchUserDialogOpen} username={usernameInput} onClose={handleSearchUserDialogClose} />
+
+            <Snackbar open={snackBarState.open} autoHideDuration={6000} onClose={closeSnackBar} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
+                <Alert onClose={closeSnackBar} severity={snackBarState.severity} sx={{ width: '100%' }}>
+                    {snackBarState.message}
+                </Alert>
+            </Snackbar>
         </Container>
     )
 }
