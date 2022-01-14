@@ -5,7 +5,7 @@ import { UserRequest } from "../../interfaces/user/UserRequest";
 import { retrieveUserFriends, retrieveUserInfo, selectUserStatus } from "../../services/user/userSplice";
 import { selectId, selectToken } from "../../services/auth/authSplice";
 import { AuthData } from "../../interfaces/auth/Auth";
-import { Box, Divider, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { Box, Container, Divider, Grid, IconButton, Stack, TextField, Typography } from "@mui/material";
 import { Search } from "@mui/icons-material";
 import { SearchUserDialog } from "../../components/searchUserDialog/SearchUserDialog";
 import { User, UserFriend } from "../../interfaces/user/User";
@@ -25,6 +25,7 @@ export function Friends() {
     const userStatus = useAppSelector(selectUserStatus)
     const [friends, setFriends] = useState<Array<UserFriend>>([])
     const [hasPendingRequests, setHasPendingRequests] = useState<boolean>(false);
+    const [hasFriends, setHasFriends] = useState<boolean>(false);
 
     useEffect(() => {
         if (userStatus === "idle") {
@@ -44,6 +45,10 @@ export function Friends() {
             for (let friendObject of value.payload.data) {
                 if (friendObject.type !== "friend" && !hasPendingRequests) {
                     setHasPendingRequests(true)
+                }
+
+                if (friendObject.type === "friend" && !hasFriends) {
+                    setHasFriends(true)
                 }
 
                 friendsTemp.push({
@@ -83,62 +88,125 @@ export function Friends() {
         setSearchUserDialogOpen(false)
     }
 
+    const handleFriendCardOnCancelOrRemove = (userId: string) => {
+        let updatedFriends: Array<UserFriend> = []
+        let hasOtherFriends = false
+        let hasOtherPendingRequests = false
+
+        for (let friend of friends) {
+            if (userId !== friend.id) {
+                updatedFriends.push(friend)
+
+                if (friend.type === "friend") {
+                    hasOtherFriends = true
+                }
+
+                if (friend.type !== "friend") {
+                    hasOtherPendingRequests = true
+                }
+            }
+        }
+        
+        setFriends(updatedFriends)
+        setHasFriends(hasOtherFriends)
+        setHasPendingRequests(hasOtherPendingRequests)
+    }
+
+    const handleFriendCardOnAccept = (userId: string) => {
+        let updatedFriends: Array<UserFriend> = []
+        let hasOtherPendingRequests = false
+        
+        for (let friend of friends) {
+            if (userId !== friend.id) {
+                updatedFriends.push(friend)
+
+                if (friend.type !== "friend") {
+                    hasOtherPendingRequests = true
+                }
+            } else {
+                updatedFriends.push({
+                    ...friend,
+                    type: "friend"
+                })
+            }
+        }
+
+        setFriends(updatedFriends)
+        
+        if (!hasFriends) {
+            setHasFriends(true)
+        }
+
+        setHasPendingRequests(hasOtherPendingRequests)
+    }
+
     return (
-        <Box sx={{ width: '1280px' }}>
+        <Container maxWidth="lg">
             <NavBar />
 
-            <TextField
-                id="searchFriends"
-                label="Search Users"
-                variant="outlined"
-                value={usernameInput}
-                onChange={handleUsernameInputChange}
-                InputProps={{
-                    endAdornment: <IconButton type="submit" sx={{ p: '1rem' }} aria-label="search" onClick={handleSearchUserDialogOpen}>
-                        <Search />
-                    </IconButton>
-                }}
-            />
+            <Grid container rowGap={3} alignItems={"center"}>
+                <Grid item>
+                    <TextField
+                        id="searchFriends"
+                        label="Search Users"
+                        variant="outlined"
+                        value={usernameInput}
+                        onChange={handleUsernameInputChange}
+                        InputProps={{
+                            endAdornment: <IconButton type="submit" sx={{ p: '1rem' }} aria-label="search" onClick={handleSearchUserDialogOpen}>
+                                <Search />
+                            </IconButton>
+                        }}
+                    />
+                </Grid>
 
-            <Stack direction={"column"} sx={{ marginTop: "1rem" }}>
-                {hasPendingRequests && <Stack direction={"column"}>
-                    <Typography sx={{ marginTop: "1rem", fontWeight: "bold" }}>
-                        Pending Requests
-                    </Typography>
+                <Grid item xs={12}>
+                    <Stack direction={"column"}>
+                        {hasPendingRequests && <Stack direction={"column"} marginBottom={2}>
+                            <Typography sx={{ marginTop: "1rem", fontWeight: "bold" }}>
+                                Pending Requests
+                            </Typography>
 
-                    <Divider />
+                            <Divider />
 
-                    <Stack direction={"row"} rowGap={4} flexWrap={"wrap"}>
-                        {friends.map((friendObject: UserFriend, index: number) => {
-                            if (friendObject.type !== "friend") {
-                                return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
-                            }
-                        })}
+                            <Grid container direction={"row"} rowGap={3} justifyContent={"space-between"} marginTop={2}>
+                                {friends.map((friendObject: UserFriend, index: number) => {
+                                    if (friendObject.type !== "friend") {
+                                        return <Grid key={index} item xs={12} sm={5.5} md={3.5}>
+                                            <FriendCard authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} onCancelOrRemove={handleFriendCardOnCancelOrRemove} onAccept={handleFriendCardOnAccept}/>
+                                        </Grid>
+                                    }
+                                })}
+                            </Grid>
+                        </Stack>}
+
+                        {hasFriends && <Stack direction={"column"}>
+                            <Typography sx={{ marginTop: "1rem", fontWeight: "bold" }}>
+                                Your Friends
+                            </Typography>
+
+                            <Divider />
+
+                            <Grid container direction={"row"} rowGap={3} justifyContent={"space-between"} marginTop={2}>
+                                {friends.map((friendObject: UserFriend, index: number) => {
+                                    if (friendObject.type === "friend") {
+                                        return <Grid key={index} item xs={12} sm={5.5} md={3.5}>
+                                            <FriendCard authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} onCancelOrRemove={handleFriendCardOnCancelOrRemove} onAccept={handleFriendCardOnAccept}/>
+                                        </Grid>
+                                    }
+                                })}
+                            </Grid>
+                        </Stack>}
+
+                        {friends.length == 0 && <Box sx={{ display: "flex", justifyContent: "center" }}>
+                            <img src={FindExploreIllustration} width={"100%"} style={{ maxWidth: "600px" }} />
+                        </Box>}
                     </Stack>
-                </Stack>}
+                </Grid>
+            </Grid>
 
-                {friends.length > 0 && !hasPendingRequests && <Stack direction={"column"}>
-                    <Typography sx={{ marginTop: "1rem", fontWeight: "bold" }}>
-                        Your Friends
-                    </Typography>
-
-                    <Divider />
-
-                    <Stack direction={"row"} rowGap={4} flexWrap={"wrap"} >
-                        {friends.map((friendObject: UserFriend, index: number) => {
-                            if (friendObject.type === "friend") {
-                                return <FriendCard key={index} authData={authData} type={friendObject.type} userId={friendObject.id} username={friendObject.username} />
-                            }
-                        })}
-                    </Stack>
-                </Stack>}
-
-                {friends.length == 0 && <Stack direction={"row"} justifyContent={"center"}>
-                    <img src={FindExploreIllustration} width={"40%"} />
-                </Stack>}
-            </Stack>
 
             <SearchUserDialog authData={authData} open={searchUserDialogOpen} username={usernameInput} onClose={handleSearchUserDialogClose} />
-        </Box>
+        </Container>
     )
 }

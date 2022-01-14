@@ -12,12 +12,14 @@ export interface FriendCardProps {
     authData: AuthData,
     userId: string,
     username: string,
-    type: 'outgoing' | 'incoming' | 'friend'
+    type: 'outgoing' | 'incoming' | 'friend',
+    onCancelOrRemove: (userId: string) => void,
+    onAccept: (userId: string) => void
 }
 
 export function FriendCard(props: FriendCardProps) {
     const dispatch = useAppDispatch()
-    const { authData, userId, username, type } = props
+    const { authData, userId, username, type, onCancelOrRemove, onAccept } = props
 
     const [updatedType, setUpdatedType] = useState<'null' | 'outgoing' | 'incoming' | 'friend'>(type)
 
@@ -61,6 +63,8 @@ export function FriendCard(props: FriendCardProps) {
                 })()
             }
         })
+
+        onAccept(userId)
     }
 
     const handleCancelFriendRequest = () => {
@@ -85,6 +89,8 @@ export function FriendCard(props: FriendCardProps) {
                 })()
             }
         })
+
+        onCancelOrRemove(userId)
     }
 
     const handleRemoveFriend = () => {
@@ -109,10 +115,12 @@ export function FriendCard(props: FriendCardProps) {
                 })()
             }
         })
+
+        onCancelOrRemove(userId)
     }
 
     return (
-        <Card elevation={1} sx={{ padding: "1rem", width: "30%", minWidth: "200px", marginTop: "1rem", marginRight: "0.5rem" }}>
+        <Card elevation={1} sx={{ padding: "1rem" }}>
             <Stack direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
                 <Stack direction={"column"} alignItems={"center"} sx={{ width: "25%" }}>
                     <UserAvatar username={username} />
