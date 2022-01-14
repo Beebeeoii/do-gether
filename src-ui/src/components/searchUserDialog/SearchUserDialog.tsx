@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogTitle, Stack, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { useAppDispatch } from "../../app/hooks";
@@ -78,23 +78,24 @@ export function SearchUserDialog(props: SearchUserDialogProps) {
     }
 
     return (
-        <Dialog onClose={handleDialogClose} open={open}>
+        <Dialog onClose={handleDialogClose} open={open} fullWidth>
             <DialogTitle>
-                User Search: {username}
+                User Search
             </DialogTitle>
 
-            {doesUserExist && <Stack direction={'row'} gap={2} sx={{ width: '300px', padding: 2 }}>
-                <UserAvatar username={username} />
+            <DialogContent>
+                {doesUserExist && <Stack direction={'row'} gap={2} >
+                    <UserAvatar username={username} />
 
-                <Typography sx={{ marginTop: "auto", marginBottom: "auto" }}>
-                    {username}
-                </Typography>
-            </Stack>}
+                    <Typography sx={{ marginTop: "auto", marginBottom: "auto" }}>
+                        {username}
+                    </Typography>
+                </Stack>}
 
-            {!doesUserExist && <Typography sx={{ width: '300px', padding: 2 }}>
-                No such user found
-            </Typography>}
-
+                {!doesUserExist && <Typography >
+                    No such user found
+                </Typography>}
+            </DialogContent>
 
             <DialogActions>
                 <Button onClick={handleDialogClose}>
@@ -102,7 +103,7 @@ export function SearchUserDialog(props: SearchUserDialogProps) {
                 </Button>
 
                 {doesUserExist && <Button variant="contained" onClick={handleSendFriendRequest}>
-                    Send Friend Request
+                    Send Request
                 </Button>}
             </DialogActions>
         </Dialog >
