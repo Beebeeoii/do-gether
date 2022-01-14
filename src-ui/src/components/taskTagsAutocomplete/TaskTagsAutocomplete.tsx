@@ -62,6 +62,7 @@ export function TaskTagsAutocomplete(props: TaskTagsAutocompleteProps) {
             renderInput={(params) => (
                 <TextField {...params} label="Tags" placeholder="Add a tag" />
             )}
+            sx={{marginTop: "0.5rem"}}
         />
     )
 }
