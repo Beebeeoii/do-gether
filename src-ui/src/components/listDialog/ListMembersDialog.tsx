@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Chip, Dialog, DialogActions, DialogTitle, TextField } from "@mui/material";
+import { Autocomplete, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { useAppDispatch } from "../../app/hooks";
@@ -46,7 +46,7 @@ export function ListMembersDialog(props: ListMembersDialogProps) {
             let retrieveListMemberUsernamesRequest: RetrieveListMembersRequest = {
                 authData: authData,
                 listId: listId
-            } 
+            }
 
             dispatch(retrieveListMembers(retrieveListMemberUsernamesRequest)).then(value => {
                 if (value.payload.data) {
@@ -63,7 +63,7 @@ export function ListMembersDialog(props: ListMembersDialogProps) {
             authData: authData,
             id: listId,
             members: membersSelected.map((member, _, __) => member.id)
-        } 
+        }
 
         dispatch(editListMembers(editListMembersRequest)).then(_ => {
             onClose()
@@ -75,39 +75,42 @@ export function ListMembersDialog(props: ListMembersDialogProps) {
     }
 
     return (
-        <Dialog onClose={handleDialogClose} open={open}>
+        <Dialog onClose={handleDialogClose} open={open} fullWidth>
             <DialogTitle>
                 List Members
             </DialogTitle>
 
-            <Autocomplete
-                multiple
-                limitTags={3}
-                id="members"
-                open={memberSuggestionsOpen}
-                onOpen={() => {
-                    setMemberSuggestionsOpen(true)
-                }}
-                onClose={() => {
-                    setMemberSuggestionsOpen(false)
-                }}
-                options={memberSuggestions.filter((value, _, __) => value.type === "friend")}
-                value={membersSelected}
-                onChange={(_, memberssSelected: Array<UserFriend>) => {
-                    setMembersSelected(memberssSelected)
-                }}
-                getOptionLabel={(option) => option.username}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                renderTags={(value: readonly UserFriend[], getTagProps) =>
-                    value.map((option: UserFriend, index: number) => (
-                        <Chip variant="outlined" label={option.username} {...getTagProps({ index })} />
-                    ))
-                }
-                renderInput={(params) => (
-                    <TextField {...params} label="Members" placeholder="Add a member" />
-                )}
-                sx={{ width: '300px', padding: 2 }}
-            />
+            <DialogContent>
+                <Autocomplete
+                    multiple
+                    limitTags={3}
+                    id="members"
+                    open={memberSuggestionsOpen}
+                    onOpen={() => {
+                        setMemberSuggestionsOpen(true)
+                    }}
+                    onClose={() => {
+                        setMemberSuggestionsOpen(false)
+                    }}
+                    options={memberSuggestions.filter((value, _, __) => value.type === "friend")}
+                    value={membersSelected}
+                    onChange={(_, memberssSelected: Array<UserFriend>) => {
+                        setMembersSelected(memberssSelected)
+                    }}
+                    getOptionLabel={(option) => option.username}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderTags={(value: readonly UserFriend[], getTagProps) =>
+                        value.map((option: UserFriend, index: number) => (
+                            <Chip variant="outlined" label={option.username} {...getTagProps({ index })} />
+                        ))
+                    }
+                    renderInput={(params) => (
+                        <TextField {...params} label="Members" placeholder="Add a member" />
+                    )}
+                    sx={{ marginTop: "0.5rem" }}
+                />
+            </DialogContent>
+
 
             <DialogActions>
                 <Button onClick={handleDialogClose}>

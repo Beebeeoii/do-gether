@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dialog, DialogActions, DialogTitle, FormControlLabel, Stack, TextField, Tooltip } from "@mui/material";
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Stack, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { List, ListSettingsDialogOpResponse } from "../../interfaces/list/List";
 import { AuthData } from "../../interfaces/auth/Auth";
@@ -101,25 +101,28 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
     }
 
     return (
-        <Dialog onClose={handleDialogClose} open={open}>
+        <Dialog onClose={handleDialogClose} open={open} fullWidth>
             <DialogTitle>
                 {data ? "Edit list" : "Create a list"}
             </DialogTitle>
 
-            <Stack direction={'column'} gap={2} sx={{ width: '300px', padding: 2 }}>
-                <TextField
-                    id="taskTitle"
-                    label="List Name"
-                    value={listName}
-                    onChange={handleListNameChange}
-                    variant="outlined"
-                    autoFocus
-                />
+            <DialogContent>
+                <Stack direction={'column'} gap={2} >
+                    <TextField
+                        id="taskTitle"
+                        label="List Name"
+                        value={listName}
+                        onChange={handleListNameChange}
+                        variant="outlined"
+                        autoFocus
+                        sx={{ marginTop: "0.5rem" }}
+                    />
 
-                <Tooltip title="Private lists do not appear on your profile page when another user searches for you" placement="right" arrow>
-                    <FormControlLabel control={<Checkbox checked={isPrivate} onChange={handleCheckboxChange} />} label="Private" />
-                </Tooltip>
-            </Stack>
+                    <Tooltip title="Private lists do not appear on your profile page when another user searches for you" placement="right" arrow>
+                        <FormControlLabel control={<Checkbox checked={isPrivate} onChange={handleCheckboxChange} />} label="Private" />
+                    </Tooltip>
+                </Stack>
+            </DialogContent>
 
             <DialogActions>
                 {data && <Button color="error" onClick={handleDeleteList}>
