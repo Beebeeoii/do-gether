@@ -11,8 +11,8 @@ RUN go mod download
 
 COPY . .
 
-ENV POSTGRES_USER postgres
-ENV POSTGRES_PASSWORD postgres-test-password
+ENV POSTGRES_USER do-gether-user
+ENV POSTGRES_PASSWORD do-gether-password
 ENV POSTGRES_HOST localhost
 ENV POSTGRES_PORT 5432
 ENV PASSWORD_SECRET dOgEtHeRpW123!@#
