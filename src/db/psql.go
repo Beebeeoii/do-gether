@@ -12,7 +12,6 @@ import (
 
 const (
 	DB_DRIVER = "postgres"
-	DB_NAME   = "dogether"
 	SSL_MODE  = "disable"
 )
 
@@ -26,10 +25,11 @@ func Init() (err error) {
 	}
 	POSTGRES_USER := os.Getenv("POSTGRES_USER")
 	POSTGRES_PASSWORD := os.Getenv("POSTGRES_PASSWORD")
+	POSTGRES_DB := os.Getenv("POSTGRES_DB")
 
 	log.Println(POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PORT, POSTGRES_USER)
 
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, DB_NAME, SSL_MODE)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, SSL_MODE)
 	return connect(psqlInfo)
 }
 
