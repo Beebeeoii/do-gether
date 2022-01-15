@@ -17,7 +17,7 @@ const DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE = false
 
 export function TaskTagsAutocomplete(props: TaskTagsAutocompleteProps) {
     const dispatch = useAppDispatch()
-    const { authData, listId, tags, freeSolo, onTagsSelect} = props
+    const { authData, listId, tags, freeSolo, onTagsSelect } = props
 
     const tagSuggestions = useAppSelector(selectTags)
     const [tagsSuggestionsOpen, setTagsSuggestionsOpen] = useState<boolean>(DEFAULT_TAG_SUGGESTIONS_OPEN_VALUE)
@@ -60,9 +60,9 @@ export function TaskTagsAutocomplete(props: TaskTagsAutocompleteProps) {
                 ))
             }
             renderInput={(params) => (
-                <TextField {...params} label="Tags" placeholder="Add a tag" />
+                <TextField {...params} label="Tags" placeholder="Enter a tag" />
             )}
-            sx={{marginTop: "0.5rem"}}
+            sx={{ marginTop: "0.5rem" }}
         />
     )
 }

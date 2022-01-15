@@ -1,5 +1,5 @@
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Stack, TextField, Tooltip } from "@mui/material";
-import { useState } from "react";
+import { KeyboardEvent, useState } from "react";
 import { List, ListSettingsDialogOpResponse } from "../../interfaces/list/List";
 import { AuthData } from "../../interfaces/auth/Auth";
 import { CreateListRequest, DeleteListRequest, EditListRequest } from "../../interfaces/list/ListRequest";
@@ -25,6 +25,12 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
 
     const handleListNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setListName(event.target.value)
+    }
+
+    const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter") {
+            handleCreateNewList()
+        }
     }
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +122,7 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
                         variant="outlined"
                         autoFocus
                         sx={{ marginTop: "0.5rem" }}
+                        onKeyDown={onKeyDown}
                     />
 
                     <Tooltip title="Private lists do not appear on your profile page when another user searches for you" placement="right" arrow>

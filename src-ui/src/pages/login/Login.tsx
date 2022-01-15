@@ -1,5 +1,5 @@
 import { Alert, Button, Card, Container, Link, Snackbar, Stack, TextField, Typography } from "@mui/material"
-import { useState } from "react";
+import { KeyboardEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../app/hooks";
 import { LoginResponse } from "../../interfaces/auth/AuthResponse";
@@ -31,6 +31,31 @@ export function Login() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
 
+    const onLogin = async () => {
+        let credentials: Credentials = {
+            username: username,
+            password: password
+        }
+        let authRes = await dispatch(login(credentials))
+        let authPayload = authRes.payload as LoginResponse
+
+        if (authPayload.success) {
+            navigate("/dashboard")
+        } else {
+            openSnackBar({
+                open: true,
+                severity: "error",
+                message: `Error: ${authPayload.error}`
+            })()
+        }
+    }
+
+    const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter") {
+            onLogin()
+        }
+    }
+
     return (
         <Container maxWidth="xs">
             <Stack direction={"column"} marginTop={"8rem"}>
@@ -40,26 +65,9 @@ export function Login() {
                             Log in to Do-gether
                         </Typography>
 
-                        <TextField id="usernameInput" label="Username" variant="outlined" onChange={(e) => setUsername(e.target.value)} autoFocus />
-                        <TextField id="passwordInput" label="Password" variant="outlined" type="password" autoComplete="current-password" onChange={(e) => setPassword(e.target.value)} />
-                        <Button variant="contained" onClick={async () => {
-                            let credentials: Credentials = {
-                                username: username,
-                                password: password
-                            }
-                            let authRes = await dispatch(login(credentials))
-                            let authPayload = authRes.payload as LoginResponse
-
-                            if (authPayload.success) {
-                                navigate("/dashboard")
-                            } else {
-                                openSnackBar({
-                                    open: true,
-                                    severity: "error",
-                                    message: `Error: ${authPayload.error}`
-                                })()
-                            }
-                        }}>
+                        <TextField id="usernameInput" label="Username" variant="outlined" onChange={(e) => setUsername(e.target.value)} onKeyDown={onKeyDown} autoFocus />
+                        <TextField id="passwordInput" label="Password" variant="outlined" type="password" autoComplete="current-password" onChange={(e) => setPassword(e.target.value)} onKeyDown={onKeyDown} />
+                        <Button variant="contained" onClick={onLogin}>
                             Login
                         </Button>
 

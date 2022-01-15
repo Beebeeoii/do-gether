@@ -144,7 +144,7 @@ export function Friends() {
             })()
             return
         }
-        
+
         let updatedFriends: Array<UserFriend> = []
         let hasOtherPendingRequests = false
 
@@ -203,8 +203,9 @@ export function Friends() {
                 <Grid item>
                     <TextField
                         id="searchFriends"
-                        label="Search Users"
+                        label="Search User"
                         variant="outlined"
+                        placeholder="Enter a username"
                         value={usernameInput}
                         onChange={handleUsernameInputChange}
                         InputProps={{

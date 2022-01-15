@@ -142,6 +142,10 @@ export function TaskDialog(props: TaskDialogProps) {
     }
 
     const handleCreateTask = () => {
+        if (taskTitle.length === 0) {
+            return
+        }
+
         if (data) {
             let editTaskRequest: EditTaskRequest = {
                 authData: authData,
@@ -229,6 +233,8 @@ export function TaskDialog(props: TaskDialogProps) {
                         variant="standard"
                         autoFocus
                         fullWidth
+                        error={taskTitle.length === 0}
+                        helperText="Task must have a name"
                     />
 
                     <Stack direction={'row'} justifyContent={'space-between'} gap={2} marginTop={"0.5rem"}>
