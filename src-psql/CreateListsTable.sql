@@ -1,0 +1,7 @@
+CREATE TABLE lists (
+    id VARCHAR(20) NOT NULL PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    owner VARCHAR(20) NOT NULL,
+    private BOOLEAN NOT NULL,
+    members VARCHAR(20)[] NOT NULL
+);
