@@ -1,6 +1,6 @@
 CREATE TABLE users (
     id VARCHAR(20) NOT NULL PRIMARY KEY,
-    username VARCHAR(20) NOT NULL,
+    username VARCHAR(20) NOT NULL UNIQUE,
     password TEXT NOT NULL,
     friends VARCHAR(20)[] NOT NULL,
     outgoing_req VARCHAR(20)[] NOT NULL,
