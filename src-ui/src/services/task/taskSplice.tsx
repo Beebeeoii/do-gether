@@ -127,7 +127,7 @@ export const taskSlice = createSlice({
         })
 
         builder.addCase(addTask.fulfilled, (state, action) => {
-            if (action.payload.success && state.listId == action.payload.data.listId) {
+            if (action.payload.success && state.listId === action.payload.data.listId) {
                 let task: Task = {
                     id: action.payload.data.id,
                     owner: action.payload.data.owner,
@@ -147,7 +147,7 @@ export const taskSlice = createSlice({
         })
 
         builder.addCase(editTask.fulfilled, (state, action) => {
-            if (action.payload.success && state.listId == action.payload.data.listId) {
+            if (action.payload.success && state.listId === action.payload.data.listId) {
                 let updatedTasks: Array<Task> = []
                 for (let task of state.tasks) {
                     if (task.id !== action.payload.data.id) {
@@ -198,7 +198,7 @@ export const taskSlice = createSlice({
         })
 
         builder.addCase(deleteTask.fulfilled, (state, action) => {
-            if (action.payload.success && state.listId == action.payload.data.listId) {
+            if (action.payload.success && state.listId === action.payload.data.listId) {
                 let updatedTasks: Array<Task> = []
                 for (let task of state.tasks) {
                     if (task.id !== action.payload.data.id) {
