@@ -29,9 +29,15 @@ export function Register() {
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
     const [username, setUsername] = useState('')
+    const [usernameEdited, setUsernameEdited] = useState<boolean>(false)
     const [password, setPassword] = useState('')
 
     const onRegister = async () => {
+        if (username.length === 0 || username.length > 20) {
+            setUsernameEdited(true)
+            return
+        }
+
         let credentials: Credentials = {
             username: username,
             password: password
@@ -67,7 +73,19 @@ export function Register() {
                             Do-gether
                         </Typography>
 
-                        <TextField id="usernameInput" label="Username" variant="outlined" onChange={(e) => setUsername(e.target.value)} onKeyDown={onKeyDown} autoFocus />
+                        <TextField
+                            id="usernameInput"
+                            label="Username"
+                            variant="outlined"
+                            onChange={(e) => {
+                                setUsernameEdited(true)
+                                setUsername(e.target.value)
+                            }}
+                            onKeyDown={onKeyDown}
+                            autoFocus
+                            error={(username.length === 0 || username.length > 20) && usernameEdited}
+                            helperText={(username.length === 0 || username.length > 20) && usernameEdited && "Username must be between 1-20 characters"}
+                        />
                         <TextField id="passwordInput" label="Password" variant="outlined" type="password" autoComplete="current-password" onChange={(e) => setPassword(e.target.value)} onKeyDown={onKeyDown} />
                         <Button variant="contained" onClick={onRegister}>
                             Register

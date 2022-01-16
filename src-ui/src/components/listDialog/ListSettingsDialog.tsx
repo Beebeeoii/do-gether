@@ -14,6 +14,7 @@ export interface ListSettingsDialogProps {
 }
 
 const DEFAULT_LIST_NAME_VALUE = ""
+const DEFAULT_LIST_NAME_EDITED_VALUE = false
 const DEFAULT_IS_PRIVATE_VALUE = true
 
 export function ListSettingsDialog(props: ListSettingsDialogProps) {
@@ -21,9 +22,11 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
     const { open, authData, data, onClose } = props
 
     let [listName, setListName] = useState<string>(data ? data.name : DEFAULT_LIST_NAME_VALUE)
+    let [listNameEdited, setListNameEdited] = useState<boolean>(DEFAULT_LIST_NAME_EDITED_VALUE)
     let [isPrivate, setIsPrivate] = useState<boolean>(data ? data.private : DEFAULT_IS_PRIVATE_VALUE)
 
     const handleListNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setListNameEdited(true)
         setListName(event.target.value)
     }
 
@@ -39,6 +42,7 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
 
     const handleCreateNewList = () => {
         if (listName.length === 0 || listName.length > 20) {
+            setListNameEdited(true)
             return
         }
 
@@ -107,6 +111,7 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
 
     function resetState() {
         setListName(DEFAULT_LIST_NAME_VALUE)
+        setListNameEdited(DEFAULT_LIST_NAME_EDITED_VALUE)
         setIsPrivate(DEFAULT_IS_PRIVATE_VALUE)
     }
 
@@ -127,8 +132,8 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
                         autoFocus
                         sx={{ marginTop: "0.5rem" }}
                         onKeyDown={onKeyDown}
-                        error={listName.length === 0 || listName.length > 20}
-                        helperText="List name must be between 1-20 characters"
+                        error={(listName.length === 0 || listName.length > 20) && listNameEdited}
+                        helperText={(listName.length === 0 || listName.length > 20) && listNameEdited && "List name must be between 1-20 characters"}
                     />
 
                     <Tooltip title="Private lists do not appear on your profile page when another user searches for you" placement="right" arrow>

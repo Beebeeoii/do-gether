@@ -61,6 +61,7 @@ const NO_LIST_VALUE = "no_list"
 const NO_LIST_TEXT = "No lists to move to"
 
 const DEFAULT_TASK_TITLE_VALUE = ""
+const DEFAULT_TASK_TITLE_EDITED_VALUE = false
 const DEFAULT_MOVE_MENU_OPEN_VALUE = false
 const DEFAULT_LIST_VALUE = "defaultList"
 const DEFAULT_TAGS_SELECTED_VALUE: Array<string> = []
@@ -71,6 +72,7 @@ export function TaskDialog(props: TaskDialogProps) {
     const { onClose, data, authData, currentListId, open } = props
 
     let [taskTitle, setTaskTitle] = useState<string>(data ? data.title : DEFAULT_TASK_TITLE_VALUE)
+    let [taskTitleEdited, setTaskTitleEdited] = useState<boolean>(DEFAULT_TASK_TITLE_EDITED_VALUE)
 
     const lists = useAppSelector(selectLists)
     let [listId, setListId] = useState<string>(currentListId)
@@ -143,6 +145,7 @@ export function TaskDialog(props: TaskDialogProps) {
 
     const handleCreateTask = () => {
         if (taskTitle.length === 0) {
+            setTaskTitleEdited(true)
             return
         }
 
@@ -197,6 +200,7 @@ export function TaskDialog(props: TaskDialogProps) {
 
     function resetState() {
         setTaskTitle(DEFAULT_TASK_TITLE_VALUE)
+        setTaskTitleEdited(DEFAULT_TASK_TITLE_EDITED_VALUE)
         setListId(DEFAULT_LIST_VALUE)
         setTagsSelected(DEFAULT_TAGS_SELECTED_VALUE)
         setPriorityLevel(DEFAULT_PRIORITY_LEVEL_VALUE)
@@ -235,8 +239,8 @@ export function TaskDialog(props: TaskDialogProps) {
                         variant="standard"
                         autoFocus
                         fullWidth
-                        error={taskTitle.length === 0}
-                        helperText="Task must have a name"
+                        error={taskTitle.length === 0 && taskTitleEdited}
+                        helperText={taskTitle.length === 0 && taskTitleEdited && "Task must have a name"}
                     />
 
                     <Stack direction={'row'} justifyContent={'space-between'} gap={2} marginTop={"0.5rem"}>
