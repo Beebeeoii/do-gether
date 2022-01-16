@@ -99,7 +99,7 @@ export function TaskDialog(props: TaskDialogProps) {
         setMoveTaskMenuOpen(false)
         onClose()
     }
-
+    
     const [tagsSelected, setTagsSelected] = useState<Array<string>>(data ? data.tags : DEFAULT_TAGS_SELECTED_VALUE)
 
     const [dueDateActive, setDueDateActive] = useState<boolean>(data ? data.due != -1 : false)
@@ -154,9 +154,9 @@ export function TaskDialog(props: TaskDialogProps) {
                 title: taskTitle,
                 tags: tagsSelected,
                 priority: priorityLevel!,
-                due: dueDate ? moment(dueDate).unix() : -1,
-                plannedStart: plannedStart ? moment(plannedStart).unix() : -1,
-                plannedEnd: plannedEnd ? moment(plannedEnd).unix() : -1
+                due: (dueDate && dueDateActive) ? moment(dueDate).unix() : -1,
+                plannedStart: (plannedStart && plannedStartActive) ? moment(plannedStart).unix() : -1,
+                plannedEnd: (plannedEnd && plannedEndActive) ? moment(plannedEnd).unix() : -1
             }
             dispatch(editTask(editTaskRequest))
         } else {
@@ -167,9 +167,9 @@ export function TaskDialog(props: TaskDialogProps) {
                 tags: tagsSelected,
                 listId: listId,
                 priority: priorityLevel!,
-                due: dueDate ? moment(dueDate).unix() : -1,
-                plannedStart: plannedStart ? moment(plannedStart).unix() : -1,
-                plannedEnd: plannedEnd ? moment(plannedEnd).unix() : -1
+                due: (dueDate && dueDateActive) ? moment(dueDate).unix() : -1,
+                plannedStart: (plannedStart && plannedStartActive) ? moment(plannedStart).unix() : -1,
+                plannedEnd: (plannedEnd && plannedEndActive) ? moment(plannedEnd).unix() : -1
             }
             dispatch(addTask(createTaskRequest))
         }
@@ -199,8 +199,10 @@ export function TaskDialog(props: TaskDialogProps) {
         setTaskTitle(DEFAULT_TASK_TITLE_VALUE)
         setListId(DEFAULT_LIST_VALUE)
         setTagsSelected(DEFAULT_TAGS_SELECTED_VALUE)
-        setDueDate(new Date())
         setPriorityLevel(DEFAULT_PRIORITY_LEVEL_VALUE)
+        setDueDate(new Date())
+        setPlannedStart(new Date())
+        setPlannedEnd(new Date())
         dispatch(resetTags())
     }
 
@@ -330,7 +332,7 @@ export function TaskDialog(props: TaskDialogProps) {
 
                     <Stack direction={"row"} justifyContent={"space-between"}>
                         <FormGroup sx={{ justifyContent: "center" }}>
-                            <FormControlLabel control={<Switch value={plannedStartActive} onChange={handlePlannedStartActiveChange} />} label="Include date to start" />
+                            <FormControlLabel control={<Switch checked={plannedStartActive} value={plannedStartActive} onChange={handlePlannedStartActiveChange} />} label="Include start date" />
                         </FormGroup>
 
                         {plannedStartActive && <LocalizationProvider dateAdapter={MomentAdapter}>
@@ -347,7 +349,7 @@ export function TaskDialog(props: TaskDialogProps) {
 
                     <Stack direction={"row"} justifyContent={"space-between"}>
                         <FormGroup sx={{ justifyContent: "center" }}>
-                            <FormControlLabel control={<Switch value={plannedEndActive} onChange={handlePlannedEndActiveChange} />} label="Include end date" />
+                            <FormControlLabel control={<Switch checked={plannedEndActive} value={plannedEndActive} onChange={handlePlannedEndActiveChange} />} label="Include end date" />
                         </FormGroup>
 
                         {plannedEndActive && <LocalizationProvider dateAdapter={MomentAdapter}>
