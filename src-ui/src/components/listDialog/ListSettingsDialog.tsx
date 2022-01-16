@@ -38,6 +38,10 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
     }
 
     const handleCreateNewList = () => {
+        if (listName.length === 0 || listName.length > 20) {
+            return
+        }
+
         if (!data) {
             let createListRequest: CreateListRequest = {
                 authData: authData,
@@ -123,6 +127,8 @@ export function ListSettingsDialog(props: ListSettingsDialogProps) {
                         autoFocus
                         sx={{ marginTop: "0.5rem" }}
                         onKeyDown={onKeyDown}
+                        error={listName.length === 0 || listName.length > 20}
+                        helperText="List name must be between 1-20 characters"
                     />
 
                     <Tooltip title="Private lists do not appear on your profile page when another user searches for you" placement="right" arrow>
