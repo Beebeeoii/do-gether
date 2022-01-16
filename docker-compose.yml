@@ -1,13 +1,13 @@
 version: '3.8'
 services:
   psql-db:
-    build: ./src-psql
+    image: beebeeoii/do-gether-psql-db:latest
     ports:
       - "5432:5432"
     expose:
       - 5432
-  go-backend:
-    build: ./src
+  backend:
+    image: beebeeoii/do-gether-backend:latest
     depends_on:
       - psql-db
     environment:
@@ -15,9 +15,9 @@ services:
       POSTGRES_PORT: 5432
     ports:
       - "8080:8080"
-  react-frontend:
-    build: ./src-ui
+  frontend:
+    image: beebeeoii/do-gether-frontend:latest
     depends_on:
-      - go-backend
+      - backend
     ports:
       - "3000:3000"
