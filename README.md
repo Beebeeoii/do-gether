@@ -35,7 +35,7 @@ docker-compose up --build
 
 in the directory with the `docker-compose.yml`.
 
-### Bare Metal
+### Localhost
 
 You would need the following 3 services:
 
@@ -122,11 +122,20 @@ go run main.go
 
 #### React Frontend
 
-Ensure you have [Node](https://nodejs.org/en/download/) installed. Navigate to `./src-ui` where the frontend code resides. Then run
+Ensure you have [Node](https://nodejs.org/en/download/) installed. Navigate to `./src-ui` where the frontend code resides.
+
+Install all packages, build and serve
 
 ``` bash
-npm start
+npm install
+npm run build
+npm install -g serve
+serve -s build
 ```
+
+### Self-host
+
+Same instructions as hosting locally, except that you will have to change the `BASE_URL` under [adapter.tsx](./src-ui/src/adapters/adapter.tsx) to the URL of your server.
 
 ## Contributing
 
