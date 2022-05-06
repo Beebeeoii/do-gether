@@ -1,11 +1,5 @@
 # Do-gether
 
-Name: Lee Jia Wei
-
-Matric Number: A0235256E
-
----
-
 Do-gether is a self-host task management application that seeks to spice things up your to-do list a little bit with friends!
 
 ## Features
