@@ -1,6 +1,6 @@
 {
   "name": "do-gether-frontend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "dependencies": {
     "@date-io/moment": "^2.13.2",
