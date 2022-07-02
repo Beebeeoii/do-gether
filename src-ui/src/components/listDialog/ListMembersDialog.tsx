@@ -56,7 +56,7 @@ export function ListMembersDialog(props: ListMembersDialogProps) {
                 }
             })
         }
-    }, [dispatch])
+    }, [dispatch, authData, listId])
 
     const handleUpdateListMembers = () => {
         let editListMembersRequest: EditListMembersRequest = {
